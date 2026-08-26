@@ -1,22 +1,12 @@
 @import "tailwindcss";
 
-:root {
-  /* --- Asosiy palitra (flower shop) --- */
+@theme {
   --color-primary: #d6336c;
   --color-primary-light: #f8d7e3;
   --color-secondary: #2f9e44;
   --color-bg: #fefefe;
   --color-text: #1a1a1a;
   --radius-base: 8px;
-}
-
-/* Tailwind v4 shu o'zgaruvchilarni util-klass sifatida tanishi uchun */
-@theme {
-  --color-primary: var(--color-primary);
-  --color-primary-light: var(--color-primary-light);
-  --color-secondary: var(--color-secondary);
-  --color-bg: var(--color-bg);
-  --color-text: var(--color-text);
 }
 
 body {
