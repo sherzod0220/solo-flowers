@@ -3,9 +3,12 @@ import { ROUTES } from '@/shared/constants/routes';
 
 import { UserLayout } from '@/app/layouts/UserLayout';
 import { AdminLayout } from '@/app/layouts/AdminLayout';
+import { RequireAdmin } from '@/app/guards/RequireAdmin';
 
 import { HomePage } from '@/pages/user/HomePage';
 import { CartPage } from '@/pages/user/CartPage';
+import { LoginPage } from '@/pages/user/LoginPage';
+import { RegisterPage } from '@/pages/user/RegisterPage';
 
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
@@ -17,15 +20,22 @@ export const router = createBrowserRouter([
     children: [
       { path: ROUTES.HOME, element: <HomePage /> },
       { path: ROUTES.CART, element: <CartPage /> },
+      { path: ROUTES.LOGIN, element: <LoginPage /> },
+      { path: ROUTES.REGISTER, element: <RegisterPage /> },
     ],
   },
   {
     path: ROUTES.ADMIN.ROOT,
-    element: <AdminLayout />,
+    element: <RequireAdmin />,
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: ROUTES.ADMIN.PRODUCTS, element: <ProductsListPage /> },
-      { path: ROUTES.ADMIN.ORDERS, element: <OrdersListPage /> },
+      {
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <DashboardPage /> },
+          { path: ROUTES.ADMIN.PRODUCTS, element: <ProductsListPage /> },
+          { path: ROUTES.ADMIN.ORDERS, element: <OrdersListPage /> },
+        ],
+      },
     ],
   },
 ]);

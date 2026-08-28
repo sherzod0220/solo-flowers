@@ -3,6 +3,8 @@ export const ROUTES = {
   PRODUCT_DETAIL: '/product/:id',
   CART: '/cart',
   CHECKOUT: '/checkout',
+  LOGIN: '/login',
+  REGISTER: '/register',
 
   ADMIN: {
     ROOT: '/admin',
