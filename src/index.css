@@ -1,16 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #d6336c;
-  --color-primary-light: #f8d7e3;
-  --color-secondary: #2f9e44;
-  --color-bg: #fefefe;
-  --color-text: #1a1a1a;
+  /* "SoLo Flowers Boutique" brend palitrasi — logo asosida (nozik pushti + to'q vishnyoviy). */
+  --color-primary: #5c1a30;
+  --color-primary-light: #f6ccd9;
+  --color-border: #e8c7d2;
+  --color-bg: #fffbf9;
+  --color-text: #2a1218;
   --radius-base: 8px;
+  --font-display: 'Playfair Display', 'Georgia', serif;
 }
 
 body {
   margin: 0;
   background-color: var(--color-bg);
   color: var(--color-text);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4 {
+  font-family: var(--font-display);
 }

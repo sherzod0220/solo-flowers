@@ -41,8 +41,24 @@ export function RegisterPage() {
   });
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 16px' }}>
-      <Card title="Ro'yxatdan o'tish" style={{ width: 360 }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - 220px)',
+        background: 'var(--color-primary-light)',
+        borderRadius: 24,
+        padding: '56px 16px',
+      }}
+    >
+      <img src="/logo-S.PNG" alt="Solo" style={{ height: 64, width: 64, borderRadius: '50%', objectFit: 'cover', marginBottom: 16 }} />
+
+      <Card
+        title={<span style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>Ro'yxatdan o'tish</span>}
+        style={{ width: 380, borderRadius: 16, boxShadow: '0 12px 32px rgba(92, 26, 48, 0.12)' }}
+      >
         <form onSubmit={onSubmit}>
           {serverError && <Alert type="error" message={serverError} style={{ marginBottom: 16 }} showIcon />}
 
