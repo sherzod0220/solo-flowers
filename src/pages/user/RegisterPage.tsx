@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Alert, Button, Card, Input, message } from 'antd';
+import { App, Button, Card, Input } from 'antd';
 import { useRegister } from '@/features/auth/hooks';
 import { FormField } from '@/shared/ui/FormField';
 import { ROUTES } from '@/shared/constants/routes';
@@ -17,8 +16,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const { notification } = App.useApp();
   const { mutateAsync, isPending } = useRegister();
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     control,
@@ -30,13 +29,20 @@ export function RegisterPage() {
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    setServerError(null);
     try {
       await mutateAsync(values);
-      message.success("Muvaffaqiyatli ro'yxatdan o'tdingiz. Endi tizimga kiring.");
+      notification.success({
+        title: "Muvaffaqiyatli ro'yxatdan o'tdingiz",
+        description: 'Endi shu email va parol bilan tizimga kiring.',
+        placement: 'top',
+      });
       navigate(ROUTES.LOGIN);
     } catch (error) {
-      setServerError(error instanceof Error ? error.message : "Ro'yxatdan o'tishda xatolik yuz berdi");
+      notification.error({
+        title: "Ro'yxatdan o'tishda xatolik yuz berdi",
+        description: error instanceof Error ? error.message : "Noma'lum xatolik yuz berdi",
+        placement: 'top',
+      });
     }
   });
 
@@ -60,8 +66,6 @@ export function RegisterPage() {
         style={{ width: 380, borderRadius: 16, boxShadow: '0 12px 32px rgba(92, 26, 48, 0.12)' }}
       >
         <form onSubmit={onSubmit}>
-          {serverError && <Alert type="error" message={serverError} style={{ marginBottom: 16 }} showIcon />}
-
           <FormField label="Email" error={errors.email?.message}>
             <Controller
               name="email"

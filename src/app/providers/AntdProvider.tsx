@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ConfigProvider } from 'antd';
+import { App, ConfigProvider } from 'antd';
 
 const theme = {
   token: {
@@ -10,5 +10,10 @@ const theme = {
 };
 
 export function AntdProvider({ children }: { children: ReactNode }) {
-  return <ConfigProvider theme={theme}>{children}</ConfigProvider>;
+  return (
+    <ConfigProvider theme={theme}>
+      {/* antd'ning message/notification/Modal statik chaqiruvlari shu <App> konteksti orqali temani to'g'ri oladi. */}
+      <App>{children}</App>
+    </ConfigProvider>
+  );
 }

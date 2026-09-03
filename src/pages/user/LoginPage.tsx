@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Alert, Button, Card, Input } from 'antd';
+import { App, Button, Card, Input } from 'antd';
 import { useLogin } from '@/features/auth/hooks';
 import { FormField } from '@/shared/ui/FormField';
 import { ROUTES } from '@/shared/constants/routes';
@@ -17,8 +16,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { notification } = App.useApp();
   const { mutateAsync, isPending } = useLogin();
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     control,
@@ -30,12 +29,20 @@ export function LoginPage() {
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    setServerError(null);
     try {
       await mutateAsync(values);
+      notification.success({
+        title: 'Muvaffaqiyatli kirdingiz',
+        description: 'Tizimga muvaffaqiyatli kirdingiz.',
+        placement: 'top',
+      });
       navigate(ROUTES.HOME);
     } catch (error) {
-      setServerError(error instanceof Error ? error.message : 'Kirishda xatolik yuz berdi');
+      notification.error({
+        title: 'Kirishda xatolik yuz berdi',
+        description: error instanceof Error ? error.message : "Noma'lum xatolik yuz berdi",
+        placement: 'top',
+      });
     }
   });
 
@@ -59,8 +66,6 @@ export function LoginPage() {
         style={{ width: 380, borderRadius: 16, boxShadow: '0 12px 32px rgba(92, 26, 48, 0.12)' }}
       >
         <form onSubmit={onSubmit}>
-          {serverError && <Alert type="error" message={serverError} style={{ marginBottom: 16 }} showIcon />}
-
           <FormField label="Email" error={errors.email?.message}>
             <Controller
               name="email"
