@@ -1,25 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Lang } from '@/shared/lib/apiClient';
+import { useLangStore } from '@/shared/store/langStore';
 import * as eventsApi from './api';
 import type { CreateEventPayload, UpdateEventPayload } from './types';
 
 const eventKeys = {
   all: ['events'] as const,
-  list: () => [...eventKeys.all, 'list'] as const,
+  list: (lang?: Lang) => [...eventKeys.all, 'list', lang] as const,
   admin: () => [...eventKeys.all, 'admin'] as const,
-  detail: (id: string) => [...eventKeys.all, 'detail', id] as const,
+  detail: (id: string, lang?: Lang) => [...eventKeys.all, 'detail', id, lang] as const,
 };
 
-export function useEvents() {
+export function useEvents(lang?: Lang) {
+  const activeLang = useLangStore((state) => state.lang);
+  const resolvedLang = lang ?? activeLang;
+
   return useQuery({
-    queryKey: eventKeys.list(),
-    queryFn: () => eventsApi.getEvents(),
+    queryKey: eventKeys.list(resolvedLang),
+    queryFn: () => eventsApi.getEvents(resolvedLang),
   });
 }
 
-export function useEvent(id: string) {
+export function useEvent(id: string, lang?: Lang) {
+  const activeLang = useLangStore((state) => state.lang);
+  const resolvedLang = lang ?? activeLang;
+
   return useQuery({
-    queryKey: eventKeys.detail(id),
-    queryFn: () => eventsApi.getEvent(id),
+    queryKey: eventKeys.detail(id, resolvedLang),
+    queryFn: () => eventsApi.getEvent(id, resolvedLang),
     enabled: !!id,
   });
 }

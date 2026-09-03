@@ -2,6 +2,8 @@ import { Outlet, Link } from 'react-router-dom';
 import { Layout, Button, Space } from 'antd';
 import { ROUTES } from '@/shared/constants/routes';
 import { useLogout, useMe } from '@/features/auth/hooks';
+import { LangSwitcher } from '@/shared/ui/LangSwitcher';
+import { useT } from '@/shared/i18n/useT';
 
 const { Header, Content, Footer } = Layout;
 
@@ -10,6 +12,7 @@ const linkStyle = { color: 'var(--color-primary)', fontWeight: 500 };
 export function UserLayout() {
   const { user, isAdmin } = useMe();
   const logout = useLogout();
+  const t = useT();
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -32,25 +35,26 @@ export function UserLayout() {
         </Link>
 
         <Space size="large">
+          <LangSwitcher />
           {user ? (
             <>
               {isAdmin && (
                 <Link to={ROUTES.ADMIN.ROOT} style={linkStyle}>
-                  Admin panel
+                  {t('nav.admin_panel')}
                 </Link>
               )}
               <span style={{ color: 'var(--color-text)' }}>{user.email}</span>
               <Button size="small" onClick={logout}>
-                Chiqish
+                {t('nav.logout')}
               </Button>
             </>
           ) : (
             <>
               <Link to={ROUTES.LOGIN} style={linkStyle}>
-                Kirish
+                {t('nav.login')}
               </Link>
               <Link to={ROUTES.REGISTER} style={linkStyle}>
-                Ro'yxatdan o'tish
+                {t('nav.register')}
               </Link>
             </>
           )}
@@ -62,7 +66,7 @@ export function UserLayout() {
       </Content>
 
       <Footer style={{ textAlign: 'center', background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
-        © {new Date().getFullYear()} Solo — Flowers Boutique
+        {t('nav.footer', { year: String(new Date().getFullYear()) })}
       </Footer>
     </Layout>
   );

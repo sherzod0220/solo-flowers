@@ -28,8 +28,8 @@ Bu hujjat backendda hozircha tayyor bo'lgan barcha endpointlarni tasvirlaydi. DD
 }
 ```
 
-- Muvaffaqiyatli bo'lsa → `data` to'ldiriladi, `error` bo'lmaydi.
-- Xatolik bo'lsa → `error` maydonida matn bo'ladi, `data` bo'lmaydi (HTTP status kodiga qarang, pastda jadval bor).
+- Muvaffaqiyatli bo'lsa — `data` to'ldiriladi, `error` bo'lmaydi.
+- Xatolik bo'lsa — `error` maydonida matn bo'ladi, `data` bo'lmaydi (HTTP status kodiga qarang, pastda jadval bor).
 
 > Eslatma: `data`, `error`, `message` maydonlari `omitempty` — ya'ni bo'sh bo'lsa JSON'da umuman ko'rinmaydi.
 
@@ -151,7 +151,7 @@ POST /api/v1/auth/refresh
 | Status | Sabab |
 |---|---|
 | 400 | body noto'g'ri |
-| 401 | refresh token yaroqsiz yoki muddati o'tgan → foydalanuvchini qayta login sahifasiga yo'naltiring |
+| 401 | refresh token yaroqsiz yoki muddati o'tgan — foydalanuvchini qayta login sahifasiga yo'naltiring |
 
 ---
 
@@ -187,39 +187,57 @@ GET /api/v1/auth/me
 
 Prefiks: **`/api/v1/categories`** (bu endpointlar `/api/v1/auth` ostida emas, to'g'ridan-to'g'ri `/api/v1` ostida)
 
-### Category obyekti (response shakli)
+Kategoriya nomi endi (mahsulot bilan bir xil qoidada) **3 tilda** (`uz`, `eng`, `ru`) saqlanadi. Ommaviy (public) endpointlar `?lang=` query parametriga qarab **bitta tildagi** javob qaytaradi; admin endpointi (`/categories/admin`) esa **har doim barcha 3 tilni** to'liq qaytaradi. Til mexanizmi mahsulotdagi bilan bir xil — [4.0](#40-til-lang-qanday-ishlaydi)ga qarang: `?lang=uz|eng|ru`, berilmasa yoki noto'g'ri bo'lsa `uz` (default), so'ralgan tilda qiymat bo'sh bo'lsa `uz`ga fallback.
+
+### Category obyekti — ommaviy (public) javob shakli
 
 ```json
 {
   "id": "uuid",
   "name": "Elektronika",
-  "parent_id": null,
+  "image_url": "https://res.cloudinary.com/.../category-images/....jpg",
+  "image_public_id": "category-images/xxxxxxx",
   "created_at": "2026-08-18T10:00:00Z",
   "updated_at": "2026-08-18T10:00:00Z"
 }
 ```
 
-> **Muhim:** `parent_id` maydoni DTO'da bor, lekin hozirgi backend logikasida hech qachon to'ldirilmaydi — har doim `null`/mavjud emas bo'lib qaytadi. Ya'ni **kategoriyalar ierarxiyasi (parent/child daraxti) hozircha backendda ishlamaydi**, barcha kategoriyalar "flat" (tekis) ro'yxat sifatida keladi. Rasm URL'i (`image_url`) response'da yo'qligiga ham e'tibor bering — bu quyida alohida ko'rsatilgan.
+### Category obyekti — admin javob shakli (`GET /categories/admin`)
 
-Yuqoridagi namunada ko'rinmasa-da, category yaratishda rasm yuklanadi, lekin hozirgi `CreateCategoryResponse` javobida **`image_url` maydoni yo'q** (backendda saqlanadi, lekin frontendga hali qaytarilmayapti). Kategoriya rasmini ko'rsatish kerak bo'lsa, hozircha buni backend jamoasiga bildirish kerak.
+```json
+{
+  "id": "uuid",
+  "name_uz": "Elektronika",
+  "name_eng": "Electronics",
+  "name_ru": "Электроника",
+  "image_url": "https://res.cloudinary.com/.../category-images/....jpg",
+  "image_public_id": "category-images/xxxxxxx",
+  "created_at": "2026-08-18T10:00:00Z",
+  "updated_at": "2026-08-18T10:00:00Z",
+  "deleted_at": null
+}
+```
+
+> **Muhim:** Kategoriyada **`parent_id` maydoni umuman yo'q** — hozircha kategoriyalar ierarxiyasi (parent/child daraxti) backendda mavjud emas, barcha kategoriyalar "flat" (tekis) ro'yxat sifatida keladi. `image_url` va `image_public_id` har doim javobda bor (Cloudinary'ga yuklangan rasm). Nomlar yaratishda **barcha 3 til majburiy** (bo'sh bo'lsa `400`).
 
 ---
 
 ### 3.1 Kategoriyalar ro'yxatini olish (public)
 
 ```
-GET /api/v1/categories?search=<matn>
+GET /api/v1/categories?search=<matn>&lang=<uz|eng|ru>
 ```
 
 - Auth talab qilinmaydi.
-- `search` — ixtiyoriy query parametr, nom bo'yicha qidirish uchun.
+- `search` — ixtiyoriy query parametr, nom bo'yicha qidirish uchun (`name_uz`/`name_eng`/`name_ru` — uchala til ustuni bo'yicha birga qidiradi).
+- `lang` — ixtiyoriy, default `uz`.
 - Faqat **o'chirilmagan** (`deleted_at IS NULL`) kategoriyalarni qaytaradi.
 
 **Javob — `200 OK`:**
 ```json
 {
   "data": [
-    { "id": "uuid", "name": "Elektronika", "image_url": "url", "created_at": "...", "updated_at": "..." }
+    { "id": "uuid", "name": "Elektronika", "image_url": "url", "image_public_id": "...", "created_at": "...", "updated_at": "..." }
   ]
 }
 ```
@@ -229,14 +247,15 @@ GET /api/v1/categories?search=<matn>
 ### 3.2 Bitta kategoriyani olish
 
 ```
-GET /api/v1/categories/{id}
+GET /api/v1/categories/{id}?lang=<uz|eng|ru>
 ```
 
 - Auth talab qilinmaydi.
+- `lang` — ixtiyoriy, default `uz`.
 
 **Javob — `200 OK`:**
 ```json
-{ "data": { "id": "uuid", "name": "Elektronika", "created_at": "...", "updated_at": "..." } }
+{ "data": { "id": "uuid", "name": "Elektronika", "image_url": "...", "image_public_id": "...", "created_at": "...", "updated_at": "..." } }
 ```
 
 ---
@@ -249,7 +268,7 @@ GET /api/v1/categories/admin?search=<matn>
 
 🔒 **Faqat admin** (`Authorization: Bearer <access_token>`, foydalanuvchi roli `admin` bo'lishi shart)
 
-- Oddiy `/categories`dan farqi: soft-delete qilingan (o'chirilgan) kategoriyalarni ham qaytaradi. Admin panelda "o'chirilgan kategoriyalar" bo'limi uchun ishlating.
+- Oddiy `/categories`dan farqi: soft-delete qilingan (o'chirilgan) kategoriyalarni ham qaytaradi va **har doim barcha 3 tilni to'liq** qaytaradi (`lang` qabul qilinmaydi — yuqoridagi admin shaklga qarang). Admin panelda ro'yxat va tahrirlash formasini shu javobdan to'ldiring.
 
 **Xatoliklar:** `401` (token yo'q), `403` (admin emas)
 
@@ -267,33 +286,27 @@ POST /api/v1/categories
 
 | Maydon | Turi | Majburiymi | Izoh |
 |---|---|---|---|
-| `name` | string | ✅ ha | Kategoriya nomi |
+| `name_uz` | string | ✅ ha | Kategoriya nomi (o'zbekcha) |
+| `name_eng` | string | ✅ ha | Kategoriya nomi (inglizcha) |
+| `name_ru` | string | ✅ ha | Kategoriya nomi (ruscha) |
 | `image` | file | ✅ ha | Kategoriya rasmi — **majburiy**, bo'lmasa 400 xato qaytadi |
 
 **Rasm cheklovlari (categories va products uchun bir xil):**
 - Maksimal hajm: **3 MB**
 - Ruxsat etilgan formatlar: `image/jpeg`, `image/png`, `image/webp`
-- Bulardan tashqarisi (masalan gif, boshqa hajm) → `400` xato
+- Bulardan tashqarisi (masalan gif, boshqa hajm) — `400` xato
 
-**Muvaffaqiyatli javob — `201 Created`:**
-```json
-{
-  "data": {
-    "id": "uuid",
-    "name": "Elektronika",
-    "created_at": "2026-08-18T10:00:00Z",
-    "updated_at": "2026-08-18T10:00:00Z"
-  }
-}
-```
+**Muvaffaqiyatli javob — `201 Created`:** `{ "data": <Category obyekti — public shakl, lang=uz> }`
 
 **Xatoliklar:**
 | Status | Sabab |
 |---|---|
-| 400 | `name` bo'sh, `image` yuborilmagan/noto'g'ri format/3MB dan katta |
+| 400 | `name_uz`/`name_eng`/`name_ru`dan biri bo'sh, `image` yuborilmagan/noto'g'ri format/3MB dan katta |
 | 401 | token yo'q |
 | 403 | admin emas |
-| 409 | shu nomdagi kategoriya allaqachon mavjud |
+| 500 | server xatosi |
+
+> Eslatma: bir xil nomli kategoriya yaratishga hozircha **cheklov yo'q** (nom unikal bo'lishi shart emas) — `409` bu endpointda qaytmaydi.
 
 ---
 
@@ -307,21 +320,30 @@ PUT /api/v1/categories/{id}
 
 **Content-Type:** `application/json`
 
-**Body:**
+**Body** (barcha maydonlar ixtiyoriy — faqat yubormoqchi bo'lgan tillarni jo'nating, qolganlari o'zgarmaydi):
 ```json
 {
-  "name": "Yangi nom"
+  "name_uz": "Yangi nom",
+  "name_eng": "New name",
+  "name_ru": "Новое название"
 }
 ```
 
-> Diqqat: bu endpoint **JSON body** qabul qiladi (rasm yangilash uchun `multipart/form-data` emas!). Hozircha faqat `name` maydonini yangilash mumkin — rasmni yangilash uchun alohida endpoint yo'q.
+> Diqqat: bu endpoint **JSON body** qabul qiladi (rasm yangilash uchun `multipart/form-data` emas!). Rasmni yangilash uchun alohida endpoint yo'q. Nomni yangilashda `name_uz`/`name_eng`/`name_ru`dan **kamida bittasini** yuborsangiz, backend o'zgarmagan tillarni joriy qiymati bilan birga qayta tekshiradi (uchalasi ham bo'sh bo'lmasligi kerak) — shuning uchun xavfsizroq usul barcha 3 tilni birga yuborishdir.
 
 **Javob — `200 OK`:**
 ```json
 { "data": null }
 ```
 
-**Xatoliklar:** `401`, `403`, `500` (backendda 400/404 mapping hozircha to'liq ulanmagan — bo'sh nom yoki topilmagan ID kelsa ham xatolik matni `error` maydonida keladi, lekin status kodi 500 bo'lishi mumkin — frontendda `error` matnini ham ko'rsating).
+**Xatoliklar:**
+| Status | Sabab |
+|---|---|
+| 400 | nom(lar) bo'sh string sifatida yuborilgan |
+| 401 | token yo'q |
+| 403 | admin emas |
+| 404 | kategoriya topilmadi |
+| 500 | server xatosi |
 
 ---
 
@@ -348,71 +370,106 @@ DELETE /api/v1/categories/{id}
 
 Prefiks: **`/api/v1/products`**
 
-Gullar do'koni mahsuloti — narx, chegirma, rasmlar (5 tagacha), Instagram video, buket xususiyatlari (rang, poya soni, qadoqlash, saqlanish muddati) va h.k. bilan.
+Mahsulot nomi va tavsifi **3 tilda** (`uz`, `eng`, `ru`) saqlanadi. Ommaviy (public) endpointlar `?lang=` query parametriga qarab **bitta tildagi** javob qaytaradi; admin endpointi (`/products/admin`, tahrirlash formasi uchun) esa **har doim barcha 3 tilni** to'liq qaytaradi.
 
-### Product obyekti (response shakli)
+### 4.0 Til (`lang`) qanday ishlaydi
+
+Quyidagi public GET endpointlarning barchasi `?lang=uz|eng|ru` query parametrini qabul qiladi:
+`GET /products`, `GET /products/{id}`, `GET /products/slug/{slug}`, `GET /categories/{id}/products`.
+
+- Berilmasa yoki noto'g'ri qiymat yuborilsa — `uz` ishlatiladi (default).
+- Agar so'ralgan tilda `name`/`description`/`tag` bo'sh bo'lsa — backend avtomatik `uz` qiymatiga fallback qiladi (frontendda bo'sh matn ko'rinmasligi uchun).
+- Misol: `GET /api/v1/products?lang=ru&page=1`
+
+> `GET /products/admin` (admin ro'yxati) `lang` qabul qilmaydi — u har doim 3 ta tilni birga qaytaradi, chunki admin panel tahrirlash formasi barcha tillarni bir vaqtda ko'rsatishi/yangilashi kerak.
+
+---
+
+### Product obyekti — ommaviy (public) javob shakli
+
+`lang`ga mos ravishda **bitta tildagi** `name`/`description`/`tag` bilan qaytadi:
 
 ```json
 {
   "id": "uuid",
   "name": "51 ta qizil atirgul",
   "description": "Premium Ekvador atirgullaridan yig'ilgan buket",
+  "tag": "bestseller",
   "images": [
     "https://res.cloudinary.com/.../product-images/....jpg",
     "https://res.cloudinary.com/.../product-images/....jpg"
   ],
-  "video_url_youtube": "https://www.youtube.com/watch?v=xxxxxxx",
-  "video_url_instagram": "https://www.instagram.com/reel/xxxxxxx/",
   "category_id": "uuid",
-  "price_amount": 15000000,
+  "price_amount": 150000,
   "price_currency": "UZS",
-  "discount_amount": 12000000,
-  "final_price_amount": 12000000,
+  "discount_amount": 120000,
+  "final_price_amount": 120000,
   "slug": "51-ta-qizil-atirgul",
   "is_available": true,
   "rating": 4.5,
   "stock": 12,
   "sold_count": 34,
-  "flower_types": ["rose"],
-  "color": "qizil",
-  "stem_count": 51,
-  "packaging_type": "box",
-  "freshness_lifespan": 5,
-  "care_instructions": "Har kuni suvini almashtiring",
-  "occasions": ["tug'ilgan kun", "yubiley"],
-  "allow_custom_card": null,
-  "compatible_addons": ["shokolad qutisi"],
   "created_at": "2026-08-18T10:00:00Z",
   "updated_at": "2026-08-18T10:00:00Z"
 }
 ```
 
+### Product obyekti — admin javob shakli (`GET /products/admin`)
+
+Barcha 3 til birga, tahrirlash formasini to'ldirish uchun:
+
+```json
+{
+  "id": "uuid",
+  "name_uz": "51 ta qizil atirgul",
+  "name_eng": "51 red roses",
+  "name_ru": "51 красная роза",
+  "description_uz": "Premium Ekvador atirgullaridan yig'ilgan buket",
+  "description_eng": "A bouquet of premium Ecuadorian roses",
+  "description_ru": "Букет из премиальных эквадорских роз",
+  "tag_uz": "bestseller",
+  "tag_eng": "Bestseller",
+  "tag_ru": "хит продаж",
+  "images": ["https://res.cloudinary.com/.../product-images/....jpg"],
+  "category_id": "uuid",
+  "price_amount": 150000,
+  "price_currency": "UZS",
+  "discount_amount": 120000,
+  "final_price_amount": 120000,
+  "slug": "51-ta-qizil-atirgul",
+  "is_available": true,
+  "rating": 4.5,
+  "stock": 12,
+  "sold_count": 34,
+  "created_at": "2026-08-18T10:00:00Z",
+  "updated_at": "2026-08-18T10:00:00Z",
+  "deleted_at": null
+}
+```
+
 Muhim izohlar:
-- **`images`** — Cloudinay CDN URL'lari ro'yxati, **eng ko'pi bilan 5 ta**. Bo'sh bo'lishi ham mumkin (`[]`) — hozircha rasm majburiy emas.
-- **`video_url_youtube`** / **`video_url_instagram`** — ikkalasi ham ixtiyoriy va bir-biridan mustaqil (bittasi, ikkalasi ham yoki hech biri bo'lmasligi mumkin). YouTube havolasi va Instagram video (reel/post) havolasi frontendda mos `<iframe>`/embed orqali ko'rsatiladi. Backend bu URL'larni tekshirmaydi va o'zgartirmaydi, xom string sifatida saqlaydi/qaytaradi. Berilmagan bo'lsa bo'sh string (`""`) qaytadi, `null` emas.
-- **`price_amount` / `discount_amount` / `final_price_amount`** — hammasi eng kichik pul birligida (tiyin). `discount_amount` bo'lmasa, javobda bu maydon umuman ko'rinmaydi (`omitempty`) va `final_price_amount` = `price_amount` bilan teng bo'ladi. `discount_amount` bo'lsa, u har doim `price_amount`dan kichik bo'ladi (backend buni yaratish/yangilashda tekshiradi) va **narxni ko'rsatishda `final_price_amount`dan foydalaning** — u chegirma bor-yo'qligidan qat'iy nazar "hozir to'lanadigan narx"ni bildiradi.
-- **`slug`** — URL uchun (masalan `/product/51-ta-qizil-atirgul`). Yaratishda yubormasangiz, backend `name`dan avtomatik hosil qiladi. Har bir mahsulotda **unikal** bo'lishi shart — band bo'lgan slug yuborilsa `409` qaytadi.
-- **`rating`** — 1 dan 5 gacha, default `1`. Hozircha foydalanuvchi sharhlaridan avtomatik hisoblanmaydi — admin qo'lda kiritadi (izoh/sharh tizimi hali yo'q, pastga qarang).
+- **`name` / `description`** — 3 tilda saqlanadi (`name_uz/eng/ru`, `description_uz/eng/ru`). Yaratishda **nom uchun barcha 3 til majburiy** (bo'sh bo'lsa `400`), tavsif ixtiyoriy (bo'sh string bo'lishi mumkin).
+- **`tag`** — ixtiyoriy belgi/badge, masalan `"bestseller"`, 3 tilda (`tag_uz/eng/ru`). Berilmasa `null`/`omitempty`.
+- Video (YouTube/Instagram) va gul-do'koniga xos maydonlar (`flower_types`, `color`, `stem_count`, `packaging_type`, `freshness_lifespan`, `care_instructions`, `allow_custom_card`, `compatible_addons`, `occasions`) **butunlay olib tashlangan** — endi mavjud emas.
+- **`images`** — Cloudinary CDN URL'lari ro'yxati, **eng ko'pi bilan 5 ta**. Bo'sh bo'lishi ham mumkin (`[]`).
+- **`price_amount` / `discount_amount` / `final_price_amount`** — endi **tiyinda emas, to'g'ridan-to'g'ri so'mda** (butun son) saqlanadi va qaytadi — backend hech qanday konversiya qilmaydi, frontend qanday yuborsa, shundayligicha saqlanadi va qaytadi. `discount_amount` bo'lmasa, javobda bu maydon umuman ko'rinmaydi (`omitempty`) va `final_price_amount` = `price_amount` bilan teng bo'ladi. `discount_amount` bo'lsa, u har doim `price_amount`dan kichik bo'ladi va **narxni ko'rsatishda `final_price_amount`dan foydalaning**.
+- **`slug`** — URL uchun (masalan `/product/51-ta-qizil-atirgul`). Yaratishda yubormasangiz, backend `name_uz`dan avtomatik hosil qiladi. Har bir mahsulotda **unikal** bo'lishi shart — band bo'lgan slug yuborilsa `409` qaytadi.
+- **`rating`** — 1 dan 5 gacha, default `1`. Hozircha foydalanuvchi sharhlaridan avtomatik hisoblanmaydi — admin qo'lda kiritadi (izoh/sharh tizimi hali yo'q).
 - **`stock`** / **`sold_count`** — ombordagi son va sotilganlar soni. `is_available` bilan bir xil narsa emas: `stock=0` bo'lsa ham `is_available` alohida `true`/`false` bo'lishi mumkin — frontendda ikkalasini alohida hisobga oling ("tugadi" belgisi uchun `is_available`ni ishlating).
-- **`flower_types`**, **`occasions`**, **`compatible_addons`** — tag ro'yxatlari (JSON massiv). Bo'lmasa `[]` bo'lib qaytadi, hech qachon `null` emas.
-- **`packaging_type`** — enum: `"bucket"`, `"box"`, `"vase"`.
-- **`freshness_lifespan`** — butun son, kunlarda, `1` dan `7` gacha, default `1`.
-- **`care_instructions`** — ixtiyoriy, berilmasa `null`.
-- **`allow_custom_card`** — hozircha **doim `null`** qaytadi. Bu — buyurtmaga tabrik kartochkasi qo'shish imkoniyati, keyinroq qo'shiladi. Frontendda hozircha bu maydonga tayanmang.
-- **Sharhlar/izohlar (comments)** — hali backendda yo'q, product obyektida ham yo'q. Sotib olgan foydalanuvchilar tomonidan izoh yozish funksiyasi kelajakda alohida endpoint sifatida qo'shiladi.
-- `category_id` — **backend create/update paytida bu ID chindan mavjud kategoriyaga tegishli ekanligini tekshiradi** (events bilan bir xil qoida) — mavjud bo'lmagan `category_id` yuborilsa `400`/`404` qaytishi mumkin (pastga qarang).
+- `category_id` — **backend create/update paytida bu ID chindan mavjud kategoriyaga tegishli ekanligini tekshiradi** — mavjud bo'lmagan `category_id` yuborilsa xato qaytadi.
 
 ---
 
 ### 4.1 Mahsulotlar ro'yxatini olish (public)
 
 ```
-GET /api/v1/products?search=<matn>&category_id=<uuid>&page=<son>&page_size=<son>
+GET /api/v1/products?search=<matn>&category_id=<uuid>&lang=<uz|eng|ru>&page=<son>&page_size=<son>
 ```
 
 - Auth talab qilinmaydi.
-- `search` — ixtiyoriy, nom bo'yicha qidirish (`ILIKE`).
+- `search` — ixtiyoriy, nom bo'yicha qidirish (`ILIKE`, uchala til ustuni — `name_uz`/`name_eng`/`name_ru` — bo'yicha birga qidiradi).
 - `category_id` — ixtiyoriy, faqat shu kategoriyaga tegishli mahsulotlarni qaytaradi. Ikkalasini birga ham berish mumkin.
+- `lang` — ixtiyoriy, [4.0](#40-til-lang-qanday-ishlaydi)ga qarang, default `uz`.
 - `page` — ixtiyoriy, sahifa raqami, **1 dan boshlanadi**. Berilmasa yoki `1`dan kichik bo'lsa `1` deb olinadi.
 - `page_size` — ixtiyoriy, sahifadagi elementlar soni. Berilmasa `20`. Maksimal `100` — undan katta qiymat yuborilsa `100`ga qisqartiriladi.
 - Faqat **o'chirilmagan** (`deleted_at IS NULL`) mahsulotlarni qaytaradi. `is_available=false` bo'lgan mahsulotlar ham shu ro'yxatda keladi (yashirilmaydi) — "tugagan" holatini frontendda `is_available` orqali ko'rsating.
@@ -421,7 +478,7 @@ GET /api/v1/products?search=<matn>&category_id=<uuid>&page=<son>&page_size=<son>
 ```json
 {
   "data": {
-    "items": [ <Product obyekti>, ... ],
+    "items": [ <Product obyekti — public shakl>, ... ],
     "pagination": {
       "page": 1,
       "page_size": 20,
@@ -432,19 +489,19 @@ GET /api/v1/products?search=<matn>&category_id=<uuid>&page=<son>&page_size=<son>
 }
 ```
 
-> Diqqat: bu **ro'yxat qaytaradigan barcha `/products` endpointlarida bir xil shakl** (pastdagi 4.2 va 4.5 ham shu). Eski (pagination'siz) formatdan farqi: `data` endi to'g'ridan-to'g'ri massiv emas, balki `items` + `pagination` bo'lgan obyekt. Mahsulotlar ro'yxatini chizishda `data.items`ni, "keyingi sahifa" tugmasi uchun `data.pagination.total_pages`ni ishlating.
+> Diqqat: bu **ro'yxat qaytaradigan barcha `/products` endpointlarida bir xil shakl** (pastdagi 4.2 va 4.5 ham shu). `data` to'g'ridan-to'g'ri massiv emas, balki `items` + `pagination` bo'lgan obyekt. Mahsulotlar ro'yxatini chizishda `data.items`ni, "keyingi sahifa" tugmasi uchun `data.pagination.total_pages`ni ishlating.
 
 ---
 
 ### 4.2 Kategoriya bo'yicha mahsulotlarni olish (public)
 
 ```
-GET /api/v1/categories/{id}/products?search=<matn>&page=<son>&page_size=<son>
+GET /api/v1/categories/{id}/products?search=<matn>&lang=<uz|eng|ru>&page=<son>&page_size=<son>
 ```
 
 - Auth talab qilinmaydi.
 - Xuddi `GET /products?category_id={id}` bilan bir xil natija — kategoriya sahifasida (masalan "Atirgullar" kategoriyasi) qulay bo'lishi uchun alohida yo'l sifatida ham ochilgan.
-- `page` / `page_size` — 4.1 bilan bir xil qoidalar.
+- `lang` / `page` / `page_size` — 4.1 bilan bir xil qoidalar.
 
 **Javob — `200 OK`:** 4.1dagi bilan bir xil `{ "data": { "items": [...], "pagination": {...} } }` shakli.
 
@@ -453,12 +510,13 @@ GET /api/v1/categories/{id}/products?search=<matn>&page=<son>&page_size=<son>
 ### 4.3 Bitta mahsulotni olish (ID bo'yicha)
 
 ```
-GET /api/v1/products/{id}
+GET /api/v1/products/{id}?lang=<uz|eng|ru>
 ```
 
 - Auth talab qilinmaydi.
+- `lang` — ixtiyoriy, default `uz`.
 
-**Javob — `200 OK`:** `{ "data": <Product obyekti> }`
+**Javob — `200 OK`:** `{ "data": <Product obyekti — public shakl> }`
 
 **Xatoliklar:** `404` — mahsulot topilmadi (yoki o'chirilgan)
 
@@ -467,12 +525,13 @@ GET /api/v1/products/{id}
 ### 4.4 Bitta mahsulotni olish (slug bo'yicha)
 
 ```
-GET /api/v1/products/slug/{slug}
+GET /api/v1/products/slug/{slug}?lang=<uz|eng|ru>
 ```
 
 - Auth talab qilinmaydi. Mahsulot sahifasi (`/product/51-ta-qizil-atirgul`) uchun SEO-friendly URL'da shundan foydalaning.
+- `lang` — ixtiyoriy, default `uz`.
 
-**Javob — `200 OK`:** `{ "data": <Product obyekti> }`
+**Javob — `200 OK`:** `{ "data": <Product obyekti — public shakl> }`
 
 **Xatoliklar:** `404` — mahsulot topilmadi
 
@@ -486,8 +545,9 @@ GET /api/v1/products/admin?search=<matn>&category_id=<uuid>&page=<son>&page_size
 
 🔒 **Faqat admin**
 
-- Oddiy `/products`dan farqi: soft-delete qilingan mahsulotlarni ham qaytaradi. Har bir elementda qo'shimcha `deleted_at` maydoni bo'ladi (o'chirilmagan bo'lsa `null`).
-- `page` / `page_size` — 4.1 bilan bir xil qoidalar. Javob shakli ham bir xil: `{ "data": { "items": [...], "pagination": {...} } }`.
+- Oddiy `/products`dan farqi: soft-delete qilingan mahsulotlarni ham qaytaradi va **har doim barcha 3 tilni to'liq** qaytaradi (`lang` qabul qilinmaydi — [4.0](#40-til-lang-qanday-ishlaydi)ga qarang). Har bir elementda qo'shimcha `deleted_at` maydoni bo'ladi (o'chirilmagan bo'lsa `null`).
+- `page` / `page_size` — 4.1 bilan bir xil qoidalar. Javob shakli ham bir xil: `{ "data": { "items": [...], "pagination": {...} } }`, lekin har bir element yuqoridagi **admin shaklida** (`name_uz/eng/ru`, `description_uz/eng/ru`, `tag_uz/eng/ru`, `deleted_at`).
+- Admin panelda mahsulotni tahrirlash formasini shu ro'yxatdagi qatordan to'ldiring — alohida "bitta mahsulotni admin ko'rinishida olish" endpointi yo'q.
 
 **Xatoliklar:** `401` (token yo'q), `403` (admin emas)
 
@@ -505,38 +565,35 @@ POST /api/v1/products
 
 | Maydon | Turi | Majburiymi | Izoh |
 |---|---|---|---|
-| `name` | string | ✅ ha | Mahsulot nomi |
-| `description` | string | ❌ yo'q | Tavsif |
+| `name_uz` | string | ✅ ha | Mahsulot nomi (o'zbekcha) |
+| `name_eng` | string | ✅ ha | Mahsulot nomi (inglizcha) |
+| `name_ru` | string | ✅ ha | Mahsulot nomi (ruscha) |
+| `description_uz` | string | ❌ yo'q | Tavsif (o'zbekcha) |
+| `description_eng` | string | ❌ yo'q | Tavsif (inglizcha) |
+| `description_ru` | string | ❌ yo'q | Tavsif (ruscha) |
 | `category_id` | string (uuid) | ✅ ha | Mavjud kategoriya ID'si — backend tekshiradi |
-| `amount` | integer | ✅ ha | Narx, **tiyinda** (eng kichik pul birligi) |
+| `amount` | integer | ✅ ha | Narx, **so'mda** (butun son, tiyinga aylantirilmaydi) |
 | `currency` | string | ✅ ha | Valyuta kodi, masalan `"UZS"` |
-| `discount_amount` | integer | ❌ yo'q | Chegirma narxi, tiyinda. Berilsa `amount`dan kichik va bir xil valyutada bo'lishi shart |
-| `slug` | string | ❌ yo'q | Bo'sh qoldirilsa `name`dan avtomatik hosil qilinadi |
-| `video_url_youtube` | string | ❌ yo'q | YouTube video havolasi |
-| `video_url_instagram` | string | ❌ yo'q | Instagram video havolasi |
+| `discount_amount` | integer | ❌ yo'q | Chegirma narxi, so'mda. Berilsa `amount`dan kichik va bir xil valyutada bo'lishi shart |
+| `slug` | string | ❌ yo'q | Bo'sh qoldirilsa `name_uz`dan avtomatik hosil qilinadi |
 | `is_available` | `"true"`/`"false"` | ❌ yo'q | Berilmasa `true` deb olinadi |
 | `rating` | number | ❌ yo'q | 1–5, berilmasa `1` |
 | `stock` | integer | ❌ yo'q | Berilmasa `0` |
-| `flower_types` | string | ❌ yo'q | Vergul bilan ajratilgan (masalan `"rose,tulip"`) |
-| `color` | string | ❌ yo'q | Rangi |
-| `stem_count` | integer | ❌ yo'q | Buketdagi gullar soni |
-| `packaging_type` | string | ✅ ha | `"bucket"` \| `"box"` \| `"vase"` |
-| `freshness_lifespan` | integer | ❌ yo'q | 1–7 kun, berilmasa `1` |
-| `care_instructions` | string | ❌ yo'q | Parvarish ko'rsatmasi |
-| `occasions` | string | ❌ yo'q | Vergul bilan ajratilgan tag'lar (masalan `"tug'ilgan kun,to'y"`) |
-| `compatible_addons` | string | ❌ yo'q | Vergul bilan ajratilgan (masalan `"shokolad qutisi,otkritka"`) |
+| `tag_uz` | string | ❌ yo'q | Belgi/badge, masalan `"bestseller"` (o'zbekcha, ixtiyoriy) |
+| `tag_eng` | string | ❌ yo'q | Belgi/badge (inglizcha, ixtiyoriy) |
+| `tag_ru` | string | ❌ yo'q | Belgi/badge (ruscha, ixtiyoriy) |
 | `images` | file (bir nechta) | ❌ yo'q | Bir nechta faylni **bir xil `images` maydon nomi bilan** yuboring; eng ko'pi bilan 5 ta |
 
 > Ko'p faylni bitta form-data maydonida yuborish: `FormData.append('images', file1); FormData.append('images', file2); ...` (brauzer/`fetch`da bir nechta marta shu nomda `append` qiling — array belgisi `images[]` shart emas, backend `images` nomidagi barcha fayllarni oladi).
 
 **Rasm cheklovi:** har bir rasm — maks. 3MB, formatlar: `jpeg`/`png`/`webp` (categorydagi bilan bir xil).
 
-**Muvaffaqiyatli javob — `201 Created`:** `{ "data": <Product obyekti> }`
+**Muvaffaqiyatli javob — `201 Created`:** `{ "data": <Product obyekti — public shakl, lang=uz> }`
 
 **Xatoliklar:**
 | Status | Sabab |
 |---|---|
-| 400 | `name`/`category_id`/`packaging_type` bo'sh yoki noto'g'ri, `amount`/`discount_amount` noto'g'ri yoki chegirma asosiy narxdan katta, `rating`/`freshness_lifespan` diapazondan tashqari, 5 tadan ortiq rasm, rasm formati/hajmi noto'g'ri |
+| 400 | `name_uz`/`name_eng`/`name_ru`/`category_id` bo'sh yoki noto'g'ri, `amount`/`discount_amount` noto'g'ri yoki chegirma asosiy narxdan katta, `rating` diapazondan tashqari, 5 tadan ortiq rasm, rasm formati/hajmi noto'g'ri |
 | 401 | token yo'q |
 | 403 | admin emas |
 | 409 | shu `slug` allaqachon band |
@@ -557,42 +614,41 @@ PUT /api/v1/products/{id}
 **Body** (barcha maydonlar ixtiyoriy — faqat yubormoqchi bo'lgan maydonlarni jo'nating, qolganlari o'zgarmaydi):
 ```json
 {
-  "name": "Yangi nom",
-  "description": "Yangi tavsif",
-  "video_url_youtube": "https://www.youtube.com/watch?v=yyyyyyy",
-  "video_url_instagram": "https://www.instagram.com/reel/yyyyyyy/",
+  "name_uz": "Yangi nom",
+  "name_eng": "New name",
+  "name_ru": "Новое название",
+  "description_uz": "Yangi tavsif",
+  "description_eng": "New description",
+  "description_ru": "Новое описание",
   "category_id": "boshqa-uuid",
-  "amount": 16000000,
+  "amount": 160000,
   "currency": "UZS",
-  "discount_amount": 13000000,
+  "discount_amount": 130000,
   "clear_discount": false,
   "slug": "yangi-slug",
   "is_available": true,
   "rating": 4.8,
   "stock": 20,
   "sold_count": 40,
-  "flower_types": ["rose", "peony"],
-  "color": "pushti",
-  "stem_count": 25,
-  "packaging_type": "vase",
-  "freshness_lifespan": 6,
-  "care_instructions": "Sovuq joyda saqlang",
-  "clear_care_instructions": false,
-  "occasions": ["yubiley"],
-  "compatible_addons": ["shokolad qutisi"]
+  "tag_uz": "bestseller",
+  "tag_eng": "Bestseller",
+  "tag_ru": "хит продаж",
+  "clear_tag_uz": false,
+  "clear_tag_eng": false,
+  "clear_tag_ru": false
 }
 ```
 
-> Diqqat: bu endpoint **JSON body** qabul qiladi (rasm yangilash uchun `multipart/form-data` emas — hozircha rasmlarni yangilash uchun alohida endpoint yo'q). `category_id` yuborilsa, backend uni ham mavjudligiga tekshiradi.
+> Diqqat: bu endpoint **JSON body** qabul qiladi (rasm yangilash uchun `multipart/form-data` emas — hozircha rasmlarni yangilash uchun alohida endpoint yo'q). `category_id` yuborilsa, backend uni ham mavjudligiga tekshiradi. Nomni yangilashda `name_uz`/`name_eng`/`name_ru`dan **kamida bittasini** yuborsangiz, backend o'zgarmagan tillarni joriy qiymati bilan birga qayta tekshiradi — shuning uchun agar 3 tildan birortasini yangilamoqchi bo'lsangiz ham, xavfsizroq usul barcha 3 tilni birga yuborishdir.
 >
-> Ikkita maxsus bayroq bor: `clear_discount: true` — chegirmani butunlay o'chiradi (`discount_amount`ni yubormasdan); `clear_care_instructions: true` — parvarish ko'rsatmasini `null` qiladi. Bu ikkisi berilmasa, mos `*_amount`/`care_instructions` maydoni yuborilgan taqdirdagina o'zgaradi.
+> Maxsus bayroqlar: `clear_discount: true` — chegirmani butunlay o'chiradi (`discount_amount`ni yubormasdan); `clear_tag_uz`/`clear_tag_eng`/`clear_tag_ru: true` — mos tildagi tag'ni `null` qiladi. Bular berilmasa, mos maydon yuborilgan taqdirdagina o'zgaradi.
 
 **Javob — `200 OK`:** `{ "data": null }`
 
 **Xatoliklar:**
 | Status | Sabab |
 |---|---|
-| 400 | validatsiya xatosi (bo'sh nom, noto'g'ri narx/chegirma, noto'g'ri enum qiymati va h.k.) |
+| 400 | validatsiya xatosi (bo'sh nom, noto'g'ri narx/chegirma va h.k.) |
 | 401 | token yo'q |
 | 403 | admin emas |
 | 404 | mahsulot topilmadi |
@@ -624,7 +680,9 @@ DELETE /api/v1/products/{id}
 
 Bosh sahifadagi banner/aksiya bloklari (masalan "Bugungi taklif — Sevimlilar uchun gullar") uchun. Prefiks: **`/api/v1/events`**
 
-### Event obyekti (response shakli)
+`eyebrow`, `title`, `subtitle`, `cta` — to'rttasi ham endi **3 tilda** (`uz`, `eng`, `ru`) saqlanadi (product/category bilan bir xil qoida). Ommaviy endpointlar `?lang=` query parametriga qarab **bitta tildagi** javob qaytaradi; admin endpointi (`/events/admin`) esa **har doim barcha 3 tilni** to'liq qaytaradi. Til mexanizmi — [4.0](#40-til-lang-qanday-ishlaydi)ga qarang: `?lang=uz|eng|ru`, berilmasa yoki noto'g'ri bo'lsa `uz` (default), so'ralgan tilda qiymat bo'sh bo'lsa `uz`ga fallback.
+
+### Event obyekti — ommaviy (public) javob shakli
 
 ```json
 {
@@ -641,19 +699,47 @@ Bosh sahifadagi banner/aksiya bloklari (masalan "Bugungi taklif — Sevimlilar u
 }
 ```
 
+### Event obyekti — admin javob shakli (`GET /events/admin`)
+
+```json
+{
+  "id": "uuid",
+  "eyebrow_uz": "Bugungi taklif",
+  "eyebrow_eng": "Today's offer",
+  "eyebrow_ru": "Предложение дня",
+  "title_uz": "Sevimlilar uchun gullar",
+  "title_eng": "Flowers for your loved ones",
+  "title_ru": "Цветы для любимых",
+  "subtitle_uz": "Bugun buyurtma bering, bugun yetkazamiz",
+  "subtitle_eng": "Order today, delivered today",
+  "subtitle_ru": "Закажите сегодня — доставим сегодня",
+  "cta_uz": "Mahsulotlarni ko'rish",
+  "cta_eng": "View products",
+  "cta_ru": "Смотреть товары",
+  "image": "https://res.cloudinary.com/.../event-images/....jpg",
+  "category_id": "uuid",
+  "is_root": true,
+  "created_at": "2026-08-18T10:00:00Z",
+  "updated_at": "2026-08-18T10:00:00Z",
+  "deleted_at": null
+}
+```
+
 - `image` — Cloudinary'ga yuklangan rasmning to'liq CDN URL'i (local `/images/...` fayl yo'li emas — bu maydonga to'g'ridan-to'g'ri backenddan qaytgan URL keladi, frontendda `<img src>` sifatida shuni ishlating).
 - `category_id` — event qaysi kategoriyaga tegishli ekanligi. **Create va update paytida backend bu ID chindan mavjud kategoriyaga tegishli ekanligini tekshiradi** — mavjud bo'lmagan/noto'g'ri `category_id` yuborilsa `400` xato qaytadi.
 - `is_root` — `true` bo'lsa, `GET /events` va `GET /events/admin` ro'yxatlarida **birinchi bo'lib** chiqadi (backendda `ORDER BY is_root DESC, created_at DESC`). Bir nechta event `is_root: true` bo'lishi mumkin — ular orasida eng yangisi birinchi keladi.
+- `title` — yaratishda **barcha 3 til majburiy** (bo'sh bo'lsa `400`). `eyebrow`/`subtitle`/`cta` — ixtiyoriy (bo'sh string bo'lishi mumkin).
 
 ---
 
 ### 5.1 Eventlar ro'yxatini olish (public)
 
 ```
-GET /api/v1/events
+GET /api/v1/events?lang=<uz|eng|ru>
 ```
 
 - Auth talab qilinmaydi.
+- `lang` — ixtiyoriy, default `uz`.
 - Faqat **o'chirilmagan** (`deleted_at IS NULL`) eventlarni qaytaradi — bosh sahifada shundan foydalaning.
 
 **Javob — `200 OK`:**
@@ -681,10 +767,11 @@ GET /api/v1/events
 ### 5.2 Bitta eventni olish
 
 ```
-GET /api/v1/events/{id}
+GET /api/v1/events/{id}?lang=<uz|eng|ru>
 ```
 
 - Auth talab qilinmaydi.
+- `lang` — ixtiyoriy, default `uz`.
 
 **Javob — `200 OK`:**
 ```json
@@ -703,22 +790,7 @@ GET /api/v1/events/admin
 
 🔒 **Faqat admin**
 
-- Oddiy `/events`dan farqi: soft-delete qilingan eventlarni ham qaytaradi. Har bir elementda qo'shimcha `deleted_at` maydoni bo'ladi (o'chirilmagan bo'lsa `null`, o'chirilgan bo'lsa sana).
-
-**Javob — `200 OK`:**
-```json
-{
-  "data": [
-    {
-      "id": "uuid",
-      "eyebrow": "...", "title": "...", "subtitle": "...", "cta": "...",
-      "image": "...", "category_id": "uuid", "is_root": false,
-      "created_at": "...", "updated_at": "...",
-      "deleted_at": null
-    }
-  ]
-}
-```
+- Oddiy `/events`dan farqi: soft-delete qilingan eventlarni ham qaytaradi va **har doim barcha 3 tilni to'liq** qaytaradi (`lang` qabul qilinmaydi — yuqoridagi admin shaklga qarang). Har bir elementda qo'shimcha `deleted_at` maydoni bo'ladi (o'chirilmagan bo'lsa `null`, o'chirilgan bo'lsa sana).
 
 **Xatoliklar:** `401` (token yo'q), `403` (admin emas)
 
@@ -736,38 +808,30 @@ POST /api/v1/events
 
 | Maydon | Turi | Majburiymi | Izoh |
 |---|---|---|---|
-| `eyebrow` | string | ❌ yo'q | Kichik ustki matn |
-| `title` | string | ✅ ha | Sarlavha |
-| `subtitle` | string | ❌ yo'q | Sarlavha ostidagi matn |
-| `cta` | string | ❌ yo'q | Tugma matni (masalan "Mahsulotlarni ko'rish") |
+| `eyebrow_uz` | string | ❌ yo'q | Kichik ustki matn (o'zbekcha) |
+| `eyebrow_eng` | string | ❌ yo'q | Kichik ustki matn (inglizcha) |
+| `eyebrow_ru` | string | ❌ yo'q | Kichik ustki matn (ruscha) |
+| `title_uz` | string | ✅ ha | Sarlavha (o'zbekcha) |
+| `title_eng` | string | ✅ ha | Sarlavha (inglizcha) |
+| `title_ru` | string | ✅ ha | Sarlavha (ruscha) |
+| `subtitle_uz` | string | ❌ yo'q | Sarlavha ostidagi matn (o'zbekcha) |
+| `subtitle_eng` | string | ❌ yo'q | Sarlavha ostidagi matn (inglizcha) |
+| `subtitle_ru` | string | ❌ yo'q | Sarlavha ostidagi matn (ruscha) |
+| `cta_uz` | string | ❌ yo'q | Tugma matni, masalan "Mahsulotlarni ko'rish" (o'zbekcha) |
+| `cta_eng` | string | ❌ yo'q | Tugma matni (inglizcha) |
+| `cta_ru` | string | ❌ yo'q | Tugma matni (ruscha) |
 | `category_id` | string (uuid) | ✅ ha | Mavjud kategoriya ID'si — backend tekshiradi |
 | `is_root` | `"true"` / `"false"` | ❌ yo'q | Berilmasa `false` deb olinadi |
 | `image` | file | ✅ ha | Event rasmi — majburiy |
 
-**Rasm cheklovi:** maks. 3MB, formatlar `jpeg`/`png`/`webp` (categories/products bilan bir xil — [5-bo'lim](#6-fayl-yuklash-haqida-umumiy-qoidalar)ga qarang).
+**Rasm cheklovi:** maks. 3MB, formatlar `jpeg`/`png`/`webp` (categories/products bilan bir xil — [6-bo'lim](#6-fayl-yuklash-haqida-umumiy-qoidalar)ga qarang).
 
-**Muvaffaqiyatli javob — `201 Created`:**
-```json
-{
-  "data": {
-    "id": "uuid",
-    "eyebrow": "Bugungi taklif",
-    "title": "Sevimlilar uchun gullar",
-    "subtitle": "Bugun buyurtma bering, bugun yetkazamiz",
-    "cta": "Mahsulotlarni ko'rish",
-    "image": "https://res.cloudinary.com/.../event-images/....jpg",
-    "category_id": "uuid",
-    "is_root": true,
-    "created_at": "2026-08-18T10:00:00Z",
-    "updated_at": "2026-08-18T10:00:00Z"
-  }
-}
-```
+**Muvaffaqiyatli javob — `201 Created`:** `{ "data": <Event obyekti — public shakl, lang=uz> }`
 
 **Xatoliklar:**
 | Status | Sabab |
 |---|---|
-| 400 | `title` bo'sh, `category_id` bo'sh/mavjud bo'lmagan kategoriyaga ishora qilyapti, `image` yuborilmagan yoki formati/hajmi noto'g'ri |
+| 400 | `title_uz`/`title_eng`/`title_ru`dan biri bo'sh, `category_id` bo'sh/mavjud bo'lmagan kategoriyaga ishora qilyapti, `image` yuborilmagan yoki formati/hajmi noto'g'ri |
 | 401 | token yo'q |
 | 403 | admin emas |
 | 500 | server xatosi |
@@ -784,19 +848,27 @@ PUT /api/v1/events/{id}
 
 **Content-Type:** `application/json`
 
-**Body** (barcha maydonlar ixtiyoriy — faqat yubormoqchi bo'lgan maydonlarni jo'nating, qolganlari o'zgarmaydi):
+**Body** (barcha maydonlar ixtiyoriy — faqat yubormoqchi bo'lgan tillarni jo'nating, qolganlari o'zgarmaydi):
 ```json
 {
-  "eyebrow": "Yangi eyebrow",
-  "title": "Yangi sarlavha",
-  "subtitle": "Yangi subtitle",
-  "cta": "Yangi tugma matni",
+  "eyebrow_uz": "Yangi eyebrow",
+  "eyebrow_eng": "New eyebrow",
+  "eyebrow_ru": "Новый eyebrow",
+  "title_uz": "Yangi sarlavha",
+  "title_eng": "New title",
+  "title_ru": "Новый заголовок",
+  "subtitle_uz": "Yangi subtitle",
+  "subtitle_eng": "New subtitle",
+  "subtitle_ru": "Новый подзаголовок",
+  "cta_uz": "Yangi tugma matni",
+  "cta_eng": "New button text",
+  "cta_ru": "Новый текст кнопки",
   "category_id": "boshqa-uuid",
   "is_root": false
 }
 ```
 
-> Diqqat: bu endpoint **JSON body** qabul qiladi. Rasmni bu orqali yangilab bo'lmaydi (hozircha rasmni yangilash uchun alohida endpoint yo'q). `category_id` yuborilsa, backend uni ham mavjudligiga tekshiradi.
+> Diqqat: bu endpoint **JSON body** qabul qiladi. Rasmni bu orqali yangilab bo'lmaydi (hozircha rasmni yangilash uchun alohida endpoint yo'q). `category_id` yuborilsa, backend uni ham mavjudligiga tekshiradi. Nomni (`title`) yangilashda `title_uz`/`title_eng`/`title_ru`dan **kamida bittasini** yuborsangiz, backend o'zgarmagan tillarni joriy qiymati bilan birga qayta tekshiradi (uchalasi ham bo'sh bo'lmasligi kerak) — shuning uchun xavfsizroq usul barcha 3 tilni birga yuborishdir.
 
 **Javob — `200 OK`:**
 ```json
@@ -806,7 +878,7 @@ PUT /api/v1/events/{id}
 **Xatoliklar:**
 | Status | Sabab |
 |---|---|
-| 400 | `title` bo'sh string sifatida yuborilgan, yoki `category_id` mavjud bo'lmagan kategoriyaga ishora qilyapti |
+| 400 | `title_uz`/`title_eng`/`title_ru` bo'sh string sifatida yuborilgan, yoki `category_id` mavjud bo'lmagan kategoriyaga ishora qilyapti |
 | 401 | token yo'q |
 | 403 | admin emas |
 | 404 | event topilmadi |
@@ -890,10 +962,8 @@ Frontendda: login qilingandan keyin `GET /auth/me` chaqirib, javobdagi `role` ma
 Frontend ishini rejalashtirishda hisobga oling:
 
 - ❌ Mahsulotga izoh/sharh (comments) — foydalanuvchi sotib olgandan keyin izoh qoldirishi kelajakda qo'shiladi, hozircha yo'q
-- ❌ `allow_custom_card` (buyurtmaga tabrik kartochkasi) — product obyektida maydon bor, lekin har doim `null`, hali to'liq funksiya emas
 - ❌ Mahsulot rasmlarini alohida yangilash (PUT productda faqat matn/raqam maydonlari o'zgaradi, `images` emas — rasmlarni o'zgartirish uchun alohida endpoint hali yo'q)
-- ❌ Kategoriya ierarxiyasi (parent/child daraxti) — `parent_id` maydoni bor, lekin ishlamaydi
-- ❌ Category rasm URL'i response'da yo'q
+- ❌ Kategoriya ierarxiyasi (parent/child daraxti) — kategoriyada `parent_id` degan maydon umuman yo'q, barcha kategoriyalar "flat" ro'yxat
 - ❌ Event rasmini alohida yangilash (PUT eventda faqat matn maydonlari o'zgaradi, rasm emas)
 - ❌ Savat, buyurtma (order) — `internal/ordering` papkasi mavjud, lekin ichida hali HTTP endpoint yo'q
 - ❌ Parolni tiklash / o'zgartirish, logout endpointi

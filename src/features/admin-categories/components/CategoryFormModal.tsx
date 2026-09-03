@@ -3,7 +3,8 @@ import { Modal, Form, Input, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateCategory, useUpdateCategory } from '@/features/categories/hooks';
-import type { Category } from '@/features/categories/types';
+import type { CategoryAdmin } from '@/features/categories/types';
+import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE_MB = 3;
@@ -11,14 +12,21 @@ const MAX_SIZE_MB = 3;
 interface CategoryFormModalProps {
   open: boolean;
   /** `null`/`undefined` — yaratish rejimi, aks holda tahrirlash rejimi. */
-  category?: Category | null;
+  category?: CategoryAdmin | null;
   onClose: () => void;
 }
 
+interface CategoryFormValues {
+  name_uz: string;
+  name_eng: string;
+  name_ru: string;
+}
+
 export function CategoryFormModal({ open, category, onClose }: CategoryFormModalProps) {
-  const [form] = Form.useForm<{ name: string }>();
+  const [form] = Form.useForm<CategoryFormValues>();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const isEdit = !!category;
+  const t = useT();
 
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
@@ -26,17 +34,21 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
 
   function handleAfterOpenChange(visible: boolean) {
     if (!visible) return;
-    form.setFieldsValue({ name: category?.name ?? '' });
+    form.setFieldsValue({
+      name_uz: category?.name_uz ?? '',
+      name_eng: category?.name_eng ?? '',
+      name_ru: category?.name_ru ?? '',
+    });
     setFileList([]);
   }
 
   function beforeUpload(file: File) {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      message.error('Faqat JPEG, PNG yoki WEBP formatidagi rasm yuklash mumkin');
+      message.error(t('common.upload_type_error'));
       return Upload.LIST_IGNORE;
     }
     if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
-      message.error('Rasm hajmi 3MB dan oshmasligi kerak');
+      message.error(t('common.upload_size_error'));
       return Upload.LIST_IGNORE;
     }
     // false — Upload'ning o'zi yubormaydi, faylni submit paytida biz formaga qo'shib yuboramiz.
@@ -48,40 +60,56 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
 
     try {
       if (isEdit && category) {
-        await updateMutation.mutateAsync({ id: category.id, payload: { name: values.name } });
+        await updateMutation.mutateAsync({
+          id: category.id,
+          payload: { name_uz: values.name_uz, name_eng: values.name_eng, name_ru: values.name_ru },
+        });
       } else {
         const imageFile = fileList[0]?.originFileObj as File | undefined;
         if (!imageFile) {
-          message.error('Rasm tanlang');
+          message.error(t('common.choose_image_required'));
           return;
         }
-        await createMutation.mutateAsync({ name: values.name, image: imageFile });
+        await createMutation.mutateAsync({
+          name_uz: values.name_uz,
+          name_eng: values.name_eng,
+          name_ru: values.name_ru,
+          image: imageFile,
+        });
       }
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : 'Xatolik yuz berdi');
+      message.error(error instanceof Error ? error.message : t('common.error'));
     }
   }
 
   return (
     <Modal
-      title={isEdit ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'}
+      title={isEdit ? t('category.edit_title') : t('category.new')}
       open={open}
       afterOpenChange={handleAfterOpenChange}
       onCancel={onClose}
       onOk={handleSubmit}
       confirmLoading={isSubmitting}
-      okText={isEdit ? 'Saqlash' : "Qo'shish"}
-      cancelText="Bekor qilish"
+      okText={isEdit ? t('common.save') : t('common.add')}
+      cancelText={t('common.cancel')}
       destroyOnHidden
     >
       <Form form={form} layout="vertical">
-        <Form.Item name="name" label="Nomi" rules={[{ required: true, message: 'Nom kiritilishi shart' }]}>
-          <Input placeholder="Masalan: Guldastalar" />
+        <Form.Item name="name_uz" label={t('common.name_uz')} rules={[{ required: true, message: t('common.name_required') }]}>
+          <Input placeholder={t('category.name_placeholder_uz')} />
+        </Form.Item>
+
+        <Form.Item name="name_eng" label={t('common.name_eng')} rules={[{ required: true, message: t('common.name_required') }]}>
+          <Input placeholder={t('category.name_placeholder_eng')} />
+        </Form.Item>
+
+        <Form.Item name="name_ru" label={t('common.name_ru')} rules={[{ required: true, message: t('common.name_required') }]}>
+          <Input placeholder={t('category.name_placeholder_ru')} />
         </Form.Item>
 
         {!isEdit && (
-          <Form.Item label="Rasm" required>
+          <Form.Item label={t('common.image')} required>
             <Upload
               beforeUpload={beforeUpload}
               fileList={fileList}
@@ -91,7 +119,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
               maxCount={1}
               listType="picture"
             >
-              <Button icon={<UploadOutlined />}>Rasm tanlash</Button>
+              <Button icon={<UploadOutlined />}>{t('common.choose_image')}</Button>
             </Upload>
           </Form.Item>
         )}

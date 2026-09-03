@@ -3,17 +3,19 @@ import { Table, Button, Space, Tag, Popconfirm, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAdminEvents, useDeleteEvent } from '@/features/events/hooks';
 import { useCategories } from '@/features/categories/hooks';
-import type { Event } from '@/features/events/types';
+import type { EventAdmin } from '@/features/events/types';
 import { formatDate } from '@/shared/lib/utils';
+import { useT } from '@/shared/i18n/useT';
 import { EventFormModal } from './EventFormModal';
 
 export function EventTable() {
   const { data: events, isLoading } = useAdminEvents();
   const { data: categories } = useCategories();
   const deleteMutation = useDeleteEvent();
+  const t = useT();
 
   const [formOpen, setFormOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editingEvent, setEditingEvent] = useState<EventAdmin | null>(null);
 
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -26,49 +28,49 @@ export function EventTable() {
     setFormOpen(true);
   }
 
-  function openEdit(event: Event) {
+  function openEdit(event: EventAdmin) {
     setEditingEvent(event);
     setFormOpen(true);
   }
 
-  async function handleDelete(event: Event) {
+  async function handleDelete(event: EventAdmin) {
     try {
       await deleteMutation.mutateAsync(event.id);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : 'Xatolik yuz berdi');
+      message.error(error instanceof Error ? error.message : t('common.error'));
     }
   }
 
   const columns = [
     {
-      title: 'Rasm',
+      title: t('event.col_image'),
       dataIndex: 'image',
       key: 'image',
       render: (image: string) => (
         <img src={image} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8 }} />
       ),
     },
-    { title: 'Sarlavha', dataIndex: 'title', key: 'title' },
+    { title: t('event.col_title_uz'), dataIndex: 'title_uz', key: 'title_uz' },
     {
-      title: 'Kategoriya',
+      title: t('event.col_category'),
       dataIndex: 'category_id',
       key: 'category_id',
       render: (categoryId: string) => categoryNameById.get(categoryId) ?? '—',
     },
     {
-      title: 'Bosh banner',
+      title: t('event.col_root'),
       dataIndex: 'is_root',
       key: 'is_root',
-      render: (isRoot: boolean) => (isRoot ? <Tag color="gold">Ha</Tag> : '—'),
+      render: (isRoot: boolean) => (isRoot ? <Tag color="gold">{t('event.yes')}</Tag> : '—'),
     },
     {
-      title: 'Holati',
+      title: t('event.col_status'),
       key: 'status',
-      render: (_: unknown, record: Event) =>
-        record.deleted_at ? <Tag color="red">O'chirilgan</Tag> : <Tag color="green">Faol</Tag>,
+      render: (_: unknown, record: EventAdmin) =>
+        record.deleted_at ? <Tag color="red">{t('common.deleted')}</Tag> : <Tag color="green">{t('common.active')}</Tag>,
     },
     {
-      title: 'Yaratilgan',
+      title: t('common.created_at'),
       dataIndex: 'created_at',
       key: 'created_at',
       render: (value: string) => formatDate(value),
@@ -76,22 +78,22 @@ export function EventTable() {
     {
       title: '',
       key: 'actions',
-      render: (_: unknown, record: Event) => (
+      render: (_: unknown, record: EventAdmin) => (
         <Space>
           <Button size="small" onClick={() => openEdit(record)} disabled={!!record.deleted_at}>
-            Tahrirlash
+            {t('common.edit')}
           </Button>
           <Popconfirm
-            title="Eventni o'chirish"
-            description={`"${record.title}"ni o'chirmoqchimisiz?`}
-            okText="O'chirish"
-            cancelText="Bekor qilish"
+            title={t('event.delete_title')}
+            description={t('event.delete_confirm', { name: record.title_uz })}
+            okText={t('common.delete')}
+            cancelText={t('common.cancel')}
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(record)}
             disabled={!!record.deleted_at}
           >
             <Button size="small" danger disabled={!!record.deleted_at}>
-              O'chirish
+              {t('common.delete')}
             </Button>
           </Popconfirm>
         </Space>
@@ -103,7 +105,7 @@ export function EventTable() {
     <div>
       <Space style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          Yangi event
+          {t('event.new')}
         </Button>
       </Space>
 

@@ -12,6 +12,8 @@ import { RegisterPage } from '@/pages/user/RegisterPage';
 
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
+import { CategoriesListPage } from '@/pages/admin/CategoriesListPage';
+import { EventsListPage } from '@/pages/admin/EventsListPage';
 import { OrdersListPage } from '@/pages/admin/OrdersListPage';
 
 export const router = createBrowserRouter([
@@ -33,6 +35,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <DashboardPage /> },
           { path: ROUTES.ADMIN.PRODUCTS, element: <ProductsListPage /> },
+          { path: ROUTES.ADMIN.CATEGORIES, element: <CategoriesListPage /> },
+          { path: ROUTES.ADMIN.EVENTS, element: <EventsListPage /> },
           { path: ROUTES.ADMIN.ORDERS, element: <OrdersListPage /> },
         ],
       },

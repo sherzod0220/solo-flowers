@@ -2,46 +2,50 @@ import { useState } from 'react';
 import { Table, Button, Space, Tag, Input, Popconfirm, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAdminCategories, useDeleteCategory } from '@/features/categories/hooks';
-import type { Category } from '@/features/categories/types';
+import type { CategoryAdmin } from '@/features/categories/types';
 import { formatDate } from '@/shared/lib/utils';
+import { useT } from '@/shared/i18n/useT';
 import { CategoryFormModal } from './CategoryFormModal';
 
 export function CategoryTable() {
   const [search, setSearch] = useState<string>();
   const { data: categories, isLoading } = useAdminCategories(search);
   const deleteMutation = useDeleteCategory();
+  const t = useT();
 
   const [formOpen, setFormOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<CategoryAdmin | null>(null);
 
   function openCreate() {
     setEditingCategory(null);
     setFormOpen(true);
   }
 
-  function openEdit(category: Category) {
+  function openEdit(category: CategoryAdmin) {
     setEditingCategory(category);
     setFormOpen(true);
   }
 
-  async function handleDelete(category: Category) {
+  async function handleDelete(category: CategoryAdmin) {
     try {
       await deleteMutation.mutateAsync(category.id);
     } catch (error) {
-      message.error(error instanceof Error ? error.message : 'Xatolik yuz berdi');
+      message.error(error instanceof Error ? error.message : t('common.error'));
     }
   }
 
   const columns = [
-    { title: 'Nomi', dataIndex: 'name', key: 'name' },
+    { title: t('category.col_name_uz'), dataIndex: 'name_uz', key: 'name_uz' },
+    { title: t('category.col_name_eng'), dataIndex: 'name_eng', key: 'name_eng' },
+    { title: t('category.col_name_ru'), dataIndex: 'name_ru', key: 'name_ru' },
     {
-      title: 'Holati',
+      title: t('category.col_status'),
       key: 'status',
-      render: (_: unknown, record: Category) =>
-        record.deleted_at ? <Tag color="red">O'chirilgan</Tag> : <Tag color="green">Faol</Tag>,
+      render: (_: unknown, record: CategoryAdmin) =>
+        record.deleted_at ? <Tag color="red">{t('common.deleted')}</Tag> : <Tag color="green">{t('common.active')}</Tag>,
     },
     {
-      title: 'Yaratilgan',
+      title: t('common.created_at'),
       dataIndex: 'created_at',
       key: 'created_at',
       render: (value: string) => formatDate(value),
@@ -49,22 +53,22 @@ export function CategoryTable() {
     {
       title: '',
       key: 'actions',
-      render: (_: unknown, record: Category) => (
+      render: (_: unknown, record: CategoryAdmin) => (
         <Space>
           <Button size="small" onClick={() => openEdit(record)} disabled={!!record.deleted_at}>
-            Tahrirlash
+            {t('common.edit')}
           </Button>
           <Popconfirm
-            title="Kategoriyani o'chirish"
-            description={`"${record.name}"ni o'chirmoqchimisiz?`}
-            okText="O'chirish"
-            cancelText="Bekor qilish"
+            title={t('category.delete_title')}
+            description={t('category.delete_confirm', { name: record.name_uz })}
+            okText={t('common.delete')}
+            cancelText={t('common.cancel')}
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(record)}
             disabled={!!record.deleted_at}
           >
             <Button size="small" danger disabled={!!record.deleted_at}>
-              O'chirish
+              {t('common.delete')}
             </Button>
           </Popconfirm>
         </Space>
@@ -76,13 +80,13 @@ export function CategoryTable() {
     <div>
       <Space style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
         <Input.Search
-          placeholder="Kategoriya nomi bo'yicha qidirish"
+          placeholder={t('category.search_placeholder')}
           allowClear
           onSearch={setSearch}
           style={{ width: 280 }}
         />
         <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          Yangi kategoriya
+          {t('category.new')}
         </Button>
       </Space>
 

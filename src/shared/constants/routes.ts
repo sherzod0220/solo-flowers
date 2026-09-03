@@ -10,6 +10,8 @@ export const ROUTES = {
     ROOT: '/admin',
     DASHBOARD: '/admin',
     PRODUCTS: '/admin/products',
+    CATEGORIES: '/admin/categories',
+    EVENTS: '/admin/events',
     ORDERS: '/admin/orders',
   },
 } as const;

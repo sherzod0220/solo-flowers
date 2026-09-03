@@ -1,3 +1,5 @@
+import { ProductTable } from '@/features/admin-products/components/ProductTable';
+
 export function ProductsListPage() {
-  return <h1>📦 Admin — Mahsulotlar ro'yxati</h1>;
+  return <ProductTable />;
 }

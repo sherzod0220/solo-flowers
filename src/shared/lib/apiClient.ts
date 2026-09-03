@@ -6,6 +6,9 @@ export interface Envelope<T> {
   message?: string;
 }
 
+/** `categories`/`products`/`events` ommaviy endpointlari qabul qiladigan `?lang=` qiymati. */
+export type Lang = 'uz' | 'eng' | 'ru';
+
 export interface PaginationMeta {
   page: number;
   page_size: number;
