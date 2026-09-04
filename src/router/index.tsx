@@ -9,6 +9,8 @@ import { HomePage } from '@/pages/user/HomePage';
 import { CartPage } from '@/pages/user/CartPage';
 import { LoginPage } from '@/pages/user/LoginPage';
 import { RegisterPage } from '@/pages/user/RegisterPage';
+import { ProductDetailPage } from '@/pages/user/ProductDetailPage';
+import { CategoryPage } from '@/pages/user/CategoryPage';
 
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
@@ -21,6 +23,8 @@ export const router = createBrowserRouter([
     element: <UserLayout />,
     children: [
       { path: ROUTES.HOME, element: <HomePage /> },
+      { path: ROUTES.PRODUCT_DETAIL, element: <ProductDetailPage /> },
+      { path: ROUTES.CATEGORY, element: <CategoryPage /> },
       { path: ROUTES.CART, element: <CartPage /> },
       { path: ROUTES.LOGIN, element: <LoginPage /> },
       { path: ROUTES.REGISTER, element: <RegisterPage /> },

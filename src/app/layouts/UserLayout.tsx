@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { Layout, Button, Space } from 'antd';
+import { Layout, Button, Space, Badge } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import { ROUTES } from '@/shared/constants/routes';
 import { useLogout, useMe } from '@/features/auth/hooks';
+import { useCartCount } from '@/features/cart/hooks';
+import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import { LangSwitcher } from '@/shared/ui/LangSwitcher';
 import { useT } from '@/shared/i18n/useT';
 
@@ -12,6 +16,8 @@ const linkStyle = { color: 'var(--color-primary)', fontWeight: 500 };
 export function UserLayout() {
   const { user, isAdmin } = useMe();
   const logout = useLogout();
+  const cartCount = useCartCount();
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const t = useT();
 
   return (
@@ -36,6 +42,13 @@ export function UserLayout() {
 
         <Space size="large">
           <LangSwitcher />
+          <Badge count={cartCount} size="small" offset={[-2, 2]}>
+            <Button
+              type="text"
+              icon={<ShoppingCartOutlined style={{ fontSize: 20, color: 'var(--color-primary)' }} />}
+              onClick={() => setIsCartOpen(true)}
+            />
+          </Badge>
           {user ? (
             <>
               {isAdmin && (
@@ -68,6 +81,8 @@ export function UserLayout() {
       <Footer style={{ textAlign: 'center', background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
         {t('nav.footer', { year: String(new Date().getFullYear()) })}
       </Footer>
+
+      <CartDrawer open={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </Layout>
   );
 }

@@ -1,23 +1,14 @@
-import { Button, Skeleton } from 'antd';
+import { Button, Carousel, Skeleton } from 'antd';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/shared/constants/routes';
 import { useEvents } from '../hooks';
+import type { Event } from '../types';
 
-/** Bosh sahifadagi katta banner — ro'yxatdagi birinchi eventni ko'rsatadi (`is_root` saralash backendda bajariladi). */
-export function EventBanner() {
-  const { data: events, isLoading } = useEvents();
-
-  if (isLoading) {
-    return <Skeleton.Image active style={{ width: '100%', height: 320 }} />;
-  }
-
-  const event = events?.[0];
-  if (!event) return null;
-
+function EventSlide({ event }: { event: Event }) {
   return (
     <div
       style={{
         position: 'relative',
-        borderRadius: 24,
-        overflow: 'hidden',
         minHeight: 320,
         display: 'flex',
         alignItems: 'center',
@@ -25,7 +16,6 @@ export function EventBanner() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         padding: '0 48px',
-        marginBottom: 32,
       }}
     >
       <div style={{ maxWidth: 420, color: '#fff' }}>
@@ -42,12 +32,34 @@ export function EventBanner() {
         {event.subtitle && <div style={{ fontSize: 16, marginBottom: 20, opacity: 0.9 }}>{event.subtitle}</div>}
 
         {event.cta && (
-          // Kategoriya sahifasiga real yo'naltirish — 7-bosqichda ROUTES.CATEGORY qo'shilgach ulanadi.
-          <Button type="primary" size="large">
-            {event.cta}
-          </Button>
+          <Link to={ROUTES.CATEGORY.replace(':id', event.category_id)}>
+            <Button type="primary" size="large">
+              {event.cta}
+            </Button>
+          </Link>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Bosh sahifadagi katta banner — bir nechta event bo'lsa, ular orasida avtomatik va silliq almashib turadi. */
+export function EventBanner() {
+  const { data: events, isLoading } = useEvents();
+
+  if (isLoading) {
+    return <Skeleton.Image active style={{ width: '100%', height: 320 }} />;
+  }
+
+  if (!events || events.length === 0) return null;
+
+  return (
+    <div style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 32 }}>
+      <Carousel autoplay autoplaySpeed={5000} effect="fade">
+        {events.map((event) => (
+          <EventSlide key={event.id} event={event} />
+        ))}
+      </Carousel>
     </div>
   );
 }

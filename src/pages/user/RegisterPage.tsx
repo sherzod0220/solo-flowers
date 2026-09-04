@@ -9,6 +9,7 @@ import { FormField } from '@/shared/ui/FormField';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
 import { useLangStore } from '@/shared/store/langStore';
+import { PageMeta } from '@/shared/ui/PageMeta';
 
 interface RegisterFormValues {
   email: string;
@@ -76,6 +77,8 @@ export function RegisterPage() {
         padding: '56px 16px',
       }}
     >
+      <PageMeta title={t('meta.register_title')} />
+
       <img src="/logo-S.PNG" alt="Solo" style={{ height: 64, width: 64, borderRadius: '50%', objectFit: 'cover', marginBottom: 16 }} />
 
       <Card

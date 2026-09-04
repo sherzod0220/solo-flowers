@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, Tag } from 'antd';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
+import { useT } from '@/shared/i18n/useT';
 import type { Product } from '../types';
 
 interface ProductCardProps {
@@ -9,11 +10,12 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const t = useT();
   const hasDiscount = product.discount_amount !== undefined;
   const cover = product.images[0];
 
   return (
-    <Link to={ROUTES.PRODUCT_DETAIL.replace(':id', product.id)}>
+    <Link to={ROUTES.PRODUCT_DETAIL.replace(':slug', product.slug)}>
       <Card
         hoverable
         styles={{ body: { padding: 16 } }}
@@ -43,7 +45,7 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
             {!product.is_available && (
               <Tag color="default" style={{ position: 'absolute', top: 8, left: 8 }}>
-                Tugadi
+                {t('product.out_of_stock')}
               </Tag>
             )}
           </div>

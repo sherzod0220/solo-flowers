@@ -1,6 +1,21 @@
 import type { Lang } from '@/shared/lib/apiClient';
 
 export const translations = {
+  // --- SEO / sahifa metama'lumotlari ---
+  'meta.home_title': { uz: "Solo — Gullar va guldastalar do'koni", eng: 'Solo — Flowers & Bouquets Shop', ru: 'Solo — Магазин цветов и букетов' },
+  'meta.home_description': {
+    uz: "Solo — online gul do'koni. Har xil bayram va kunlar uchun guldastalar, tuvakdagi gullar va sovg'a to'plamlarini tanlang, onlayn buyurtma bering.",
+    eng: 'Solo is an online flower shop. Choose bouquets, potted flowers and gift sets for any occasion and order online.',
+    ru: 'Solo — интернет-магазин цветов. Выбирайте букеты, горшечные растения и подарочные наборы к любому событию и заказывайте онлайн.',
+  },
+  'meta.login_title': { uz: 'Tizimga kirish — Solo', eng: 'Sign in — Solo', ru: 'Вход — Solo' },
+  'meta.register_title': { uz: "Ro'yxatdan o'tish — Solo", eng: 'Sign up — Solo', ru: 'Регистрация — Solo' },
+
+  // --- Mahsulot sahifasi ---
+  'product.add_to_cart': { uz: "Savatga qo'shish", eng: 'Add to cart', ru: 'В корзину' },
+  'common.back_to_home': { uz: 'Bosh sahifaga qaytish', eng: 'Back to home', ru: 'Вернуться на главную' },
+  'common.search_in_category': { uz: 'Shu kategoriyada qidirish...', eng: 'Search in this category...', ru: 'Поиск в этой категории...' },
+
   // --- Umumiy ---
   'common.error': { uz: 'Xatolik yuz berdi', eng: 'Something went wrong', ru: 'Произошла ошибка' },
   'common.unknown_error': { uz: "Noma'lum xatolik yuz berdi", eng: 'An unknown error occurred', ru: 'Произошла неизвестная ошибка' },
@@ -29,6 +44,7 @@ export const translations = {
   'common.name_required': { uz: 'Nom kiritilishi shart', eng: 'Name is required', ru: 'Введите название' },
   'common.all_categories': { uz: 'Barcha kategoriyalar', eng: 'All categories', ru: 'Все категории' },
   'common.search_products': { uz: 'Mahsulot qidirish...', eng: 'Search products...', ru: 'Поиск товаров...' },
+  'common.products_not_found': { uz: 'Mahsulot topilmadi', eng: 'No products found', ru: 'Товары не найдены' },
   'common.category_required': { uz: 'Kategoriya tanlanishi shart', eng: 'Please select a category', ru: 'Выберите категорию' },
   'common.name_uz': { uz: "Nomi (o'zbekcha)", eng: 'Name (Uzbek)', ru: 'Название (узбекский)' },
   'common.name_eng': { uz: 'Nomi (inglizcha)', eng: 'Name (English)', ru: 'Название (английский)' },
@@ -44,6 +60,19 @@ export const translations = {
     eng: '© {year} Solo — Flowers Boutique',
     ru: '© {year} Solo — Flowers Boutique',
   },
+
+  // --- Savat ---
+  'cart.title': { uz: 'Savat', eng: 'Cart', ru: 'Корзина' },
+  'cart.empty': { uz: "Savatingiz bo'sh", eng: 'Your cart is empty', ru: 'Ваша корзина пуста' },
+  'cart.total': { uz: 'Jami', eng: 'Total', ru: 'Итого' },
+  'cart.view_cart': { uz: "Savatni ko'rish", eng: 'View cart', ru: 'Смотреть корзину' },
+  'cart.checkout': { uz: 'Buyurtma berish', eng: 'Checkout', ru: 'Оформить заказ' },
+  'cart.checkout_coming_soon': {
+    uz: 'Buyurtma berish funksiyasi tez orada qo\'shiladi',
+    eng: 'Checkout is coming soon',
+    ru: 'Оформление заказа скоро появится',
+  },
+  'cart.added': { uz: "Savatga qo'shildi", eng: 'Added to cart', ru: 'Добавлено в корзину' },
 
   'admin.panel_title': { uz: 'Admin Panel', eng: 'Admin Panel', ru: 'Админ-панель' },
   'admin.dashboard': { uz: 'Dashboard', eng: 'Dashboard', ru: 'Дашборд' },

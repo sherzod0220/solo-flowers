@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 
 import { AntdProvider } from './app/providers/AntdProvider';
@@ -9,12 +10,14 @@ import App from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryProvider>
-      <AntdProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </AntdProvider>
-    </QueryProvider>
+    <HelmetProvider>
+      <QueryProvider>
+        <AntdProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </AntdProvider>
+      </QueryProvider>
+    </HelmetProvider>
   </StrictMode>,
 );
