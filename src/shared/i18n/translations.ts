@@ -74,6 +74,21 @@ export const translations = {
   },
   'cart.added': { uz: "Savatga qo'shildi", eng: 'Added to cart', ru: 'Добавлено в корзину' },
 
+  // --- Bosh sahifa ---
+  'home.categories_title': { uz: 'Kategoriyalar', eng: 'Categories', ru: 'Категории' },
+  'home.bestsellers_title': { uz: 'Ommabop mahsulotlar', eng: 'Popular products', ru: 'Популярные товары' },
+
+  // --- Qidiruv sahifasi ---
+  'search.title': { uz: 'Mahsulotlarni qidirish', eng: 'Search products', ru: 'Поиск товаров' },
+
+  // --- Ruxsat yo'q (403) ---
+  'forbidden.title': { uz: "Ruxsat yo'q", eng: 'Access denied', ru: 'Доступ запрещён' },
+  'forbidden.description': {
+    uz: "Bu sahifani ko'rish uchun sizda yetarli huquq yo'q.",
+    eng: "You don't have permission to view this page.",
+    ru: 'У вас нет прав для просмотра этой страницы.',
+  },
+
   'admin.panel_title': { uz: 'Admin Panel', eng: 'Admin Panel', ru: 'Админ-панель' },
   'admin.dashboard': { uz: 'Dashboard', eng: 'Dashboard', ru: 'Дашборд' },
   'admin.products': { uz: 'Mahsulotlar', eng: 'Products', ru: 'Товары' },

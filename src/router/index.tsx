@@ -11,6 +11,8 @@ import { LoginPage } from '@/pages/user/LoginPage';
 import { RegisterPage } from '@/pages/user/RegisterPage';
 import { ProductDetailPage } from '@/pages/user/ProductDetailPage';
 import { CategoryPage } from '@/pages/user/CategoryPage';
+import { SearchPage } from '@/pages/user/SearchPage';
+import { ForbiddenPage } from '@/pages/user/ForbiddenPage';
 
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
@@ -25,9 +27,11 @@ export const router = createBrowserRouter([
       { path: ROUTES.HOME, element: <HomePage /> },
       { path: ROUTES.PRODUCT_DETAIL, element: <ProductDetailPage /> },
       { path: ROUTES.CATEGORY, element: <CategoryPage /> },
+      { path: ROUTES.SEARCH, element: <SearchPage /> },
       { path: ROUTES.CART, element: <CartPage /> },
       { path: ROUTES.LOGIN, element: <LoginPage /> },
       { path: ROUTES.REGISTER, element: <RegisterPage /> },
+      { path: ROUTES.FORBIDDEN, element: <ForbiddenPage /> },
     ],
   },
   {

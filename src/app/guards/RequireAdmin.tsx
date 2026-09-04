@@ -12,8 +12,8 @@ export function RequireAdmin() {
 
   if (user.role !== 'admin') {
     // Foydalanuvchi tizimga kirgan, lekin admin emas — qayta login taklif qilish ma'nosiz,
-    // shuning uchun login sahifasiga emas, bosh sahifaga qaytariladi.
-    return <Navigate to={ROUTES.HOME} replace />;
+    // shuning uchun login sahifasiga emas, "ruxsat yo'q" sahifasiga yo'naltiriladi.
+    return <Navigate to={ROUTES.FORBIDDEN} replace />;
   }
 
   return <Outlet />;

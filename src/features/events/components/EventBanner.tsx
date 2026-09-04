@@ -16,6 +16,7 @@ function EventSlide({ event }: { event: Event }) {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         padding: '0 48px',
+        userSelect: 'none',
       }}
     >
       <div style={{ maxWidth: 420, color: '#fff' }}>
@@ -54,8 +55,8 @@ export function EventBanner() {
   if (!events || events.length === 0) return null;
 
   return (
-    <div style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 32 }}>
-      <Carousel autoplay autoplaySpeed={5000} effect="fade">
+    <div style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 32, cursor: 'grab' }}>
+      <Carousel autoplay autoplaySpeed={5000} draggable swipeToSlide>
         {events.map((event) => (
           <EventSlide key={event.id} event={event} />
         ))}

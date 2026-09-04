@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { Layout, Button, Space, Badge } from 'antd';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Layout, Button, Space, Badge, Input } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { ROUTES } from '@/shared/constants/routes';
 import { useLogout, useMe } from '@/features/auth/hooks';
@@ -18,7 +18,14 @@ export function UserLayout() {
   const logout = useLogout();
   const cartCount = useCartCount();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const navigate = useNavigate();
   const t = useT();
+
+  function handleSearch(value: string) {
+    const query = value.trim();
+    if (!query) return;
+    navigate(`${ROUTES.SEARCH}?q=${encodeURIComponent(query)}`);
+  }
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
@@ -27,18 +34,29 @@ export function UserLayout() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: 24,
           background: 'var(--color-primary-light)',
           borderBottom: '1px solid var(--color-border)',
           padding: '0 32px',
           height: 76,
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
         }}
       >
-        <Link to={ROUTES.HOME} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Link to={ROUTES.HOME} style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
           <img src="/logo-S.PNG" alt="Solo" style={{ height: 40, width: 40, borderRadius: '50%', objectFit: 'cover' }} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, color: 'var(--color-primary)' }}>
             Solo
           </span>
         </Link>
+
+        <Input.Search
+          placeholder={t('common.search_products')}
+          onSearch={handleSearch}
+          allowClear
+          style={{ maxWidth: 320, flex: 1 }}
+        />
 
         <Space size="large">
           <LangSwitcher />
