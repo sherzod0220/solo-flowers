@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Table, Button, Space, Tag, Input, Popconfirm, message } from 'antd';
+import { App, Table, Button, Space, Tag, Input, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAdminProducts, useDeleteProduct } from '@/features/admin-products/hooks';
 import { useCategories } from '@/features/categories/hooks';
@@ -17,6 +17,7 @@ export function ProductTable() {
   const [categoryId, setCategoryId] = useState<string>();
   const [page, setPage] = useState(1);
   const t = useT();
+  const { notification } = App.useApp();
 
   const { data, isLoading } = useAdminProducts({ search, category_id: categoryId, page, page_size: PAGE_SIZE });
   const { data: categories } = useCategories();
@@ -44,8 +45,13 @@ export function ProductTable() {
   async function handleDelete(product: ProductAdmin) {
     try {
       await deleteMutation.mutateAsync(product.id);
+      notification.success({ title: t('product.delete_success'), placement: 'top' });
     } catch (error) {
-      message.error(error instanceof Error ? error.message : t('common.error'));
+      notification.error({
+        title: t('product.delete_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
     }
   }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Form, Input, Upload, Button, message } from 'antd';
+import { App, Modal, Form, Input, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateCategory, useUpdateCategory } from '@/features/categories/hooks';
@@ -27,6 +27,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const isEdit = !!category;
   const t = useT();
+  const { notification } = App.useApp();
 
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
@@ -77,9 +78,17 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
           image: imageFile,
         });
       }
+      notification.success({
+        title: isEdit ? t('category.update_success') : t('category.create_success'),
+        placement: 'top',
+      });
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : t('common.error'));
+      notification.error({
+        title: isEdit ? t('category.update_error') : t('category.create_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
     }
   }
 

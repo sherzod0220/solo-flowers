@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* "SoLo Flowers Boutique" brend palitrasi — logo asosida (nozik pushti + to'q vishnyoviy). */
+  /*
+   * "SoLo Flowers Boutique" brend palitrasi — logo asosida.
+   * Xaki — sahifaning asosiy iliq foni (canvas), oq/krem — bo'lim va karta yuzalari (surface),
+   * pushti — kichik aksentlar (chegirma belgisi, kategoriya doiralari), vino — tugmalar/linklar/footer.
+   */
   --color-primary: #5c1a30;
   --color-primary-light: #f6ccd9;
-  --color-border: #e8c7d2;
-  --color-bg: #fffbf9;
+  --color-khaki: #f3ecd8;
+  --color-surface: #fffefb;
+  --color-border: #e4d6ae;
+  --color-bg: #f3ecd8;
   --color-text: #2a1218;
   --radius-base: 8px;
   --font-display: 'Playfair Display', 'Georgia', serif;
@@ -29,4 +35,91 @@ h6,
 .ant-typography h3,
 .ant-typography h4 {
   font-family: var(--font-display);
+}
+
+/* Rasm/kategoriya kartalarining tashqi romkasi — nozik soya, hover'da ko'tariladi. */
+.shadow-card {
+  box-shadow: 0 1px 2px rgba(42, 18, 24, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.shadow-card:hover {
+  box-shadow: 0 12px 28px rgba(42, 18, 24, 0.14);
+  transform: translateY(-2px);
+}
+
+/*
+ * Fon olib tashlangan (shaffof) mahsulot/kategoriya rasmlari uchun "pedestal" foni —
+ * markazi ochiq, chetlari xakiga tortadigan iliq gradient, xuddi studiya fotosuratidek.
+ * img'ga qo'yilgan drop-shadow shaffoflikni hisobga oladi — gulning aniq shaklida soya tushadi,
+ * box-shadow kabi to'rtburchak emas, shu bilan rasm "jonli"/hajmli ko'rinadi.
+ */
+.image-pedestal {
+  background: radial-gradient(ellipse 70% 65% at 50% 58%, #faf6ea 0%, #eee0bd 100%);
+}
+
+.image-pedestal img {
+  filter: drop-shadow(0 14px 14px rgba(42, 18, 24, 0.28));
+}
+
+.social-icon-button {
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.social-icon-button:hover {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+  transform: translateY(-2px);
+}
+
+.event-banner-carousel .slick-dots li button {
+  background: rgba(255, 255, 255, 0.55);
+  height: 6px;
+  border-radius: 999px;
+}
+
+.event-banner-carousel .slick-dots li.slick-active button {
+  background: #ffffff;
+}
+
+/* Bosh sahifadagi kategoriya doirasi — mobilda kichikroq, desktopda 2 barobar kattaroq. */
+.category-avatar {
+  width: 96px;
+  height: 96px;
+}
+
+@media (min-width: 640px) {
+  .category-avatar {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .category-avatar {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+.category-card {
+  padding: 10px;
+}
+
+@media (min-width: 1024px) {
+  .category-card {
+    padding: 16px;
+  }
+}
+
+.category-label {
+  max-width: 110px;
+  font-size: 13px;
+}
+
+@media (min-width: 1024px) {
+  .category-label {
+    max-width: 170px;
+    font-size: 15px;
+  }
 }

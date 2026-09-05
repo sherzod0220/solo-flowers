@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Space, Tag, Input, Popconfirm, message } from 'antd';
+import { App, Table, Button, Space, Tag, Input, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAdminCategories, useDeleteCategory } from '@/features/categories/hooks';
 import type { CategoryAdmin } from '@/features/categories/types';
@@ -12,6 +12,7 @@ export function CategoryTable() {
   const { data: categories, isLoading } = useAdminCategories(search);
   const deleteMutation = useDeleteCategory();
   const t = useT();
+  const { notification } = App.useApp();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryAdmin | null>(null);
@@ -29,8 +30,13 @@ export function CategoryTable() {
   async function handleDelete(category: CategoryAdmin) {
     try {
       await deleteMutation.mutateAsync(category.id);
+      notification.success({ title: t('category.delete_success'), placement: 'top' });
     } catch (error) {
-      message.error(error instanceof Error ? error.message : t('common.error'));
+      notification.error({
+        title: t('category.delete_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
     }
   }
 

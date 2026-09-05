@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Table, Button, Space, Tag, Popconfirm, message } from 'antd';
+import { App, Table, Button, Space, Tag, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useAdminEvents, useDeleteEvent } from '@/features/events/hooks';
 import { useCategories } from '@/features/categories/hooks';
@@ -13,6 +13,7 @@ export function EventTable() {
   const { data: categories } = useCategories();
   const deleteMutation = useDeleteEvent();
   const t = useT();
+  const { notification } = App.useApp();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventAdmin | null>(null);
@@ -36,8 +37,13 @@ export function EventTable() {
   async function handleDelete(event: EventAdmin) {
     try {
       await deleteMutation.mutateAsync(event.id);
+      notification.success({ title: t('event.delete_success'), placement: 'top' });
     } catch (error) {
-      message.error(error instanceof Error ? error.message : t('common.error'));
+      notification.error({
+        title: t('event.delete_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
     }
   }
 

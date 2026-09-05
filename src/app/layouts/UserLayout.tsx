@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Layout, Button, Space, Badge, Input } from 'antd';
-import { ShoppingCartOutlined } from '@ant-design/icons';
+import {
+  ShoppingCartOutlined,
+  InstagramFilled,
+  TelegramFilled,
+  FacebookFilled,
+} from '@ant-design/icons';
 import { ROUTES } from '@/shared/constants/routes';
 import { useLogout, useMe } from '@/features/auth/hooks';
 import { useCartCount } from '@/features/cart/hooks';
@@ -12,6 +17,13 @@ import { useT } from '@/shared/i18n/useT';
 const { Header, Content, Footer } = Layout;
 
 const linkStyle = { color: 'var(--color-primary)', fontWeight: 500 };
+
+// TODO: haqiqiy ijtimoiy tarmoq profillariga almashtiring.
+const SOCIAL_LINKS = [
+  { key: 'instagram', href: '#', label: 'Instagram', icon: <InstagramFilled /> },
+  { key: 'telegram', href: '#', label: 'Telegram', icon: <TelegramFilled /> },
+  { key: 'facebook', href: '#', label: 'Facebook', icon: <FacebookFilled /> },
+];
 
 export function UserLayout() {
   const { user, isAdmin } = useMe();
@@ -35,7 +47,7 @@ export function UserLayout() {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 24,
-          background: 'var(--color-primary-light)',
+          background: 'var(--color-surface)',
           borderBottom: '1px solid var(--color-border)',
           padding: '0 32px',
           height: 76,
@@ -96,8 +108,59 @@ export function UserLayout() {
         <Outlet />
       </Content>
 
-      <Footer style={{ textAlign: 'center', background: 'var(--color-primary-light)', color: 'var(--color-primary)' }}>
-        {t('nav.footer', { year: String(new Date().getFullYear()) })}
+      <Footer
+        style={{
+          background: 'var(--color-primary)',
+          color: '#f6ccd9',
+          padding: '32px 32px 24px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            maxWidth: 1200,
+            margin: '0 auto',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <img src="/logo-S.PNG" alt="Solo" style={{ height: 32, width: 32, borderRadius: '50%', objectFit: 'cover' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff' }}>Solo</span>
+          </div>
+
+          <Space size={12}>
+            {SOCIAL_LINKS.map((social) => (
+              <a
+                key={social.key}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                className="social-icon-button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 38,
+                  height: 38,
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.12)',
+                  color: '#fff',
+                  fontSize: 16,
+                }}
+              >
+                {social.icon}
+              </a>
+            ))}
+          </Space>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 24, fontSize: 13, opacity: 0.75 }}>
+          {t('nav.footer', { year: String(new Date().getFullYear()) })}
+        </div>
       </Footer>
 
       <CartDrawer open={isCartOpen} onClose={() => setIsCartOpen(false)} />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Form, Input, Upload, Button, Switch, message } from 'antd';
+import { App, Modal, Form, Input, Upload, Button, Switch, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateEvent, useUpdateEvent } from '@/features/events/hooks';
@@ -39,6 +39,7 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const isEdit = !!event;
   const t = useT();
+  const { notification } = App.useApp();
 
   const createMutation = useCreateEvent();
   const updateMutation = useUpdateEvent();
@@ -91,9 +92,17 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
         }
         await createMutation.mutateAsync({ ...values, image: imageFile });
       }
+      notification.success({
+        title: isEdit ? t('event.update_success') : t('event.create_success'),
+        placement: 'top',
+      });
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : t('common.error'));
+      notification.error({
+        title: isEdit ? t('event.update_error') : t('event.create_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
     }
   }
 

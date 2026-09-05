@@ -11,10 +11,10 @@ export function CategoryCarousel() {
 
   if (isLoading) {
     return (
-      <div style={{ background: '#F3EDD3', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
         <div style={{ display: 'flex', gap: 24 }}>
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton.Avatar key={index} active size={72} shape="circle" />
+            <Skeleton.Avatar key={index} active size={120} shape="circle" />
           ))}
         </div>
       </div>
@@ -24,13 +24,14 @@ export function CategoryCarousel() {
   if (!categories || categories.length === 0) return null;
 
   // Real ma'lumot slotlardan kam bo'lsa ham qator to'liq ko'rinishi uchun, slidesToShow mavjud kategoriya soniga moslanadi.
-  const desktopShow = Math.min(6, categories.length);
-  const tabletShow = Math.min(5, categories.length);
-  const smallTabletShow = Math.min(4, categories.length);
-  const mobileShow = Math.min(3, categories.length);
+  // Doiralar kattalashgani sababli (bosqichma-bosqich .category-avatar orqali), bir qatordagi soni ham shunga moslab kamaytirildi.
+  const desktopShow = Math.min(5, categories.length);
+  const tabletShow = Math.min(4, categories.length);
+  const smallTabletShow = Math.min(3, categories.length);
+  const mobileShow = Math.min(2, categories.length);
 
   return (
-    <div style={{ background: '#F3EDD3', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
         {t('home.categories_title')}
       </h2>
@@ -38,13 +39,16 @@ export function CategoryCarousel() {
         arrows
         dots={false}
         draggable
-        infinite={false}
+        swipeToSlide
+        infinite
+        autoplay
+        autoplaySpeed={3000}
         slidesToShow={desktopShow}
-        slidesToScroll={desktopShow}
+        slidesToScroll={1}
         responsive={[
-          { breakpoint: 1024, settings: { slidesToShow: tabletShow, slidesToScroll: tabletShow } },
-          { breakpoint: 768, settings: { slidesToShow: smallTabletShow, slidesToScroll: smallTabletShow } },
-          { breakpoint: 480, settings: { slidesToShow: mobileShow, slidesToScroll: mobileShow } },
+          { breakpoint: 1024, settings: { slidesToShow: tabletShow, slidesToScroll: 1 } },
+          { breakpoint: 768, settings: { slidesToShow: smallTabletShow, slidesToScroll: 1 } },
+          { breakpoint: 480, settings: { slidesToShow: mobileShow, slidesToScroll: 1 } },
         ]}
       >
         {categories.map((category) => (
@@ -61,30 +65,39 @@ export function CategoryCarousel() {
               }}
             >
               <div
+                className="shadow-card category-card"
                 style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  background: 'var(--color-primary-light)',
-                  flexShrink: 0,
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 24,
                 }}
               >
-                <img
-                  src={category.image_url}
-                  alt={category.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+                <div
+                  className="image-pedestal category-avatar"
+                  style={{
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '14%',
+                  }}
+                >
+                  <img
+                    src={category.image_url}
+                    alt={category.name}
+                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                  />
+                </div>
               </div>
               <span
+                className="category-label"
                 style={{
-                  fontSize: 13,
                   fontWeight: 500,
                   textAlign: 'center',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  maxWidth: 96,
                 }}
               >
                 {category.name}

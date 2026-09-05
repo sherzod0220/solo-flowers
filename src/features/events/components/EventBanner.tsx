@@ -12,7 +12,7 @@ function EventSlide({ event }: { event: Event }) {
         minHeight: 320,
         display: 'flex',
         alignItems: 'center',
-        backgroundImage: `linear-gradient(90deg, rgba(42,18,24,0.78), rgba(42,18,24,0.2)), url(${event.image})`,
+        backgroundImage: `linear-gradient(90deg, rgba(46,20,32,0.72), rgba(46,20,32,0.15)), url(${event.image})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         padding: '0 48px',
@@ -34,7 +34,7 @@ function EventSlide({ event }: { event: Event }) {
 
         {event.cta && (
           <Link to={ROUTES.CATEGORY.replace(':id', event.category_id)}>
-            <Button type="primary" size="large">
+            <Button type="primary" size="large" style={{ borderRadius: 999, paddingInline: 28 }}>
               {event.cta}
             </Button>
           </Link>
@@ -55,7 +55,7 @@ export function EventBanner() {
   if (!events || events.length === 0) return null;
 
   return (
-    <div style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 32, cursor: 'grab' }}>
+    <div className="event-banner-carousel" style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 32, cursor: 'grab' }}>
       <Carousel autoplay autoplaySpeed={5000} draggable swipeToSlide>
         {events.map((event) => (
           <EventSlide key={event.id} event={event} />

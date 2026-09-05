@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Form, Input, InputNumber, Upload, Switch, Divider, message } from 'antd';
+import { App, Modal, Form, Input, InputNumber, Upload, Switch, Divider, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateProduct, useUpdateProduct } from '@/features/admin-products/hooks';
@@ -42,6 +42,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const isEdit = !!product;
   const t = useT();
+  const { notification } = App.useApp();
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
@@ -156,9 +157,17 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
           images: imageFiles.length > 0 ? imageFiles : undefined,
         });
       }
+      notification.success({
+        title: isEdit ? t('product.update_success') : t('product.create_success'),
+        placement: 'top',
+      });
       onClose();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : t('common.error'));
+      notification.error({
+        title: isEdit ? t('product.update_error') : t('product.create_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
     }
   }
 

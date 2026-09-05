@@ -20,7 +20,7 @@ export function BestsellerCarousel() {
 
   if (isLoading) {
     return (
-      <div style={{ background: 'var(--color-primary-light)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
         <div style={{ display: 'flex', gap: 16 }}>
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} active paragraph={{ rows: 3 }} style={{ maxWidth: 260 }} />
@@ -36,7 +36,7 @@ export function BestsellerCarousel() {
   // carusel o'rniga oddiy qator ishlatiladi — carusel faqat haqiqatan aylantirish kerak bo'lganda ishga tushadi.
   if (bestsellers.length <= DESKTOP_SHOW) {
     return (
-      <div style={{ background: 'var(--color-primary-light)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
           {t('home.bestsellers_title')}
         </h2>
@@ -52,7 +52,7 @@ export function BestsellerCarousel() {
   }
 
   return (
-    <div style={{ background: 'var(--color-primary-light)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
         {t('home.bestsellers_title')}
       </h2>

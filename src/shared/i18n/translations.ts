@@ -240,6 +240,28 @@ export const translations = {
   'product.slug_placeholder': { uz: 'masalan: 51-ta-qizil-atirgul', eng: 'e.g. 51-red-roses', ru: 'например: 51-krasnaya-roza' },
   'product.is_available': { uz: 'Sotuvda bormi?', eng: 'In stock?', ru: 'В наличии?' },
   'product.add_image': { uz: "Qo'shish", eng: 'Add', ru: 'Добавить' },
+
+  // --- Notification xabarlari (create/update/delete) — admin har bir amal natijasini ko'rib tursin ---
+  'category.create_success': { uz: 'Kategoriya yaratildi', eng: 'Category created', ru: 'Категория создана' },
+  'category.update_success': { uz: 'Kategoriya tahrirlandi', eng: 'Category updated', ru: 'Категория обновлена' },
+  'category.delete_success': { uz: "Kategoriya o'chirildi", eng: 'Category deleted', ru: 'Категория удалена' },
+  'category.create_error': { uz: 'Kategoriya yaratishda xatolik', eng: 'Failed to create category', ru: 'Ошибка при создании категории' },
+  'category.update_error': { uz: 'Kategoriyani tahrirlashda xatolik', eng: 'Failed to update category', ru: 'Ошибка при обновлении категории' },
+  'category.delete_error': { uz: "Kategoriyani o'chirishda xatolik", eng: 'Failed to delete category', ru: 'Ошибка при удалении категории' },
+
+  'event.create_success': { uz: 'Event yaratildi', eng: 'Event created', ru: 'Акция создана' },
+  'event.update_success': { uz: 'Event tahrirlandi', eng: 'Event updated', ru: 'Акция обновлена' },
+  'event.delete_success': { uz: "Event o'chirildi", eng: 'Event deleted', ru: 'Акция удалена' },
+  'event.create_error': { uz: 'Event yaratishda xatolik', eng: 'Failed to create event', ru: 'Ошибка при создании акции' },
+  'event.update_error': { uz: 'Eventni tahrirlashda xatolik', eng: 'Failed to update event', ru: 'Ошибка при обновлении акции' },
+  'event.delete_error': { uz: "Eventni o'chirishda xatolik", eng: 'Failed to delete event', ru: 'Ошибка при удалении акции' },
+
+  'product.create_success': { uz: 'Mahsulot yaratildi', eng: 'Product created', ru: 'Товар создан' },
+  'product.update_success': { uz: 'Mahsulot tahrirlandi', eng: 'Product updated', ru: 'Товар обновлён' },
+  'product.delete_success': { uz: "Mahsulot o'chirildi", eng: 'Product deleted', ru: 'Товар удалён' },
+  'product.create_error': { uz: 'Mahsulot yaratishda xatolik', eng: 'Failed to create product', ru: 'Ошибка при создании товара' },
+  'product.update_error': { uz: 'Mahsulotni tahrirlashda xatolik', eng: 'Failed to update product', ru: 'Ошибка при обновлении товара' },
+  'product.delete_error': { uz: "Mahsulotni o'chirishda xatolik", eng: 'Failed to delete product', ru: 'Ошибка при удалении товара' },
 } satisfies Record<string, Record<Lang, string>>;
 
 export type TranslationKey = keyof typeof translations;

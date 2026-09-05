@@ -1,5 +1,5 @@
 import { Outlet, Link } from 'react-router-dom';
-import { Layout, Menu, Button } from 'antd';
+import { Layout, Menu, Button, Space } from 'antd';
 import {
   DashboardOutlined,
   ShoppingOutlined,
@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
+import { LangSwitcher } from '@/shared/ui/LangSwitcher';
 
 const { Header, Sider, Content } = Layout;
 
@@ -35,9 +36,12 @@ export function AdminLayout() {
 
       <Layout>
         <Header style={{ background: '#fff', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <Link to={ROUTES.HOME}>
-            <Button icon={<HomeOutlined />}>{t('admin.go_to_site')}</Button>
-          </Link>
+          <Space size={16}>
+            <LangSwitcher />
+            <Link to={ROUTES.HOME}>
+              <Button icon={<HomeOutlined />}>{t('admin.go_to_site')}</Button>
+            </Link>
+          </Space>
         </Header>
         <Content style={{ margin: '16px' }}>
           <Outlet />
