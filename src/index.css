@@ -15,6 +15,8 @@
   --color-text: #2a1218;
   --radius-base: 8px;
   --font-display: 'Playfair Display', 'Georgia', serif;
+  /* Katta ekranlarda (desktop/monitor) kontent cheksiz cho'zilib ketmasligi uchun. */
+  --content-max-width: 1280px;
 }
 
 body {
@@ -80,6 +82,37 @@ h6,
 
 .event-banner-carousel .slick-dots li.slick-active button {
   background: #ffffff;
+}
+
+/* Storefront (UserLayout) uchun umumiy kenglik chegarasi — header, asosiy kontent va footer bir xil o'qda joylashadi. */
+.page-container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/*
+ * Navbar responsive holati — ekran torayganda to'liq nav qatori (qidiruv, katalog, biz haqimizda,
+ * aloqa, til, hisob) sig'may qolmasligi uchun burger tugma bilan almashtiriladi (UserLayout.tsx).
+ */
+.nav-desktop-row {
+  display: flex;
+  align-items: center;
+}
+
+.nav-mobile-row {
+  display: none;
+  align-items: center;
+}
+
+@media (max-width: 960px) {
+  .nav-desktop-row {
+    display: none !important;
+  }
+
+  .nav-mobile-row {
+    display: flex !important;
+  }
 }
 
 /* Bosh sahifadagi kategoriya doirasi — mobilda kichikroq, desktopda 2 barobar kattaroq. */

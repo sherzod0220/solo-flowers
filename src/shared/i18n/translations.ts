@@ -10,6 +10,7 @@ export const translations = {
   },
   'meta.login_title': { uz: 'Tizimga kirish — Solo', eng: 'Sign in — Solo', ru: 'Вход — Solo' },
   'meta.register_title': { uz: "Ro'yxatdan o'tish — Solo", eng: 'Sign up — Solo', ru: 'Регистрация — Solo' },
+  'meta.about_title': { uz: 'Biz haqimizda — Solo', eng: 'About Us — Solo', ru: 'О нас — Solo' },
 
   // --- Mahsulot sahifasi ---
   'product.add_to_cart': { uz: "Savatga qo'shish", eng: 'Add to cart', ru: 'В корзину' },
@@ -55,10 +56,21 @@ export const translations = {
   'nav.logout': { uz: 'Chiqish', eng: 'Log out', ru: 'Выйти' },
   'nav.login': { uz: 'Kirish', eng: 'Log in', ru: 'Войти' },
   'nav.register': { uz: "Ro'yxatdan o'tish", eng: 'Sign up', ru: 'Регистрация' },
+  'nav.catalog': { uz: 'Katalog', eng: 'Catalog', ru: 'Каталог' },
+  'nav.about': { uz: 'Biz haqimizda', eng: 'About Us', ru: 'О нас' },
+  'nav.menu': { uz: 'Menyu', eng: 'Menu', ru: 'Меню' },
   'nav.footer': {
     uz: '© {year} Solo — Flowers Boutique',
     eng: '© {year} Solo — Flowers Boutique',
     ru: '© {year} Solo — Flowers Boutique',
+  },
+
+  // --- Biz haqimizda ---
+  'about.title': { uz: 'Biz haqimizda', eng: 'About Us', ru: 'О нас' },
+  'about.paragraph': {
+    uz: "Solo — har bir kombinatsiyani mehr bilan tayyorlaydigan premium gul butigi. Har bir guldasta qo'lda, eng yangi va sifatli gullardan yig'iladi — sizning maxsus lahzalaringizni yanada unutilmas qilish uchun.",
+    eng: 'Solo is a premium flower boutique where every arrangement is crafted with care. Each bouquet is hand-picked from the freshest, finest flowers — making your special moments even more memorable.',
+    ru: 'Solo — премиальный цветочный бутик, где каждая композиция создаётся с любовью. Каждый букет собирается вручную из самых свежих и качественных цветов, чтобы сделать ваши особенные моменты ещё более незабываемыми.',
   },
 
   // --- Savat ---

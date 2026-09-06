@@ -13,6 +13,7 @@ import { ProductDetailPage } from '@/pages/user/ProductDetailPage';
 import { CategoryPage } from '@/pages/user/CategoryPage';
 import { SearchPage } from '@/pages/user/SearchPage';
 import { ForbiddenPage } from '@/pages/user/ForbiddenPage';
+import { AboutPage } from '@/pages/user/AboutPage';
 
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { ProductsListPage } from '@/pages/admin/ProductsListPage';
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.PRODUCT_DETAIL, element: <ProductDetailPage /> },
       { path: ROUTES.CATEGORY, element: <CategoryPage /> },
       { path: ROUTES.SEARCH, element: <SearchPage /> },
+      { path: ROUTES.ABOUT, element: <AboutPage /> },
       { path: ROUTES.CART, element: <CartPage /> },
       { path: ROUTES.LOGIN, element: <LoginPage /> },
       { path: ROUTES.REGISTER, element: <RegisterPage /> },
