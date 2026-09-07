@@ -61,6 +61,14 @@ export function useUpdateCategory() {
   });
 }
 
+export function useUpdateCategoryImage() {
+  const invalidate = useInvalidateCategories();
+  return useMutation({
+    mutationFn: ({ id, image }: { id: string; image: File }) => categoriesApi.updateCategoryImage(id, image),
+    onSuccess: invalidate,
+  });
+}
+
 export function useDeleteCategory() {
   const invalidate = useInvalidateCategories();
   return useMutation({

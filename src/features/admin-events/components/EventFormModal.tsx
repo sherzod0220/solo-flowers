@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { App, Modal, Form, Input, Upload, Button, Switch, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
-import { useCreateEvent, useUpdateEvent } from '@/features/events/hooks';
+import { useCreateEvent, useUpdateEvent, useUpdateEventImage } from '@/features/events/hooks';
 import type { EventAdmin } from '@/features/events/types';
 import { CategorySelect } from '@/features/categories/components/CategorySelect';
 import { useT } from '@/shared/i18n/useT';
@@ -43,7 +43,8 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
 
   const createMutation = useCreateEvent();
   const updateMutation = useUpdateEvent();
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const updateImageMutation = useUpdateEventImage();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending || updateImageMutation.isPending;
 
   function handleAfterOpenChange(visible: boolean) {
     if (!visible) return;
@@ -84,6 +85,11 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
     try {
       if (isEdit && event) {
         await updateMutation.mutateAsync({ id: event.id, payload: values });
+
+        const newImageFile = fileList[0]?.originFileObj as File | undefined;
+        if (newImageFile) {
+          await updateImageMutation.mutateAsync({ id: event.id, image: newImageFile });
+        }
       } else {
         const imageFile = fileList[0]?.originFileObj as File | undefined;
         if (!imageFile) {
@@ -168,21 +174,29 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
           <Switch />
         </Form.Item>
 
-        {!isEdit && (
-          <Form.Item label={t('common.image')} required>
-            <Upload
-              beforeUpload={beforeUpload}
-              fileList={fileList}
-              onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
-              onRemove={() => setFileList([])}
-              accept="image/jpeg,image/png,image/webp"
-              maxCount={1}
-              listType="picture"
-            >
-              <Button icon={<UploadOutlined />}>{t('common.choose_image')}</Button>
-            </Upload>
+        {isEdit && event && (
+          <Form.Item label={t('event.current_image')}>
+            <img
+              src={event.image}
+              alt={event.title_uz}
+              style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }}
+            />
           </Form.Item>
         )}
+
+        <Form.Item label={isEdit ? t('event.replace_image') : t('common.image')} required={!isEdit}>
+          <Upload
+            beforeUpload={beforeUpload}
+            fileList={fileList}
+            onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
+            onRemove={() => setFileList([])}
+            accept="image/jpeg,image/png,image/webp"
+            maxCount={1}
+            listType="picture"
+          >
+            <Button icon={<UploadOutlined />}>{t('common.choose_image')}</Button>
+          </Upload>
+        </Form.Item>
       </Form>
     </Modal>
   );

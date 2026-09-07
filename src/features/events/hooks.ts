@@ -61,6 +61,14 @@ export function useUpdateEvent() {
   });
 }
 
+export function useUpdateEventImage() {
+  const invalidate = useInvalidateEvents();
+  return useMutation({
+    mutationFn: ({ id, image }: { id: string; image: File }) => eventsApi.updateEventImage(id, image),
+    onSuccess: invalidate,
+  });
+}
+
 export function useDeleteEvent() {
   const invalidate = useInvalidateEvents();
   return useMutation({

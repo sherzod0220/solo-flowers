@@ -24,9 +24,16 @@ export function createCategory(payload: CreateCategoryPayload) {
   return unwrap<Category>(apiClient.post('/categories', formData));
 }
 
-/** Faqat nomlarni yangilaydi — rasm yangilash uchun alohida endpoint hozircha yo'q. */
+/** Faqat nomlarni yangilaydi — rasm yangilash uchun alohida endpoint bor, quyida. */
 export function updateCategory(id: string, payload: UpdateCategoryPayload) {
   return unwrap<null>(apiClient.put(`/categories/${id}`, payload));
+}
+
+/** Joriy rasmni yangisiga almashtiradi — eskisi S3'dan avtomatik o'chiriladi. */
+export function updateCategoryImage(id: string, image: File) {
+  const formData = new FormData();
+  formData.append('image', image);
+  return unwrap<Category>(apiClient.put(`/categories/${id}/image`, formData));
 }
 
 /** Soft delete. */

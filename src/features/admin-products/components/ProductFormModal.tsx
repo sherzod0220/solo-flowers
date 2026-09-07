@@ -1,8 +1,14 @@
 import { useState } from 'react';
-import { App, Modal, Form, Input, InputNumber, Upload, Switch, Divider, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { App, Modal, Form, Input, InputNumber, Upload, Button, Switch, Divider, Popconfirm, message } from 'antd';
+import { PlusOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
-import { useCreateProduct, useUpdateProduct } from '@/features/admin-products/hooks';
+import {
+  useCreateProduct,
+  useUpdateProduct,
+  useAddProductImages,
+  useReplaceProductImage,
+  useDeleteProductImage,
+} from '@/features/admin-products/hooks';
 import type { ProductAdmin, UpdateProductPayload } from '@/features/products/types';
 import { CategorySelect } from '@/features/categories/components/CategorySelect';
 import { useT } from '@/shared/i18n/useT';
@@ -40,12 +46,19 @@ interface ProductFormValues {
 export function ProductFormModal({ open, product, onClose }: ProductFormModalProps) {
   const [form] = Form.useForm<ProductFormValues>();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [currentImages, setCurrentImages] = useState<string[]>([]);
+  const [pendingNewImages, setPendingNewImages] = useState<UploadFile[]>([]);
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
   const isEdit = !!product;
   const t = useT();
   const { notification } = App.useApp();
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
+  const addImagesMutation = useAddProductImages();
+  const replaceImageMutation = useReplaceProductImage();
+  const deleteImageMutation = useDeleteProductImage();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   function handleAfterOpenChange(visible: boolean) {
@@ -69,6 +82,71 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
       tag_ru: product?.tag_ru ?? '',
     });
     setFileList([]);
+    setPendingNewImages([]);
+    setCurrentImages(product?.images ?? []);
+  }
+
+  async function handleReplaceImage(index: number, file: File) {
+    if (!product) return false;
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      message.error(t('common.upload_type_error'));
+      return false;
+    }
+    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+      message.error(t('common.upload_size_error'));
+      return false;
+    }
+    setReplacingIndex(index);
+    try {
+      const updated = await replaceImageMutation.mutateAsync({ id: product.id, index, image: file });
+      setCurrentImages(updated.images);
+      notification.success({ title: t('product.image_replace_success'), placement: 'top' });
+    } catch (error) {
+      notification.error({
+        title: t('product.image_replace_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
+    } finally {
+      setReplacingIndex(null);
+    }
+    return false;
+  }
+
+  async function handleDeleteImage(index: number) {
+    if (!product) return;
+    setDeletingIndex(index);
+    try {
+      const updated = await deleteImageMutation.mutateAsync({ id: product.id, index });
+      setCurrentImages(updated.images);
+      notification.success({ title: t('product.image_delete_success'), placement: 'top' });
+    } catch (error) {
+      notification.error({
+        title: t('product.image_delete_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
+    } finally {
+      setDeletingIndex(null);
+    }
+  }
+
+  async function handleAddImages() {
+    if (!product) return;
+    const files = pendingNewImages.map((file) => file.originFileObj as File | undefined).filter((file): file is File => !!file);
+    if (files.length === 0) return;
+    try {
+      const updated = await addImagesMutation.mutateAsync({ id: product.id, images: files });
+      setCurrentImages(updated.images);
+      setPendingNewImages([]);
+      notification.success({ title: t('product.image_add_success'), placement: 'top' });
+    } catch (error) {
+      notification.error({
+        title: t('product.image_add_error'),
+        description: error instanceof Error ? error.message : t('common.error'),
+        placement: 'top',
+      });
+    }
   }
 
   function beforeUpload(file: File) {
@@ -250,31 +328,114 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
           <Switch />
         </Form.Item>
 
-        {!isEdit && (
+        <Divider titlePlacement="left" plain>
+          {t('product.section_images', { max: String(MAX_IMAGES) })}
+        </Divider>
+
+        {isEdit && product ? (
           <>
-            <Divider titlePlacement="left" plain>
-              {t('product.section_images', { max: String(MAX_IMAGES) })}
-            </Divider>
-            <Form.Item>
-              <Upload
-                beforeUpload={beforeUpload}
-                fileList={fileList}
-                onChange={({ fileList: newList }) => setFileList(newList.slice(-MAX_IMAGES))}
-                onRemove={(file) => setFileList((prev) => prev.filter((item) => item.uid !== file.uid))}
-                accept="image/jpeg,image/png,image/webp"
-                maxCount={MAX_IMAGES}
-                multiple
-                listType="picture-card"
-              >
-                {fileList.length < MAX_IMAGES && (
-                  <div>
-                    <PlusOutlined />
-                    <div style={{ marginTop: 8 }}>{t('product.add_image')}</div>
-                  </div>
-                )}
-              </Upload>
-            </Form.Item>
+            {currentImages.length > 0 && (
+              <Form.Item label={t('product.current_images')}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {currentImages.map((image, index) => (
+                    <div key={image} style={{ position: 'relative', width: 80, height: 80 }}>
+                      <img
+                        src={image}
+                        alt={product.name_uz}
+                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                      />
+                      <Upload
+                        showUploadList={false}
+                        beforeUpload={(file) => {
+                          void handleReplaceImage(index, file);
+                          return false;
+                        }}
+                        accept="image/jpeg,image/png,image/webp"
+                      >
+                        <Button
+                          size="small"
+                          icon={<UploadOutlined />}
+                          loading={replacingIndex === index}
+                          aria-label={t('product.replace_image_button')}
+                          title={t('product.replace_image_button')}
+                          style={{ position: 'absolute', bottom: 2, right: 2 }}
+                        />
+                      </Upload>
+                      <Popconfirm
+                        title={t('product.delete_image_confirm')}
+                        okText={t('common.delete')}
+                        cancelText={t('common.cancel')}
+                        okButtonProps={{ danger: true }}
+                        onConfirm={() => void handleDeleteImage(index)}
+                        disabled={currentImages.length <= 1}
+                      >
+                        <Button
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
+                          loading={deletingIndex === index}
+                          disabled={currentImages.length <= 1}
+                          aria-label={t('product.delete_image_button')}
+                          title={t('product.delete_image_button')}
+                          style={{ position: 'absolute', bottom: 2, left: 2 }}
+                        />
+                      </Popconfirm>
+                    </div>
+                  ))}
+                </div>
+              </Form.Item>
+            )}
+
+            {currentImages.length < MAX_IMAGES && (
+              <Form.Item label={t('product.add_new_images_label')}>
+                <Upload
+                  beforeUpload={beforeUpload}
+                  fileList={pendingNewImages}
+                  onChange={({ fileList: newList }) => setPendingNewImages(newList.slice(-(MAX_IMAGES - currentImages.length)))}
+                  onRemove={(file) => setPendingNewImages((prev) => prev.filter((item) => item.uid !== file.uid))}
+                  accept="image/jpeg,image/png,image/webp"
+                  maxCount={MAX_IMAGES - currentImages.length}
+                  multiple
+                  listType="picture-card"
+                >
+                  {pendingNewImages.length < MAX_IMAGES - currentImages.length && (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>{t('product.add_image')}</div>
+                    </div>
+                  )}
+                </Upload>
+                <Button
+                  onClick={handleAddImages}
+                  disabled={pendingNewImages.length === 0}
+                  loading={addImagesMutation.isPending}
+                  style={{ marginTop: 8 }}
+                >
+                  {t('product.add_images_button')}
+                </Button>
+              </Form.Item>
+            )}
           </>
+        ) : (
+          <Form.Item required>
+            <Upload
+              beforeUpload={beforeUpload}
+              fileList={fileList}
+              onChange={({ fileList: newList }) => setFileList(newList.slice(-MAX_IMAGES))}
+              onRemove={(file) => setFileList((prev) => prev.filter((item) => item.uid !== file.uid))}
+              accept="image/jpeg,image/png,image/webp"
+              maxCount={MAX_IMAGES}
+              multiple
+              listType="picture-card"
+            >
+              {fileList.length < MAX_IMAGES && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>{t('product.add_image')}</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
         )}
       </Form>
     </Modal>

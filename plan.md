@@ -198,3 +198,127 @@ To'liq tafsilot: [frontend.md](frontend.md) — bo'lim 3 (Categories), 4.0 (til 
 - [ ] Haqiqiy backend (`192.168.1.61:8080`) bilan: kategoriya/mahsulot/event ro'yxatlarini `lang=uz`, `lang=eng`, `lang=ru` bilan sinash.
 - [ ] Admin panelda kategoriya/mahsulot/event yaratish-yangilash-o'chirishni haqiqiy backend bilan uchtala tilni ham to'ldirib sinash.
 - [ ] `formatPrice()` endi narxni 100ga bo'lmasligini tasdiqlash (haqiqiy backend javobidagi son bilan solishtirib).
+
+---
+
+## 12-bosqich — Rasmlarni tahrirlash (yangi backend endpointlari)
+
+**2026-09-07**: Backend'da 3 ta yangi endpoint qo'shildi — kategoriya, mahsulot va event uchun tahrirlashda rasmni ham o'zgartirish endi mumkin (avval faqat yaratishda rasm yuklanardi, tahrirlashda matn maydonlari bilan cheklangan edi).
+
+### Yangi endpointlar
+
+| Endpoint | Metod | Maydon | Izoh |
+|---|---|---|---|
+| `/categories/{id}/image` | PUT | `image` (1 ta fayl) | Eski rasm muvaffaqiyatli saqlangandan keyin S3'dan avtomatik o'chiriladi |
+| ~~`/products/{id}/images`~~ | ~~PUT~~ | ~~`images` (1–5 ta fayl)~~ | ⚠️ **Eskirgan — 13-bosqichda to'g'irlandi**, pastga qarang |
+| `/events/{id}/image` | PUT | `image` (1 ta fayl) | Eski rasm muvaffaqiyatli saqlangandan keyin S3'dan avtomatik o'chiriladi |
+
+Uchalasi ham faqat admin, `multipart/form-data`, javob — yangilangan Output (mos ravishda public shakl bilan bir xil), xatoliklar: 400 (rasm yo'q/hajmi katta/format noto'g'ri, productda 5 tadan ortiq), 401, 403, 404, 500.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/categories/api.ts`**
+- [x] `updateCategoryImage(id, image: File)` — `PUT /categories/{id}/image`, multipart.
+
+**`src/features/categories/hooks.ts`**
+- [x] `useUpdateCategoryImage()` — mutation, muvaffaqiyatdan keyin kategoriya cache'ini invalidate qiladi.
+
+**`src/features/admin-categories/components/CategoryFormModal.tsx`**
+- [x] Rasm yuklash bloki endi tahrirlash rejimida ham ko'rinadi: joriy rasm preview qilinadi, yangisini tanlash ixtiyoriy (tanlanmasa — eskisi qoladi).
+- [x] Submit paytida: matn maydonlari har doim `updateCategory` orqali, yangi rasm tanlangan bo'lsagina qo'shimcha `updateCategoryImage` chaqiriladi.
+
+**`src/features/events/api.ts`**
+- [x] `updateEventImage(id, image: File)` — `PUT /events/{id}/image`, multipart.
+
+**`src/features/events/hooks.ts`**
+- [x] `useUpdateEventImage()` — mutation, muvaffaqiyatdan keyin event cache'ini invalidate qiladi.
+
+**`src/features/admin-events/components/EventFormModal.tsx`**
+- [x] Xuddi kategoriya kabi: tahrirlashda ham rasm bloki ko'rinadi, joriy rasm preview, yangisi ixtiyoriy.
+
+**`src/features/admin-products/api.ts`** — ⚠️ *bu qism 13-bosqichda `addProductImages`/`replaceProductImage`ga almashtirildi, pastga qarang.*
+
+**`src/features/admin-products/hooks.ts`** — ⚠️ *xuddi shunday, 13-bosqichga qarang.*
+
+**`src/features/admin-products/components/ProductFormModal.tsx`** — ⚠️ *rasm bloki 13-bosqichda qayta yozildi (to'liq almashtirish o'rniga qo'shish/bittasini almashtirish).*
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] Kategoriya va event formalarida: mavjud yozuvni ochib, FAQAT rasmni almashtirish (matnga tegmasdan) — saqlangandan keyin yangi rasm haqiqatan ko'rinishini tasdiqlash.
+- [x] Rasm tanlanmasdan faqat matn o'zgartirilsa — rasm endpointi umuman chaqirilmasligi tasdiqlandi.
+- [ ] ~~Mahsulotda to'liq almashtirish sinovi~~ — endi kerak emas, 13-bosqichga qarang.
+
+---
+
+## 13-bosqich — Mahsulot rasm endpointi to'g'irlandi (12-bosqichdagi spetsifikatsiya eskirdi)
+
+**2026-09-07 (davomi)**: Backend jamoasi 12-bosqichdagi `PUT /products/{id}/images` (to'liq almashtirish) endpointini **ikkita** aniqroq endpointga almashtirdi — bittasini o'zgartirish uchun barcha 5 ta rasmni qayta yuklashga majbur qilish noqulay UX bo'lgani uchun.
+
+### Yangi endpointlar (eskisi o'rniga)
+
+| Endpoint | Metod | Maydon | Izoh |
+|---|---|---|---|
+| `/products/{id}/images` | POST | `images` (1 yoki bir nechta fayl) | **Qo'shish** — mavjud rasmlarni o'chirmaydi, ustiga qo'shadi. Jami (eski+yangi) 5 tadan oshsa — 400. |
+| `/products/{id}/images/{index}` | PUT | `image` (1 ta fayl) | **Bitta rasmni almashtirish** — `index` (0 dan boshlab, `images` massividagi o'rni) bo'yicha faqat o'sha rasm almashtiriladi, qolganlari tegilmaydi. Eski rasm S3'dan avtomatik o'chiriladi. |
+
+Ikkalasi ham faqat admin, `multipart/form-data`, javob — yangilangan `ProductOutput` (to'liq `images` massivi bilan). Xatoliklar: 400 (rasm yo'q / jami 5tadan oshadi yoki index noto'g'ri / hajmi katta / format xato), 401, 403, 404, 500.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/admin-products/api.ts`**
+- [x] `updateProductImages` olib tashlandi.
+- [x] `addProductImages(id, images: File[])` — `POST /products/{id}/images`, multipart.
+- [x] `replaceProductImage(id, index: number, image: File)` — `PUT /products/{id}/images/{index}`, multipart.
+
+**`src/features/admin-products/hooks.ts`**
+- [x] `useUpdateProductImages` olib tashlandi.
+- [x] `useAddProductImages()`, `useReplaceProductImage()` — ikkalasi ham muvaffaqiyatdan keyin admin va public mahsulot cache'larini invalidate qiladi.
+
+**`src/features/admin-products/components/ProductFormModal.tsx`**
+- [x] Tahrirlash rejimida rasm bloki butunlay qayta qurildi:
+  - Har bir joriy rasm alohida thumbnail sifatida ko'rsatiladi, ustiga kichik "almashtirish" tugmasi bilan — bosilib fayl tanlansa, **shu birgina rasm** darhol `replaceProductImage` orqali almashtiriladi (forma "Saqlash" tugmasini kutmasdan).
+  - Rasmlar soni 5 tadan kam bo'lsa, "Yangi rasm(lar) qo'shish" bloki ko'rinadi — bir nechta fayl tanlab, alohida "Qo'shish" tugmasi bosilganda `addProductImages` chaqiriladi.
+  - Har ikkala amal ham natijada backend qaytargan **to'liq** `images` massivini local state'ga yozadi — modal qayta ochilmasdan ham darhol yangi holatni ko'rsatadi.
+  - Yaratish (create) rejimida eski xatti-harakat o'zgarishsiz qoladi (bir nechta rasm tanlab, forma bilan birga yuboriladi).
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] Mavjud mahsulotni ochib, faqat bitta rasmni almashtirish — qolgan rasmlar o'zgarmasligini, faqat shu birining yangilanishini tasdiqlash. (2→2, o'rni to'g'ri almashdi)
+- [x] Yangi rasm(lar) qo'shish — jami rasmlar soni to'g'ri oshishini tasdiqlash. (2→3)
+- [ ] 5 ta rasm bo'lganda "qo'shish" bloki butunlay yashirilishini tekshirish.
+- [x] Haqiqiy backend bilan network xatolarsiz ishlashini brauzerda sinash.
+
+---
+
+## 14-bosqich — Mahsulotning bitta rasmini o'chirish
+
+**2026-09-07 (davomi)**: 13-bosqichdagi qo'shish/almashtirish endpointlariga to'ldiruvchi sifatida, bitta rasmni o'chirish endpointi qo'shildi.
+
+### Yangi endpoint
+
+| Endpoint | Metod | Izoh |
+|---|---|---|
+| `/products/{id}/images/{index}` | DELETE | Faqat shu bitta rasm o'chiriladi, qolganlari tegilmaydi. Mahsulotda kamida 1 ta rasm qolishi shart — oxirgi rasmni o'chirishga urinilsa 400 qaytadi. Muvaffaqiyatli o'chirilgandan keyin S3'dan ham o'chiriladi. |
+
+Faqat admin, javob — yangilangan `ProductOutput` (to'liq `images` massivi bilan). Xatoliklar: 400 (index noto'g'ri yoki yagona rasmni o'chirishga urinish), 401, 403, 404, 500.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/admin-products/api.ts`**
+- [x] `deleteProductImage(id, index: number)` — `DELETE /products/{id}/images/{index}`.
+
+**`src/features/admin-products/hooks.ts`**
+- [x] `useDeleteProductImage()` — mutation, muvaffaqiyatdan keyin admin va public mahsulot cache'larini invalidate qiladi.
+
+**`src/features/admin-products/components/ProductFormModal.tsx`**
+- [x] Har bir joriy rasm thumbnail'ida "almashtirish" tugmasi yoniga kichik "o'chirish" tugmasi qo'shildi, `Popconfirm` bilan tasdiqlash so'raladi (qaytarib bo'lmaydigan amal).
+- [x] Agar rasmlar soni 1 taga tushsa, o'chirish tugmasi frontend darajasida o'chirilgan (disabled) — backend baribir 400 qaytaradi, lekin foydalanuvchiga oldindan tushunarli qilingan.
+- [x] Muvaffaqiyatli o'chirishdan keyin backend qaytargan to'liq `images` massivi local state'ga yoziladi.
+
+### Tekshirish rejasi
+
+- [ ] `tsc -b` / `eslint` / `npm run build` — toza.
+- [ ] Bitta rasmni o'chirib, qolgan rasmlar soni va tartibi to'g'ri qolishini tasdiqlash.
+- [ ] Faqat 1 ta rasm qolganda o'chirish tugmasi disabled ekanini tekshirish.

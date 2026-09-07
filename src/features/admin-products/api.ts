@@ -36,9 +36,28 @@ export function createProduct(payload: CreateProductPayload) {
   return unwrap<Product>(apiClient.post('/products', formData));
 }
 
-/** Faqat matn/raqam maydonlarini yangilaydi — rasmlarni yangilash uchun alohida endpoint hozircha yo'q. */
+/** Faqat matn/raqam maydonlarini yangilaydi — rasmlarni yangilash uchun alohida endpoint bor, quyida. */
 export function updateProduct(id: string, payload: UpdateProductPayload) {
   return unwrap<null>(apiClient.put(`/products/${id}`, payload));
+}
+
+/** Mavjud rasmlarni o'chirmaydi — yangilarini ustiga qo'shadi. Jami (eski+yangi) 5 tadan oshsa 400 qaytadi. */
+export function addProductImages(id: string, images: File[]) {
+  const formData = new FormData();
+  images.forEach((file) => formData.append('images', file));
+  return unwrap<Product>(apiClient.post(`/products/${id}/images`, formData));
+}
+
+/** `index` (0 dan boshlab, `images` massividagi o'rni) bo'yicha faqat shu bitta rasmni almashtiradi. */
+export function replaceProductImage(id: string, index: number, image: File) {
+  const formData = new FormData();
+  formData.append('image', image);
+  return unwrap<Product>(apiClient.put(`/products/${id}/images/${index}`, formData));
+}
+
+/** `index` bo'yicha faqat shu bitta rasmni o'chiradi. Yagona rasmni o'chirishga urinish 400 bilan qaytadi. */
+export function deleteProductImage(id: string, index: number) {
+  return unwrap<Product>(apiClient.delete(`/products/${id}/images/${index}`));
 }
 
 /** Soft delete. */

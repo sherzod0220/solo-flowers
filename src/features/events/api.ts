@@ -34,9 +34,16 @@ export function createEvent(payload: CreateEventPayload) {
   return unwrap<Event>(apiClient.post('/events', formData));
 }
 
-/** Faqat matn maydonlarini yangilaydi — rasm yangilash uchun alohida endpoint hozircha yo'q. */
+/** Faqat matn maydonlarini yangilaydi — rasm yangilash uchun alohida endpoint bor, quyida. */
 export function updateEvent(id: string, payload: UpdateEventPayload) {
   return unwrap<null>(apiClient.put(`/events/${id}`, payload));
+}
+
+/** Joriy rasmni yangisiga almashtiradi — eskisi S3'dan avtomatik o'chiriladi. */
+export function updateEventImage(id: string, image: File) {
+  const formData = new FormData();
+  formData.append('image', image);
+  return unwrap<Event>(apiClient.put(`/events/${id}/image`, formData));
 }
 
 /** Soft delete. */

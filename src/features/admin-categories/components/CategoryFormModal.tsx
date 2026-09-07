@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { App, Modal, Form, Input, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
-import { useCreateCategory, useUpdateCategory } from '@/features/categories/hooks';
+import { useCreateCategory, useUpdateCategory, useUpdateCategoryImage } from '@/features/categories/hooks';
 import type { CategoryAdmin } from '@/features/categories/types';
 import { useT } from '@/shared/i18n/useT';
 
@@ -31,7 +31,8 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
 
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const updateImageMutation = useUpdateCategoryImage();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending || updateImageMutation.isPending;
 
   function handleAfterOpenChange(visible: boolean) {
     if (!visible) return;
@@ -65,6 +66,11 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
           id: category.id,
           payload: { name_uz: values.name_uz, name_eng: values.name_eng, name_ru: values.name_ru },
         });
+
+        const newImageFile = fileList[0]?.originFileObj as File | undefined;
+        if (newImageFile) {
+          await updateImageMutation.mutateAsync({ id: category.id, image: newImageFile });
+        }
       } else {
         const imageFile = fileList[0]?.originFileObj as File | undefined;
         if (!imageFile) {
@@ -117,21 +123,29 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
           <Input placeholder={t('category.name_placeholder_ru')} />
         </Form.Item>
 
-        {!isEdit && (
-          <Form.Item label={t('common.image')} required>
-            <Upload
-              beforeUpload={beforeUpload}
-              fileList={fileList}
-              onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
-              onRemove={() => setFileList([])}
-              accept="image/jpeg,image/png,image/webp"
-              maxCount={1}
-              listType="picture"
-            >
-              <Button icon={<UploadOutlined />}>{t('common.choose_image')}</Button>
-            </Upload>
+        {isEdit && category && (
+          <Form.Item label={t('category.current_image')}>
+            <img
+              src={category.image_url}
+              alt={category.name_uz}
+              style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }}
+            />
           </Form.Item>
         )}
+
+        <Form.Item label={isEdit ? t('category.replace_image') : t('common.image')} required={!isEdit}>
+          <Upload
+            beforeUpload={beforeUpload}
+            fileList={fileList}
+            onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
+            onRemove={() => setFileList([])}
+            accept="image/jpeg,image/png,image/webp"
+            maxCount={1}
+            listType="picture"
+          >
+            <Button icon={<UploadOutlined />}>{t('common.choose_image')}</Button>
+          </Upload>
+        </Form.Item>
       </Form>
     </Modal>
   );

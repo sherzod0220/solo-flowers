@@ -44,7 +44,7 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
   const t = useT();
 
   return (
-    <Space direction={stacked ? 'vertical' : 'horizontal'} size={stacked ? 12 : 'large'} style={stacked ? { width: '100%' } : undefined}>
+    <Space orientation={stacked ? 'vertical' : 'horizontal'} size={stacked ? 12 : 'large'} style={stacked ? { width: '100%' } : undefined}>
       {user ? (
         <>
           {isAdmin && (
@@ -229,7 +229,7 @@ export function UserLayout() {
         </div>
       </Footer>
 
-      <Drawer title={t('nav.menu')} open={isMenuOpen} onClose={() => setIsMenuOpen(false)} placement="right" width={300}>
+      <Drawer title={t('nav.menu')} open={isMenuOpen} onClose={() => setIsMenuOpen(false)} placement="right" size={300}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <Input.Search placeholder={t('common.search_products')} onSearch={handleSearch} allowClear />
 

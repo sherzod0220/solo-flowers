@@ -42,6 +42,31 @@ export function useUpdateProduct() {
   });
 }
 
+export function useAddProductImages() {
+  const invalidate = useInvalidateAdminProducts();
+  return useMutation({
+    mutationFn: ({ id, images }: { id: string; images: File[] }) => adminProductsApi.addProductImages(id, images),
+    onSuccess: invalidate,
+  });
+}
+
+export function useReplaceProductImage() {
+  const invalidate = useInvalidateAdminProducts();
+  return useMutation({
+    mutationFn: ({ id, index, image }: { id: string; index: number; image: File }) =>
+      adminProductsApi.replaceProductImage(id, index, image),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteProductImage() {
+  const invalidate = useInvalidateAdminProducts();
+  return useMutation({
+    mutationFn: ({ id, index }: { id: string; index: number }) => adminProductsApi.deleteProductImage(id, index),
+    onSuccess: invalidate,
+  });
+}
+
 export function useDeleteProduct() {
   const invalidate = useInvalidateAdminProducts();
   return useMutation({
