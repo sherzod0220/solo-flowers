@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { App, Modal, Form, Input, InputNumber, Upload, Button, Switch, Divider, Popconfirm, message } from 'antd';
+import { App, Modal, Form, Input, InputNumber, Upload, Button, Switch, Divider, Popconfirm } from 'antd';
 import { PlusOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import {
@@ -89,11 +89,11 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
   async function handleReplaceImage(index: number, file: File) {
     if (!product) return false;
     if (!ALLOWED_TYPES.includes(file.type)) {
-      message.error(t('common.upload_type_error'));
+      notification.error({ title: t('common.upload_type_error'), description: file.name, placement: 'top' });
       return false;
     }
     if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
-      message.error(t('common.upload_size_error'));
+      notification.error({ title: t('common.upload_size_error'), description: file.name, placement: 'top' });
       return false;
     }
     setReplacingIndex(index);
@@ -151,11 +151,19 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
 
   function beforeUpload(file: File) {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      message.error(t('common.upload_type_error'));
+      notification.error({
+        title: t('common.upload_type_error'),
+        description: `${file.name} (${file.type || 'unknown type'})`,
+        placement: 'top',
+      });
       return Upload.LIST_IGNORE;
     }
     if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
-      message.error(t('common.upload_size_error'));
+      notification.error({
+        title: t('common.upload_size_error'),
+        description: `${file.name} — ${(file.size / 1024 / 1024).toFixed(1)}MB`,
+        placement: 'top',
+      });
       return Upload.LIST_IGNORE;
     }
     // false — Upload'ning o'zi yubormaydi, faylni submit paytida biz formaga qo'shib yuboramiz.
@@ -209,6 +217,17 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
         }
 
         await updateMutation.mutateAsync({ id: product.id, payload });
+
+        // Admin "Yangi rasm(lar) qo'shish" bo'limida fayl tanlagan-u, alohida "Qo'shish" tugmasini bosmasdan
+        // to'g'ridan-to'g'ri asosiy "Saqlash"ni bosgan bo'lishi mumkin — shu holatda ham rasmlar yo'qolib qolmasin.
+        const pendingFiles = pendingNewImages
+          .map((file) => file.originFileObj as File | undefined)
+          .filter((file): file is File => !!file);
+        if (pendingFiles.length > 0) {
+          const updated = await addImagesMutation.mutateAsync({ id: product.id, images: pendingFiles });
+          setCurrentImages(updated.images);
+          setPendingNewImages([]);
+        }
       } else {
         const imageFiles = fileList
           .map((file) => file.originFileObj as File | undefined)
