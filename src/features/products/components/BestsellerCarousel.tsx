@@ -1,20 +1,49 @@
 import { Carousel, Skeleton } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useProducts } from '../hooks';
 import { ProductCard } from './ProductCard';
 import { useT } from '@/shared/i18n/useT';
+import { useResponsiveCount } from '@/shared/hooks/useResponsiveCount';
 
 const FETCH_SIZE = 20;
 const SHOW_COUNT = 10;
-const DESKTOP_SHOW = 4;
-const TABLET_SHOW = 3;
-const SMALL_TABLET_SHOW = 2;
-const MOBILE_SHOW = 1;
 const CARD_MAX_WIDTH = 260;
+
+// Banner/kategoriya bilan bir xil chegaralar (xs/sm/md/lg/xl/2xl: 640/768/1024/1280/1536).
+const PRODUCT_BREAKPOINTS = [
+  { minWidth: 1536, count: 6 },
+  { minWidth: 1280, count: 5 },
+  { minWidth: 1024, count: 4 },
+  { minWidth: 768, count: 3 },
+  { minWidth: 640, count: 2 },
+];
+const PRODUCT_BASE_COUNT = 1;
+
+interface ProductArrowProps {
+  direction: 'prev' | 'next';
+  onClick?: () => void;
+}
+
+/** Karta chegarasidan biroz "chiqib turadigan" dumaloq, romkali tugma — kartalar bilan orasida doim bo'shliq bor. */
+function ProductArrow({ direction, onClick }: ProductArrowProps) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      className={`carousel-arrow-button carousel-arrow-button--${direction}`}
+      onClick={onClick}
+      aria-label={direction === 'prev' ? t('common.prev') : t('common.next')}
+    >
+      {direction === 'prev' ? <LeftOutlined /> : <RightOutlined />}
+    </button>
+  );
+}
 
 /** Bosh sahifadagi "Ommabop mahsulotlar" qatori — `sold_count` bo'yicha eng ko'p sotilganlar, avtomatik aylanadi. */
 export function BestsellerCarousel() {
   const { data, isLoading } = useProducts({ page_size: FETCH_SIZE });
   const t = useT();
+  const responsiveCount = useResponsiveCount(PRODUCT_BREAKPOINTS, PRODUCT_BASE_COUNT);
 
   const bestsellers = [...(data?.items ?? [])].sort((a, b) => b.sold_count - a.sold_count).slice(0, SHOW_COUNT);
 
@@ -32,9 +61,10 @@ export function BestsellerCarousel() {
 
   if (bestsellers.length === 0) return null;
 
-  // Mahsulotlar soni bitta qatorga (DESKTOP_SHOW) sig'sa, kartalarni cho'zib-kattalashtirmaslik uchun
-  // carusel o'rniga oddiy qator ishlatiladi — carusel faqat haqiqatan aylantirish kerak bo'lganda ishga tushadi.
-  if (bestsellers.length <= DESKTOP_SHOW) {
+  // Mahsulotlar soni joriy breakpointning slotlariga (responsiveCount) sig'sa, kartalarni
+  // cho'zib-kattalashtirmaslik uchun carusel o'rniga oddiy qator ishlatiladi — carusel faqat
+  // haqiqatan aylantirish kerak bo'lganda (ma'lumot slotlardan ko'p bo'lganda) ishga tushadi.
+  if (bestsellers.length <= responsiveCount) {
     return (
       <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
@@ -52,7 +82,7 @@ export function BestsellerCarousel() {
   }
 
   return (
-    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+    <div style={{ position: 'relative', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
         {t('home.bestsellers_title')}
       </h2>
@@ -63,16 +93,13 @@ export function BestsellerCarousel() {
         autoplay
         autoplaySpeed={4000}
         infinite
-        slidesToShow={DESKTOP_SHOW}
-        slidesToScroll={DESKTOP_SHOW}
-        responsive={[
-          { breakpoint: 1024, settings: { slidesToShow: TABLET_SHOW, slidesToScroll: TABLET_SHOW } },
-          { breakpoint: 768, settings: { slidesToShow: SMALL_TABLET_SHOW, slidesToScroll: SMALL_TABLET_SHOW } },
-          { breakpoint: 480, settings: { slidesToShow: MOBILE_SHOW, slidesToScroll: MOBILE_SHOW } },
-        ]}
+        prevArrow={<ProductArrow direction="prev" />}
+        nextArrow={<ProductArrow direction="next" />}
+        slidesToShow={responsiveCount}
+        slidesToScroll={responsiveCount}
       >
         {bestsellers.map((product) => (
-          <div key={product.id} style={{ margin: '0 8px' }}>
+          <div key={product.id} className="product-slide">
             <ProductCard product={product} />
           </div>
         ))}

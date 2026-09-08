@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Layout, Button, Space, Badge, Input, Drawer, Divider, Popconfirm } from 'antd';
 import {
   ShoppingCartOutlined,
+  HeartOutlined,
   InstagramFilled,
   TelegramFilled,
   FacebookFilled,
@@ -13,6 +14,7 @@ import { ROUTES } from '@/shared/constants/routes';
 import { useLogout, useMe } from '@/features/auth/hooks';
 import { useCartCount } from '@/features/cart/hooks';
 import { CartDrawer } from '@/features/cart/components/CartDrawer';
+import { useWishlistCount } from '@/features/wishlist/hooks';
 import { CategoryNavMenu } from '@/features/categories/components/CategoryNavMenu';
 import { LangSwitcher } from '@/shared/ui/LangSwitcher';
 import { useT } from '@/shared/i18n/useT';
@@ -93,6 +95,7 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
 
 export function UserLayout() {
   const cartCount = useCartCount();
+  const wishlistCount = useWishlistCount();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -116,6 +119,14 @@ export function UserLayout() {
         }}
       />
     </Badge>
+  );
+
+  const wishlistButton = (
+    <Link to={ROUTES.WISHLIST} onClick={() => setIsMenuOpen(false)} aria-label={t('wishlist.title')}>
+      <Badge count={wishlistCount} size="small" offset={[-2, 2]}>
+        <Button type="text" icon={<HeartOutlined style={{ fontSize: 20, color: 'var(--color-primary)' }} />} />
+      </Badge>
+    </Link>
   );
 
   const contactPhoneLink = (
@@ -169,6 +180,7 @@ export function UserLayout() {
             {contactPhoneLink}
 
             <LangSwitcher />
+            {wishlistButton}
             {cartButton}
             <AuthLinks />
           </div>
@@ -261,6 +273,10 @@ export function UserLayout() {
 
           <Link to={ROUTES.ABOUT} style={linkStyle} onClick={() => setIsMenuOpen(false)}>
             {t('nav.about')}
+          </Link>
+
+          <Link to={ROUTES.WISHLIST} style={linkStyle} onClick={() => setIsMenuOpen(false)}>
+            {t('wishlist.title')}
           </Link>
 
           {contactPhoneLink}

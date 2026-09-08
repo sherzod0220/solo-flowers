@@ -4,9 +4,11 @@ import { ROUTES } from '@/shared/constants/routes';
 import { UserLayout } from '@/app/layouts/UserLayout';
 import { AdminLayout } from '@/app/layouts/AdminLayout';
 import { RequireAdmin } from '@/app/guards/RequireAdmin';
+import { RequireAuth } from '@/app/guards/RequireAuth';
 
 import { HomePage } from '@/pages/user/HomePage';
 import { CartPage } from '@/pages/user/CartPage';
+import { WishlistPage } from '@/pages/user/WishlistPage';
 import { LoginPage } from '@/pages/user/LoginPage';
 import { RegisterPage } from '@/pages/user/RegisterPage';
 import { ProductDetailPage } from '@/pages/user/ProductDetailPage';
@@ -34,6 +36,10 @@ export const router = createBrowserRouter([
       { path: ROUTES.LOGIN, element: <LoginPage /> },
       { path: ROUTES.REGISTER, element: <RegisterPage /> },
       { path: ROUTES.FORBIDDEN, element: <ForbiddenPage /> },
+      {
+        element: <RequireAuth />,
+        children: [{ path: ROUTES.WISHLIST, element: <WishlistPage /> }],
+      },
     ],
   },
   {

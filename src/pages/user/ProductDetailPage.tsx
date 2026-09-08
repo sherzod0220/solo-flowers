@@ -4,6 +4,7 @@ import { Image, Rate, Tag, Button, InputNumber, Skeleton, Row, Col, App } from '
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useProductBySlug } from '@/features/products/hooks';
 import { useCartActions } from '@/features/cart/hooks';
+import { WishlistButton } from '@/features/wishlist/components/WishlistButton';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
 import { PageMeta } from '@/shared/ui/PageMeta';
@@ -120,7 +121,14 @@ export function ProductDetailPage() {
             </Tag>
           )}
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 8, marginTop: 0 }}>{product.name}</h1>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 8, marginTop: 0 }}>{product.name}</h1>
+            <WishlistButton
+              productId={product.id}
+              size="large"
+              style={{ border: '1px solid var(--color-border)', flexShrink: 0 }}
+            />
+          </div>
 
           <Rate disabled allowHalf value={product.rating} style={{ fontSize: 16, marginBottom: 16 }} />
 
