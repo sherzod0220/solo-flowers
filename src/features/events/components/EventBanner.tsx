@@ -7,34 +7,37 @@ import type { Event } from '../types';
 function EventSlide({ event }: { event: Event }) {
   return (
     <div
+      className="event-banner-slide"
       style={{
         position: 'relative',
-        minHeight: 320,
         display: 'flex',
         alignItems: 'center',
         backgroundImage: `linear-gradient(90deg, rgba(46,20,32,0.72), rgba(46,20,32,0.15)), url(${event.image})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        padding: '0 48px',
         userSelect: 'none',
       }}
     >
-      <div style={{ maxWidth: 420, color: '#fff' }}>
+      <div className="event-banner-content" style={{ color: '#fff' }}>
         {event.eyebrow && (
-          <div style={{ textTransform: 'uppercase', letterSpacing: 2, fontSize: 13, marginBottom: 8, opacity: 0.85 }}>
+          <div className="event-banner-eyebrow" style={{ textTransform: 'uppercase', letterSpacing: 2, opacity: 0.85 }}>
             {event.eyebrow}
           </div>
         )}
 
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 600, marginBottom: 12 }}>
+        <div className="event-banner-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
           {event.title}
         </div>
 
-        {event.subtitle && <div style={{ fontSize: 16, marginBottom: 20, opacity: 0.9 }}>{event.subtitle}</div>}
+        {event.subtitle && (
+          <div className="event-banner-subtitle" style={{ opacity: 0.9 }}>
+            {event.subtitle}
+          </div>
+        )}
 
         {event.cta && (
           <Link to={ROUTES.CATEGORY.replace(':id', event.category_id)}>
-            <Button type="primary" size="large" style={{ borderRadius: 999, paddingInline: 28 }}>
+            <Button type="primary" size="large" className="event-banner-button" style={{ borderRadius: 999 }}>
               {event.cta}
             </Button>
           </Link>
