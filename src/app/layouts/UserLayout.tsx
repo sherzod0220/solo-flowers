@@ -24,16 +24,15 @@ const { Header, Content, Footer } = Layout;
 
 const linkStyle = { color: 'var(--color-primary)', fontWeight: 500 };
 
-// TODO: haqiqiy ijtimoiy tarmoq profillariga almashtiring.
+// Facebook uchun hozircha haqiqiy account yo'q — '#' bilan placeholder sifatida qoldirilgan.
 const SOCIAL_LINKS = [
-  { key: 'instagram', href: '#', label: 'Instagram', icon: <InstagramFilled /> },
-  { key: 'telegram', href: '#', label: 'Telegram', icon: <TelegramFilled /> },
+  { key: 'instagram', href: 'https://instagram.com/soloflowers.uz', label: 'Instagram', icon: <InstagramFilled /> },
+  { key: 'telegram', href: 'https://t.me/solo_flowers', label: 'Telegram', icon: <TelegramFilled /> },
   { key: 'facebook', href: '#', label: 'Facebook', icon: <FacebookFilled /> },
 ];
 
-// TODO: haqiqiy telefon raqamiga almashtiring.
-const CONTACT_PHONE_DISPLAY = '+998 90 123 45 67';
-const CONTACT_PHONE_HREF = 'tel:+998901234567';
+const CONTACT_PHONE_DISPLAY = '+998 50 005 07 53';
+const CONTACT_PHONE_HREF = 'tel:+998500050753';
 
 interface AuthLinksProps {
   stacked?: boolean;
@@ -242,6 +241,18 @@ export function UserLayout() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img src="/logo-S.PNG" alt="Solo" style={{ height: 32, width: 32, borderRadius: '50%', objectFit: 'cover' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff' }}>Solo</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, letterSpacing: 0.4, textTransform: 'uppercase', opacity: 0.75 }}>
+              {t('footer.contact_title')}
+            </span>
+            <a
+              href={CONTACT_PHONE_HREF}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fff', fontWeight: 500, whiteSpace: 'nowrap' }}
+            >
+              <PhoneOutlined /> {CONTACT_PHONE_DISPLAY}
+            </a>
           </div>
 
           <Space size={12}>

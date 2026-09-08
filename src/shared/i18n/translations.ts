@@ -64,6 +64,7 @@ export const translations = {
     eng: '© {year} Solo — Flowers Boutique',
     ru: '© {year} Solo — Flowers Boutique',
   },
+  'footer.contact_title': { uz: 'Aloqa', eng: 'Contact', ru: 'Контакты' },
 
   // --- Biz haqimizda ---
   'about.title': { uz: 'Biz haqimizda', eng: 'About Us', ru: 'О нас' },
