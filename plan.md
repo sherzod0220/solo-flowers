@@ -319,6 +319,55 @@ Faqat admin, javob — yangilangan `ProductOutput` (to'liq `images` massivi bila
 
 ### Tekshirish rejasi
 
-- [ ] `tsc -b` / `eslint` / `npm run build` — toza.
-- [ ] Bitta rasmni o'chirib, qolgan rasmlar soni va tartibi to'g'ri qolishini tasdiqlash.
-- [ ] Faqat 1 ta rasm qolganda o'chirish tugmasi disabled ekanini tekshirish.
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] Bitta rasmni o'chirib, qolgan rasmlar soni va tartibi to'g'ri qolishini tasdiqlash.
+- [x] Faqat 1 ta rasm qolganda o'chirish tugmasi disabled ekanini tekshirish.
+
+---
+
+## 15-bosqich — Sevimlilar (Wishlist)
+
+**2026-09-08**: Backend'da yangi `wishlist` bo'limi qo'shildi (Swagger: `https://api.soloflowers.uz/swagger/doc.json` orqali to'liq spetsifikatsiya olindi).
+
+### Endpointlar
+
+| Endpoint | Metod | Izoh |
+|---|---|---|
+| `/wishlist` | GET | Joriy foydalanuvchining wishlist'i — `{ user_id, items: [{ product_id, added_at }] }`. **Diqqat: faqat ID+sana qaytaradi, to'liq mahsulot ma'lumoti emas.** |
+| `/wishlist/items/{product_id}` | POST | Mahsulotni qo'shadi. Xatoliklar: 400, 409 (allaqachon bor). |
+| `/wishlist/items/{product_id}` | DELETE | Mahsulotni olib tashlaydi. Xatolik: 404 (topilmadi). |
+
+Uchalasi ham faqat tizimga kirgan foydalanuvchi uchun (`BearerAuth`).
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/wishlist/{types,api,hooks}.ts`** (yangi)
+- [x] `useWishlist()` — faqat `user` mavjud bo'lsa so'rov yuboradi (`enabled: !!user`).
+- [x] `useAddToWishlist()`, `useRemoveFromWishlist()` — muvaffaqiyatdan keyin wishlist cache'ini invalidate qiladi.
+- [x] `useIsInWishlist(productId)`, `useWishlistCount()` — qulay selektor hook'lar.
+
+**`src/features/wishlist/components/WishlistButton.tsx`** (yangi)
+- [x] Qayta ishlatiladigan yurakcha tugma — bosilganda qo'shadi/olib tashlaydi. Tizimga kirmagan bo'lsa `/login`ga yo'naltiradi. `ProductCard` ichida `<Link>` bo'lgani uchun `preventDefault`/`stopPropagation` bilan navigatsiyani to'xtatadi.
+
+**`src/features/products/components/ProductCard.tsx`**
+- [x] Rasm burchagiga `WishlistButton` qo'shildi, "Tugadi" belgisi pastga (chapga) surildi (endi yurakcha bilan ustma-ust tushmaydi).
+
+**`src/pages/user/ProductDetailPage.tsx`**
+- [x] Sarlavha yonida (romkali, katta) `WishlistButton`.
+
+**`src/pages/user/WishlistPage.tsx`** (yangi)
+- [x] `GET /wishlist` faqat ID qaytargani uchun, har bir `product_id` uchun `useQueries` bilan parallel `getProductById` chaqiriladi, natija `ProductCard` grid'ida ko'rsatiladi.
+
+**`src/router/index.tsx`, `src/shared/constants/routes.ts`**
+- [x] `ROUTES.WISHLIST = '/wishlist'`, `RequireAuth` guard bilan himoyalangan (tizimga kirmagan foydalanuvchi `/login`ga yo'naltiriladi).
+
+**`src/app/layouts/UserLayout.tsx`**
+- [x] Desktop navbar'da savat yonida yurakcha ikonka + badge (son). Mobil tor qatorga qo'shilmadi (joy yetishmasligi sababli — 1200px'gacha bo'lgan navbar sig'imi bo'yicha oldingi tekshiruvlarga asoslanib), o'rniga burger-Drawer ichiga "Sevimlilar" havolasi qo'shildi.
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] Tizimga kirmasdan yurakcha bosilsa `/login`ga yo'naltirilishi.
+- [x] Haqiqiy backend bilan: qo'shish (`POST` — 200, bildirishnoma, badge +1), olib tashlash (`DELETE` — 200, bildirishnoma, badge -1) sinaldi.
+- [x] Wishlist sahifasida mahsulotlar to'liq ma'lumot (rasm/narx/nom) bilan to'g'ri ko'rsatilgani, bo'sh holat (`EmptyState`) tasdiqlandi.
+- [x] Sinov paytida qo'shilgan test yozuvlar (4 ta) API orqali tozalandi.

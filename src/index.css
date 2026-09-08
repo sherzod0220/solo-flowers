@@ -118,45 +118,120 @@ h6,
   }
 }
 
-/* Bosh sahifadagi kategoriya doirasi — mobilda kichikroq, desktopda 2 barobar kattaroq. */
-.category-avatar {
-  width: 96px;
-  height: 96px;
-}
-
-@media (min-width: 640px) {
-  .category-avatar {
-    width: 120px;
-    height: 120px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .category-avatar {
-    width: 160px;
-    height: 160px;
-  }
+/*
+ * Bosh sahifadagi kategoriya doirasi — QATTIQ piksel o'lchamlar (breakpoint bo'yicha sakrab
+ * o'zgaradigan) ataylab ishlatilmaydi: slayd eni (konteyner/slidesToShow) breakpoint ICHIDA ham
+ * uzluksiz o'sadi, lekin qattiq piksel doira bir xil qolgani uchun slayd kengaygan sari doira
+ * atrofida bo'sh joy ("gap ochilib qolish") ham uzluksiz kattalashardi. Shuning uchun karta/doira
+ * foiz asosida (`width: 100%`) — slayd qanday kengaysa, doira ham xuddi shunday tekis kengayadi,
+ * bo'sh joy hech qachon hosil bo'lmaydi. `.category-slide`dagi margin — yagona haqiqiy bo'shliq.
+ */
+.category-slide {
+  /* Diqqat: margin ISHLAMAYDI — antd/react-slick .slick-slide'ning ichidagi bevosita bolasini
+     har doim `width: 100%`ga majburlaydi (o'zining eniga qat'iy moslaydi), shuning uchun margin
+     tomonidan "siqilgan" eni hech qachon amalda oshmaydi. Padding + border-box esa doim ishlaydi,
+     chunki u belgilangan umumiy endan ICHKARIDAN kesib oladi. */
+  box-sizing: border-box;
+  padding: 0 6px;
 }
 
 .category-card {
+  /* Diqqat: padding foizda BO'LMASLIGI kerak — CSS qoidasiga ko'ra elementning o'z padding foizi
+     o'zining emas, ONA konteynerining (bu yerda slayd) eniga nisbatan hisoblanadi. max-width tufayli
+     karta slayddan tor bo'lganda, foizli padding kutilganidan bir necha barobar katta chiqib ketardi. */
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
   padding: 10px;
 }
 
-@media (min-width: 1024px) {
-  .category-card {
-    padding: 16px;
-  }
+.category-avatar {
+  width: 100%;
+  aspect-ratio: 1;
 }
 
 .category-label {
-  max-width: 110px;
-  font-size: 13px;
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  font-size: clamp(11px, 1.6vw, 15px);
+}
+
+@media (min-width: 640px) {
+  .category-slide {
+    padding: 0 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .category-slide {
+    padding: 0 10px;
+  }
 }
 
 @media (min-width: 1024px) {
-  .category-label {
-    max-width: 170px;
-    font-size: 15px;
+  .category-slide {
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .category-slide {
+    padding: 0 14px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .category-slide {
+    padding: 0 16px;
+  }
+}
+
+/* Kategoriya karuselining chapga/o'ngga o'tkazish tugmalari — karta chegarasidan "chiqib turadi",
+   shu bilan tugma va kategoriya rasmlari orasida doim ko'zga ko'ringan bo'shliq bo'ladi. */
+.category-arrow-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(42, 18, 24, 0.14);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.category-arrow-button:hover {
+  box-shadow: 0 4px 12px rgba(42, 18, 24, 0.2);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.category-arrow-button--prev {
+  left: -14px;
+}
+
+.category-arrow-button--next {
+  right: -14px;
+}
+
+@media (min-width: 1024px) {
+  .category-arrow-button {
+    width: 42px;
+    height: 42px;
+  }
+  .category-arrow-button--prev {
+    left: -18px;
+  }
+  .category-arrow-button--next {
+    right: -18px;
   }
 }
 

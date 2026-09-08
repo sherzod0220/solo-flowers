@@ -1,13 +1,48 @@
 import { Link } from 'react-router-dom';
 import { Carousel, Skeleton } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useCategories } from '../hooks';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
+import { useResponsiveCount } from '@/shared/hooks/useResponsiveCount';
+
+// Banner/bestseller bilan bir xil chegaralar (xs/sm/md/lg/xl/2xl: 640/768/1024/1280/1536).
+// Doira/karta o'lchami endi foiz asosida (index.css'dagi .category-card/.category-avatar) —
+// shuning uchun bu yerda sonlar orasidagi farq endi "bo'sh joy ochilib qolish"ga olib kelmaydi.
+const CATEGORY_BREAKPOINTS = [
+  { minWidth: 1536, count: 7 },
+  { minWidth: 1280, count: 6 },
+  { minWidth: 1024, count: 5 },
+  { minWidth: 768, count: 4 },
+  { minWidth: 640, count: 3 },
+];
+const CATEGORY_BASE_COUNT = 2;
+
+interface CategoryArrowProps {
+  direction: 'prev' | 'next';
+  onClick?: () => void;
+}
+
+/** Karta chegarasidan biroz "chiqib turadigan" dumaloq, romkali tugma — rasm bilan orasida doim bo'shliq bor. */
+function CategoryArrow({ direction, onClick }: CategoryArrowProps) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      className={`category-arrow-button category-arrow-button--${direction}`}
+      onClick={onClick}
+      aria-label={direction === 'prev' ? t('common.prev') : t('common.next')}
+    >
+      {direction === 'prev' ? <LeftOutlined /> : <RightOutlined />}
+    </button>
+  );
+}
 
 /** Bosh sahifadagi "Kategoriyalar" qatori — rasm + nom, bosilsa shu kategoriyaga o'tadi. */
 export function CategoryCarousel() {
   const { data: categories, isLoading } = useCategories();
   const t = useT();
+  const responsiveCount = useResponsiveCount(CATEGORY_BREAKPOINTS, CATEGORY_BASE_COUNT);
 
   if (isLoading) {
     return (
@@ -23,15 +58,12 @@ export function CategoryCarousel() {
 
   if (!categories || categories.length === 0) return null;
 
-  // Real ma'lumot slotlardan kam bo'lsa ham qator to'liq ko'rinishi uchun, slidesToShow mavjud kategoriya soniga moslanadi.
-  // Doiralar kattalashgani sababli (bosqichma-bosqich .category-avatar orqali), bir qatordagi soni ham shunga moslab kamaytirildi.
-  const desktopShow = Math.min(5, categories.length);
-  const tabletShow = Math.min(4, categories.length);
-  const smallTabletShow = Math.min(3, categories.length);
-  const mobileShow = Math.min(2, categories.length);
+  // Real ma'lumot slotlardan kam bo'lsa ham qator to'liq ko'rinishi uchun, slidesToShow mavjud
+  // kategoriya soniga moslanadi.
+  const slidesToShow = Math.min(responsiveCount, categories.length);
 
   return (
-    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+    <div style={{ position: 'relative', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
         {t('home.categories_title')}
       </h2>
@@ -43,16 +75,13 @@ export function CategoryCarousel() {
         infinite
         autoplay
         autoplaySpeed={3000}
-        slidesToShow={desktopShow}
+        prevArrow={<CategoryArrow direction="prev" />}
+        nextArrow={<CategoryArrow direction="next" />}
+        slidesToShow={slidesToShow}
         slidesToScroll={1}
-        responsive={[
-          { breakpoint: 1024, settings: { slidesToShow: tabletShow, slidesToScroll: 1 } },
-          { breakpoint: 768, settings: { slidesToShow: smallTabletShow, slidesToScroll: 1 } },
-          { breakpoint: 480, settings: { slidesToShow: mobileShow, slidesToScroll: 1 } },
-        ]}
       >
         {categories.map((category) => (
-          <div key={category.id}>
+          <div key={category.id} className="category-slide">
             <Link
               to={ROUTES.CATEGORY.replace(':id', category.id)}
               style={{
@@ -60,7 +89,6 @@ export function CategoryCarousel() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: 8,
-                padding: '0 8px',
                 color: 'var(--color-text)',
               }}
             >

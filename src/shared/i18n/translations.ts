@@ -86,8 +86,18 @@ export const translations = {
   },
   'cart.added': { uz: "Savatga qo'shildi", eng: 'Added to cart', ru: 'Добавлено в корзину' },
 
+  // --- Sevimlilar (wishlist) ---
+  'wishlist.title': { uz: 'Sevimlilar', eng: 'Wishlist', ru: 'Избранное' },
+  'wishlist.empty': { uz: "Sevimlilar ro'yxati bo'sh", eng: 'Your wishlist is empty', ru: 'Список избранного пуст' },
+  'wishlist.add': { uz: "Sevimlilarga qo'shish", eng: 'Add to wishlist', ru: 'Добавить в избранное' },
+  'wishlist.remove': { uz: 'Sevimlilardan olib tashlash', eng: 'Remove from wishlist', ru: 'Удалить из избранного' },
+  'wishlist.added': { uz: "Sevimlilarga qo'shildi", eng: 'Added to wishlist', ru: 'Добавлено в избранное' },
+  'wishlist.removed': { uz: 'Sevimlilardan olib tashlandi', eng: 'Removed from wishlist', ru: 'Удалено из избранного' },
+
   // --- Bosh sahifa ---
   'home.categories_title': { uz: 'Kategoriyalar', eng: 'Categories', ru: 'Категории' },
+  'common.prev': { uz: 'Oldingi', eng: 'Previous', ru: 'Назад' },
+  'common.next': { uz: 'Keyingi', eng: 'Next', ru: 'Далее' },
   'home.bestsellers_title': { uz: 'Ommabop mahsulotlar', eng: 'Popular products', ru: 'Популярные товары' },
 
   // --- Qidiruv sahifasi ---

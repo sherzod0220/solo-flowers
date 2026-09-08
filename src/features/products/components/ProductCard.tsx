@@ -4,6 +4,7 @@ import { StarFilled } from '@ant-design/icons';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
+import { WishlistButton } from '@/features/wishlist/components/WishlistButton';
 import type { Product } from '../types';
 
 interface ProductCardProps {
@@ -66,10 +67,21 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
 
           {!product.is_available && (
-            <Tag color="default" style={{ position: 'absolute', top: 10, right: 10 }}>
+            <Tag color="default" style={{ position: 'absolute', bottom: 10, left: 10 }}>
               {t('product.out_of_stock')}
             </Tag>
           )}
+
+          <WishlistButton
+            productId={product.id}
+            size="small"
+            style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              background: 'rgba(255,255,255,0.85)',
+            }}
+          />
         </div>
 
         <div style={{ padding: 16 }}>
