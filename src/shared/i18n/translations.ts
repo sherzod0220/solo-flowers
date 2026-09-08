@@ -97,6 +97,8 @@ export const translations = {
   // --- Bosh sahifa ---
   'home.categories_title': { uz: 'Kategoriyalar', eng: 'Categories', ru: 'Категории' },
   'common.prev': { uz: 'Oldingi', eng: 'Previous', ru: 'Назад' },
+  'common.view_all': { uz: 'Barchasi', eng: 'View all', ru: 'Все' },
+  'common.show_less': { uz: 'Kamroq', eng: 'Show less', ru: 'Свернуть' },
   'common.next': { uz: 'Keyingi', eng: 'Next', ru: 'Далее' },
   'home.bestsellers_title': { uz: 'Ommabop mahsulotlar', eng: 'Popular products', ru: 'Популярные товары' },
 

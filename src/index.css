@@ -188,9 +188,9 @@ h6,
   }
 }
 
-/* Kategoriya karuselining chapga/o'ngga o'tkazish tugmalari — karta chegarasidan "chiqib turadi",
-   shu bilan tugma va kategoriya rasmlari orasida doim ko'zga ko'ringan bo'shliq bo'ladi. */
-.category-arrow-button {
+/* Karuselларning (kategoriya/mahsulot) chapga/o'ngga o'tkazish tugmalari — karta chegarasidan
+   "chiqib turadi", shu bilan tugma va kartalar orasida doim ko'zga ko'ringan bo'shliq bo'ladi. */
+.carousel-arrow-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -209,29 +209,57 @@ h6,
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.category-arrow-button:hover {
+.carousel-arrow-button:hover {
   box-shadow: 0 4px 12px rgba(42, 18, 24, 0.2);
   transform: translateY(-50%) scale(1.06);
 }
 
-.category-arrow-button--prev {
+.carousel-arrow-button--prev {
   left: -14px;
 }
 
-.category-arrow-button--next {
+.carousel-arrow-button--next {
   right: -14px;
 }
 
 @media (min-width: 1024px) {
-  .category-arrow-button {
+  .carousel-arrow-button {
     width: 42px;
     height: 42px;
   }
-  .category-arrow-button--prev {
+  .carousel-arrow-button--prev {
     left: -18px;
   }
-  .category-arrow-button--next {
+  .carousel-arrow-button--next {
     right: -18px;
+  }
+}
+
+/*
+ * "Ommabop mahsulotlar" karuselidagi slayd — xuddi `.category-slide` kabi, margin o'rniga
+ * padding+border-box ishlatiladi (antd/react-slick slaydning bevosita bolasini har doim
+ * `width:100%`ga majburlagani uchun margin hech qanday effekt bermaydi).
+ */
+.product-slide {
+  box-sizing: border-box;
+  padding: 0 6px;
+}
+
+@media (min-width: 640px) {
+  .product-slide {
+    padding: 0 8px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-slide {
+    padding: 0 10px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .product-slide {
+    padding: 0 12px;
   }
 }
 

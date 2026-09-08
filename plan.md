@@ -371,3 +371,38 @@ Uchalasi ham faqat tizimga kirgan foydalanuvchi uchun (`BearerAuth`).
 - [x] Haqiqiy backend bilan: qo'shish (`POST` — 200, bildirishnoma, badge +1), olib tashlash (`DELETE` — 200, bildirishnoma, badge -1) sinaldi.
 - [x] Wishlist sahifasida mahsulotlar to'liq ma'lumot (rasm/narx/nom) bilan to'g'ri ko'rsatilgani, bo'sh holat (`EmptyState`) tasdiqlandi.
 - [x] Sinov paytida qo'shilgan test yozuvlar (4 ta) API orqali tozalandi.
+
+---
+
+## 16-bosqich — Kategoriyalar "Barchasi" tugmasi va Ommabop mahsulotlar karuselini to'liq responsive qilish
+
+**2026-09-08 (davomi)**: Ikkita UX so'rovi — (1) bosh sahifadagi "Kategoriyalar" bo'limida barcha kategoriyalarni bir qatorda (rasm+nom bilan) ko'rish imkoniyati, (2) "Ommabop mahsulotlar" karuselini kategoriya karuseli bilan bir xil darajada 6 ta breakpoint bo'yicha (xs/sm/md/lg/xl/2xl) responsive qilish + romkali (bordered) chap/o'ng aylantirish tugmalari.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/shared/hooks/useResponsiveCount.ts`** (yangi)
+- [x] `window.matchMedia(...).matches`ni bevosita `useState` initializer'da tekshiradigan umumiy hook — react-slick'ning `responsive` prop'i sahifa birinchi marta yuklanganda ishlamaydigan (faqat keyingi `resize`da ishga tushadigan) bug'ini chetlab o'tish uchun.
+
+**`src/features/categories/components/CategoryCarousel.tsx`**
+- [x] `CategoryItem` alohida qayta ishlatiluvchi komponentga chiqarildi (karusel slaydida ham, "Barchasi" panjarasida ham ishlatiladi).
+- [x] "Barchasi"/"Kamroq" almashuvchi tugma sarlavha yonida (`justify-content: space-between`) — faqat `categories.length > slidesToShow` bo'lganda ko'rinadi.
+- [x] Kengaytirilgan holatda CSS Grid (`repeat(auto-fill, minmax(90px, 1fr))`) orqali barcha kategoriyalar bir necha qatorli panjarada, rasm+nom bilan to'liq ko'rsatiladi.
+- [x] Arrow tugma class'i `.category-arrow-button*` → umumiy `.carousel-arrow-button*`ga o'zgartirildi (bestseller karuseli bilan bo'lishish uchun).
+
+**`src/features/products/components/BestsellerCarousel.tsx`**
+- [x] Kategoriya karuseli bilan bir xil 6 ta breakpoint (`PRODUCT_BREAKPOINTS`: 640→2, 768→3, 1024→4, 1280→5, 1536→6, bazaviy 1) `useResponsiveCount` orqali qo'shildi.
+- [x] Romkali, dumaloq `ProductArrow` tugmalari (`.carousel-arrow-button`) — kartalardan "chiqib turadigan" joylashuv bilan qo'shildi.
+- [x] Slayd gap'i uchun `margin` o'rniga `.product-slide` (padding + `box-sizing: border-box`) ishlatildi — `.category-slide`da avval topilgan antd/react-slick "bola elementni majburan `width:100%`ga cho'zish" bug'i sababli.
+
+**`src/index.css`**
+- [x] `.category-arrow-button*` → `.carousel-arrow-button*` (umumiy nom).
+- [x] Yangi `.product-slide` (6 ta breakpoint bo'yicha `padding: 0 6px` → `0 12px`).
+
+**`src/shared/i18n/translations.ts`**
+- [x] `common.view_all` ("Barchasi"/"View all"/"Все"), `common.show_less` ("Kamroq"/"Show less"/"Свернуть") qo'shildi.
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] Haqiqiy backend bilan, Playwright orqali barcha 6 ta breakpoint (375/640/768/1024/1280/1536) da ekran suratlari olib tekshirildi: har ikkala bo'limda ham kartalar orasida gap doim ko'rinadi (touching/overlap yo'q), "Barchasi" tugmasi faqat kerak bo'lganda (kategoriyalar slotlardan ko'p bo'lganda) ko'rinadi va bosilganda "Kamroq"ga almashib, barcha kategoriyalarni panjarada to'liq ko'rsatadi.
+- [x] Bestseller karuselida romkali chap/o'ng tugmalar barcha o'lchamlarda to'g'ri joylashgani (kartalar bilan ustma-ust tushmasligi) tasdiqlandi.

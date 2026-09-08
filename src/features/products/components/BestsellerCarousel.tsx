@@ -1,4 +1,5 @@
 import { Carousel, Skeleton } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useProducts } from '../hooks';
 import { ProductCard } from './ProductCard';
 import { useT } from '@/shared/i18n/useT';
@@ -17,6 +18,26 @@ const PRODUCT_BREAKPOINTS = [
   { minWidth: 640, count: 2 },
 ];
 const PRODUCT_BASE_COUNT = 1;
+
+interface ProductArrowProps {
+  direction: 'prev' | 'next';
+  onClick?: () => void;
+}
+
+/** Karta chegarasidan biroz "chiqib turadigan" dumaloq, romkali tugma — kartalar bilan orasida doim bo'shliq bor. */
+function ProductArrow({ direction, onClick }: ProductArrowProps) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      className={`carousel-arrow-button carousel-arrow-button--${direction}`}
+      onClick={onClick}
+      aria-label={direction === 'prev' ? t('common.prev') : t('common.next')}
+    >
+      {direction === 'prev' ? <LeftOutlined /> : <RightOutlined />}
+    </button>
+  );
+}
 
 /** Bosh sahifadagi "Ommabop mahsulotlar" qatori — `sold_count` bo'yicha eng ko'p sotilganlar, avtomatik aylanadi. */
 export function BestsellerCarousel() {
@@ -61,7 +82,7 @@ export function BestsellerCarousel() {
   }
 
   return (
-    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+    <div style={{ position: 'relative', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 0, marginBottom: 16 }}>
         {t('home.bestsellers_title')}
       </h2>
@@ -72,11 +93,13 @@ export function BestsellerCarousel() {
         autoplay
         autoplaySpeed={4000}
         infinite
+        prevArrow={<ProductArrow direction="prev" />}
+        nextArrow={<ProductArrow direction="next" />}
         slidesToShow={responsiveCount}
         slidesToScroll={responsiveCount}
       >
         {bestsellers.map((product) => (
-          <div key={product.id} style={{ margin: '0 8px' }}>
+          <div key={product.id} className="product-slide">
             <ProductCard product={product} />
           </div>
         ))}
