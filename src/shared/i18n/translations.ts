@@ -144,6 +144,12 @@ export const translations = {
   },
   'auth.register_error_title': { uz: "Ro'yxatdan o'tishda xatolik yuz berdi", eng: 'Registration failed', ru: 'Ошибка регистрации' },
   'auth.has_account': { uz: 'Hisobingiz bormi?', eng: 'Already have an account?', ru: 'Уже есть аккаунт?' },
+  'auth.logout_confirm_title': { uz: "Tizimdan chiqish", eng: 'Log out', ru: 'Выход из системы' },
+  'auth.logout_confirm_desc': {
+    uz: 'Rostdan ham tizimdan chiqmoqchimisiz?',
+    eng: 'Are you sure you want to log out?',
+    ru: 'Вы уверены, что хотите выйти?',
+  },
 
   // --- Category admin ---
   'category.search_placeholder': {

@@ -9,25 +9,45 @@ const LANG_OPTIONS: { value: Lang; code: string; nativeName: string }[] = [
   { value: 'ru', code: 'RU', nativeName: 'Русский' },
 ];
 
-function CodeBadge({ code }: { code: string }) {
+/**
+ * Emoji bayroqlar Windows/Chromium'da to'g'ri chizilmaydi (shrift muammosi) —
+ * shuning uchun har bir til uchun mustaqil, kichik SVG bayroq ishlatiladi.
+ */
+function FlagIcon({ lang }: { lang: Lang }) {
+  const style = { display: 'block', borderRadius: 3, flexShrink: 0 } as const;
+
+  if (lang === 'uz') {
+    return (
+      <svg width="22" height="16" viewBox="0 0 22 16" style={style} aria-hidden>
+        <rect width="22" height="16" fill="#fff" />
+        <rect width="22" height="4.6" fill="#0099B5" />
+        <rect y="4.6" width="22" height="0.9" fill="#CE1126" />
+        <rect y="10.5" width="22" height="0.9" fill="#CE1126" />
+        <rect y="11.4" width="22" height="4.6" fill="#1EB53A" />
+        <circle cx="4.6" cy="2.3" r="1.5" fill="#fff" />
+        <circle cx="5.2" cy="2.3" r="1.2" fill="#0099B5" />
+      </svg>
+    );
+  }
+
+  if (lang === 'eng') {
+    return (
+      <svg width="22" height="16" viewBox="0 0 22 16" style={style} aria-hidden>
+        <rect width="22" height="16" fill="#00247D" />
+        <path d="M0,0 L22,16 M22,0 L0,16" stroke="#fff" strokeWidth="3" />
+        <path d="M0,0 L22,16 M22,0 L0,16" stroke="#CF142B" strokeWidth="1.2" />
+        <path d="M11,0 V16 M0,8 H22" stroke="#fff" strokeWidth="5" />
+        <path d="M11,0 V16 M0,8 H22" stroke="#CF142B" strokeWidth="2" />
+      </svg>
+    );
+  }
+
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 22,
-        height: 22,
-        borderRadius: '50%',
-        background: 'var(--color-primary-light)',
-        color: 'var(--color-primary)',
-        fontSize: 10,
-        fontWeight: 700,
-        flexShrink: 0,
-      }}
-    >
-      {code}
-    </span>
+    <svg width="22" height="16" viewBox="0 0 22 16" style={style} aria-hidden>
+      <rect width="22" height="16" fill="#fff" />
+      <rect y="5.33" width="22" height="5.34" fill="#0039A6" />
+      <rect y="10.67" width="22" height="5.33" fill="#D52B1E" />
+    </svg>
   );
 }
 
@@ -40,8 +60,9 @@ export function LangSwitcher() {
     key: option.value,
     label: (
       <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <CodeBadge code={option.code} />
-        <span>{option.nativeName}</span>
+        <FlagIcon lang={option.value} />
+        <span style={{ fontWeight: 600 }}>{option.code}</span>
+        <span style={{ opacity: 0.7 }}>{option.nativeName}</span>
       </span>
     ),
   }));
@@ -63,15 +84,16 @@ export function LangSwitcher() {
           gap: 6,
           background: 'transparent',
           border: '1px solid var(--color-border)',
-          borderRadius: 999,
-          padding: '3px 10px 3px 3px',
+          borderRadius: 'var(--radius-base)',
+          padding: 6,
           cursor: 'pointer',
           color: 'var(--color-primary)',
           fontWeight: 600,
           fontSize: 12,
         }}
       >
-        <CodeBadge code={current.code} />
+        <FlagIcon lang={current.value} />
+        <span>{current.code}</span>
         <DownOutlined style={{ fontSize: 9 }} />
       </button>
     </Dropdown>

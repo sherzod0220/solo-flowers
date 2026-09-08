@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Layout, Button, Space, Badge, Input, Drawer, Divider } from 'antd';
+import { Layout, Button, Space, Badge, Input, Drawer, Divider, Popconfirm } from 'antd';
 import {
   ShoppingCartOutlined,
   InstagramFilled,
@@ -44,7 +44,15 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
   const t = useT();
 
   return (
-    <Space orientation={stacked ? 'vertical' : 'horizontal'} size={stacked ? 12 : 'large'} style={stacked ? { width: '100%' } : undefined}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: stacked ? 'column' : 'row',
+        alignItems: stacked ? 'stretch' : 'center',
+        gap: stacked ? 12 : 14,
+        width: stacked ? '100%' : undefined,
+      }}
+    >
       {user ? (
         <>
           {isAdmin && (
@@ -53,15 +61,21 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
             </Link>
           )}
           <span style={{ color: 'var(--color-text)' }}>{user.email}</span>
-          <Button
-            size="small"
-            onClick={() => {
+          <Popconfirm
+            title={t('auth.logout_confirm_title')}
+            description={t('auth.logout_confirm_desc')}
+            okText={t('nav.logout')}
+            cancelText={t('common.cancel')}
+            okButtonProps={{ danger: true }}
+            onConfirm={() => {
               logout();
               onNavigate?.();
             }}
           >
-            {t('nav.logout')}
-          </Button>
+            <Button danger size="small">
+              {t('nav.logout')}
+            </Button>
+          </Popconfirm>
         </>
       ) : (
         <>
@@ -73,7 +87,7 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
           </Link>
         </>
       )}
-    </Space>
+    </div>
   );
 }
 
@@ -113,10 +127,10 @@ export function UserLayout() {
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <Header
+        className="site-header"
         style={{
           background: 'var(--color-surface)',
           borderBottom: '1px solid var(--color-border)',
-          padding: '0 24px',
           height: 76,
           position: 'sticky',
           top: 0,
@@ -156,8 +170,15 @@ export function UserLayout() {
             <AuthLinks />
           </div>
 
-          {/* Mobil qator — faqat savat va burger tugma, qolgani Drawer ichida. */}
-          <div className="nav-mobile-row" style={{ gap: 4 }}>
+          {/* Mobil qator — qidiruv va til tanlash ham shu yerda ochiq turadi, qolgani (katalog/biz haqimizda/hisob) Drawer ichida. */}
+          <div className="nav-mobile-row" style={{ gap: 4, flex: 1, justifyContent: 'flex-end', minWidth: 0 }}>
+            <Input.Search
+              placeholder={t('common.search_products')}
+              onSearch={handleSearch}
+              allowClear
+              style={{ flex: '1 1 60px', minWidth: 0, maxWidth: 320 }}
+            />
+            <LangSwitcher />
             {cartButton}
             <Button
               type="text"
@@ -231,8 +252,6 @@ export function UserLayout() {
 
       <Drawer title={t('nav.menu')} open={isMenuOpen} onClose={() => setIsMenuOpen(false)} placement="right" size={300}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <Input.Search placeholder={t('common.search_products')} onSearch={handleSearch} allowClear />
-
           <CategoryNavMenu variant="list" onNavigate={() => setIsMenuOpen(false)} />
 
           <Divider style={{ margin: 0 }} />
@@ -244,8 +263,6 @@ export function UserLayout() {
           {contactPhoneLink}
 
           <Divider style={{ margin: 0 }} />
-
-          <LangSwitcher />
 
           <AuthLinks stacked onNavigate={() => setIsMenuOpen(false)} />
         </div>

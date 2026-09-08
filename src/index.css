@@ -94,6 +94,9 @@ h6,
 /*
  * Navbar responsive holati — ekran torayganda to'liq nav qatori (qidiruv, katalog, biz haqimizda,
  * aloqa, til, hisob) sig'may qolmasligi uchun burger tugma bilan almashtiriladi (UserLayout.tsx).
+ * Chegara 1200px'da qo'yilgan — admin sifatida kirilganda (Admin panel + email + Chiqish tugmasi
+ * qo'shiladigan eng uzun holat) 1100-1150px oralig'ida "Biz haqimizda"/"Admin panel" kabi matnlar
+ * ikkinchi qatorga o'tib ketishi sinovda aniqlangan, shuning uchun xavfsiz zaxira bilan ko'tarilgan.
  */
 .nav-desktop-row {
   display: flex;
@@ -105,7 +108,7 @@ h6,
   align-items: center;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1200px) {
   .nav-desktop-row {
     display: none !important;
   }
@@ -154,5 +157,151 @@ h6,
   .category-label {
     max-width: 170px;
     font-size: 15px;
+  }
+}
+
+/*
+ * Bosh sahifadagi katta banner — 6 ta breakpoint bo'yicha (xs/sm/md/lg/xl/2xl, Tailwind qiymatlari
+ * bilan bir xil: 640/768/1024/1280/1536) responsive. Mobilda matn/tugma qisilib qolmasligi uchun
+ * har bosqichda padding, minimal balandlik va shrift o'lchami birga o'sadi.
+ */
+.event-banner-slide {
+  min-height: 220px;
+  padding: 0 20px;
+}
+
+.event-banner-content {
+  max-width: 100%;
+}
+
+.event-banner-eyebrow {
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+
+.event-banner-title {
+  font-size: 20px;
+  margin-bottom: 8px;
+  line-height: 1.15;
+}
+
+.event-banner-subtitle {
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.event-banner-button {
+  font-size: 13px !important;
+  height: 32px !important;
+  padding-inline: 16px !important;
+}
+
+@media (min-width: 640px) {
+  .event-banner-slide {
+    min-height: 260px;
+    padding: 0 32px;
+  }
+  .event-banner-content {
+    max-width: 340px;
+  }
+  .event-banner-eyebrow {
+    font-size: 11px;
+  }
+  .event-banner-title {
+    font-size: 26px;
+  }
+  .event-banner-subtitle {
+    font-size: 14px;
+  }
+  .event-banner-button {
+    font-size: 14px !important;
+    height: 36px !important;
+    padding-inline: 20px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .event-banner-slide {
+    min-height: 290px;
+    padding: 0 40px;
+  }
+  .event-banner-content {
+    max-width: 380px;
+  }
+  .event-banner-title {
+    font-size: 30px;
+  }
+  .event-banner-subtitle {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .event-banner-slide {
+    min-height: 320px;
+    padding: 0 48px;
+  }
+  .event-banner-content {
+    max-width: 420px;
+  }
+  .event-banner-eyebrow {
+    font-size: 13px;
+  }
+  .event-banner-title {
+    font-size: 34px;
+  }
+  .event-banner-subtitle {
+    font-size: 16px;
+  }
+  .event-banner-button {
+    font-size: 16px !important;
+    height: 40px !important;
+    padding-inline: 24px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .event-banner-slide {
+    min-height: 360px;
+    padding: 0 56px;
+  }
+  .event-banner-content {
+    max-width: 460px;
+  }
+  .event-banner-title {
+    font-size: 38px;
+  }
+  .event-banner-subtitle {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .event-banner-slide {
+    min-height: 400px;
+    padding: 0 64px;
+  }
+  .event-banner-content {
+    max-width: 500px;
+  }
+  .event-banner-eyebrow {
+    font-size: 14px;
+  }
+  .event-banner-title {
+    font-size: 42px;
+  }
+  .event-banner-subtitle {
+    font-size: 18px;
+  }
+}
+
+/* Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun. */
+.site-header {
+  padding: 0 12px !important;
+}
+
+@media (min-width: 480px) {
+  .site-header {
+    padding: 0 24px !important;
   }
 }
