@@ -148,8 +148,11 @@ export function UserLayout() {
             </span>
           </Link>
 
-          {/* Desktop nav qatori — ekran ~960px'dan torayganda .nav-desktop-row CSS orqali yashiriladi. */}
-          <div className="nav-desktop-row" style={{ flex: 1, gap: 24 }}>
+          {/* Desktop nav qatori — ekran ~1200px'dan torayganda .nav-desktop-row CSS orqali yashiriladi.
+              justifyContent: flex-end — qidiruv o'zining maxWidth chegarasiga yetgach, qolgan
+              elementlar (katalog...hisob) chap tomonda "osilib" qolmasdan, logotipga qarama-qarshi
+              o'ngga birlashib turishi uchun. */}
+          <div className="nav-desktop-row" style={{ flex: 1, gap: 24, justifyContent: 'flex-end' }}>
             <Input.Search
               placeholder={t('common.search_products')}
               onSearch={handleSearch}
