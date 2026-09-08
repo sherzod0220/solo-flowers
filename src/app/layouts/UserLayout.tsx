@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Layout, Button, Space, Badge, Input, Drawer, Divider, Popconfirm } from 'antd';
+import { Layout, Button, Space, Badge, Input, Drawer, Divider, Popconfirm, Modal } from 'antd';
 import {
   ShoppingCartOutlined,
-  HeartOutlined,
+  HeartFilled,
   InstagramFilled,
   TelegramFilled,
   FacebookFilled,
   MenuOutlined,
   PhoneOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { ROUTES } from '@/shared/constants/routes';
 import { useLogout, useMe } from '@/features/auth/hooks';
@@ -98,6 +99,7 @@ export function UserLayout() {
   const wishlistCount = useWishlistCount();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
   const t = useT();
 
@@ -106,6 +108,7 @@ export function UserLayout() {
     if (!query) return;
     navigate(`${ROUTES.SEARCH}?q=${encodeURIComponent(query)}`);
     setIsMenuOpen(false);
+    setIsSearchOpen(false);
   }
 
   const cartButton = (
@@ -124,7 +127,7 @@ export function UserLayout() {
   const wishlistButton = (
     <Link to={ROUTES.WISHLIST} onClick={() => setIsMenuOpen(false)} aria-label={t('wishlist.title')}>
       <Badge count={wishlistCount} size="small" offset={[-2, 2]}>
-        <Button type="text" icon={<HeartOutlined style={{ fontSize: 20, color: 'var(--color-primary)' }} />} />
+        <Button type="text" icon={<HeartFilled style={{ fontSize: 20, color: 'var(--color-primary)' }} />} />
       </Badge>
     </Link>
   );
@@ -185,15 +188,23 @@ export function UserLayout() {
             <AuthLinks />
           </div>
 
-          {/* Mobil qator — qidiruv va til tanlash ham shu yerda ochiq turadi, qolgani (katalog/biz haqimizda/hisob) Drawer ichida. */}
+          {/* Mobil qator — 768px'dan tor bo'lganda qidiruv joy tejash uchun ikonka+modalga almashadi
+              (`.search-full-row`/`.search-icon-button` CSS orqali almashtiriladi), til tanlash ochiq
+              turadi, qolgani (katalog/biz haqimizda/hisob) Drawer ichida. Sevimlilar endi shu qatorda
+              to'g'ridan-to'g'ri ko'rinadi (avval Drawer ichida edi). */}
           <div className="nav-mobile-row" style={{ gap: 4, flex: 1, justifyContent: 'flex-end', minWidth: 0 }}>
-            <Input.Search
-              placeholder={t('common.search_products')}
-              onSearch={handleSearch}
-              allowClear
-              style={{ flex: '1 1 60px', minWidth: 0, maxWidth: 320 }}
+            <div className="search-full-row" style={{ flex: '1 1 60px', minWidth: 0, maxWidth: 320 }}>
+              <Input.Search placeholder={t('common.search_products')} onSearch={handleSearch} allowClear />
+            </div>
+            <Button
+              type="text"
+              className="search-icon-button"
+              icon={<SearchOutlined style={{ fontSize: 20, color: 'var(--color-primary)' }} />}
+              onClick={() => setIsSearchOpen(true)}
+              aria-label={t('common.search_products')}
             />
             <LangSwitcher />
+            {wishlistButton}
             {cartButton}
             <Button
               type="text"
@@ -275,10 +286,6 @@ export function UserLayout() {
             {t('nav.about')}
           </Link>
 
-          <Link to={ROUTES.WISHLIST} style={linkStyle} onClick={() => setIsMenuOpen(false)}>
-            {t('wishlist.title')}
-          </Link>
-
           {contactPhoneLink}
 
           <Divider style={{ margin: 0 }} />
@@ -288,6 +295,16 @@ export function UserLayout() {
       </Drawer>
 
       <CartDrawer open={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      <Modal
+        title={t('common.search_products')}
+        open={isSearchOpen}
+        onCancel={() => setIsSearchOpen(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <Input.Search placeholder={t('common.search_products')} onSearch={handleSearch} allowClear autoFocus />
+      </Modal>
     </Layout>
   );
 }

@@ -398,6 +398,28 @@ h6,
   }
 }
 
+/*
+ * Mobil navbar qatorida qidiruv — 768px'gacha to'liq input, undan tor ekranlarda (savat+sevimlilar+
+ * til+burger bilan birga sig'may qolgani uchun) ikonkaga almashadi, bosilsa Modal ichida ochiladi.
+ */
+.search-full-row {
+  display: flex;
+}
+
+.search-icon-button {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .search-full-row {
+    display: none !important;
+  }
+
+  .search-icon-button {
+    display: inline-flex !important;
+  }
+}
+
 /* Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun. */
 .site-header {
   padding: 0 12px !important;
