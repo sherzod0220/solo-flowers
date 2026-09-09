@@ -3,15 +3,16 @@
 @theme {
   /*
    * "SoLo Flowers Boutique" brend palitrasi — logo asosida.
-   * Xaki — sahifaning asosiy iliq foni (canvas), oq/krem — bo'lim va karta yuzalari (surface),
-   * pushti — kichik aksentlar (chegirma belgisi, kategoriya doiralari), vino — tugmalar/linklar/footer.
+   * Qaymoq/krem — sahifaning asosiy foni (canvas) VA bo'lim/karta yuzalari (surface) — ikkalasi ham
+   * bir-biriga yaqin, karta chegarasi (--color-border) orqali ajratiladi (avval xaki fon ishlatilgan edi).
+   * Pushti — kichik aksentlar (chegirma belgisi, kategoriya doiralari, navbar fon), vino — tugmalar/linklar/footer.
    */
   --color-primary: #5c1a30;
   --color-primary-light: #f6ccd9;
   --color-khaki: #f3ecd8;
   --color-surface: #fffefb;
   --color-border: #e4d6ae;
-  --color-bg: #f3ecd8;
+  --color-bg: #faf6ec;
   --color-text: #2a1218;
   --radius-base: 8px;
   --font-display: 'Playfair Display', 'Georgia', serif;
@@ -48,20 +49,6 @@ h6,
 .shadow-card:hover {
   box-shadow: 0 12px 28px rgba(42, 18, 24, 0.14);
   transform: translateY(-2px);
-}
-
-/*
- * Fon olib tashlangan (shaffof) mahsulot/kategoriya rasmlari uchun "pedestal" foni —
- * markazi ochiq, chetlari xakiga tortadigan iliq gradient, xuddi studiya fotosuratidek.
- * img'ga qo'yilgan drop-shadow shaffoflikni hisobga oladi — gulning aniq shaklida soya tushadi,
- * box-shadow kabi to'rtburchak emas, shu bilan rasm "jonli"/hajmli ko'rinadi.
- */
-.image-pedestal {
-  background: radial-gradient(ellipse 70% 65% at 50% 58%, #faf6ea 0%, #eee0bd 100%);
-}
-
-.image-pedestal img {
-  filter: drop-shadow(0 14px 14px rgba(42, 18, 24, 0.28));
 }
 
 .social-icon-button {
@@ -420,9 +407,24 @@ h6,
   }
 }
 
-/* Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun. */
+/*
+ * Navbar foni — juda ochiq pushti (--color-primary-light asosida), shaffof + orqa fonni xiralashtiruvchi
+ * (backdrop-filter: blur) "muzli oyna" (frosted glass) effekti — navbar `sticky` bo'lgani uchun,
+ * pastga skroll qilinganda ostidagi kontent orqa fondan ko'rinib, xiralashib turadi.
+ * Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun padding ham shu yerda.
+ */
 .site-header {
   padding: 0 12px !important;
+  background: rgba(246, 204, 217, 0.55) !important;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+/* backdrop-filter qo'llab-quvvatlanmasa (juda eski brauzer) — shaffoflik ko'rinib qolmasligi uchun fon zichroq. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header {
+    background: rgba(246, 204, 217, 0.92) !important;
+  }
 }
 
 @media (min-width: 480px) {

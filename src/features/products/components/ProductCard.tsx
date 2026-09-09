@@ -31,7 +31,6 @@ export function ProductCard({ product }: ProductCardProps) {
         }}
       >
         <div
-          className="image-pedestal"
           style={{
             position: 'relative',
             aspectRatio: '1 / 1',
@@ -39,11 +38,11 @@ export function ProductCard({ product }: ProductCardProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 20,
+            background: 'var(--color-surface)',
           }}
         >
           {cover ? (
-            <img src={cover} alt={product.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            <img src={cover} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <div style={{ fontSize: 32 }}>🌸</div>
           )}
