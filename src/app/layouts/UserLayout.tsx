@@ -142,7 +142,6 @@ export function UserLayout() {
       <Header
         className="site-header"
         style={{
-          background: 'var(--color-surface)',
           borderBottom: '1px solid var(--color-border)',
           height: 76,
           position: 'sticky',

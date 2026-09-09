@@ -62,20 +62,18 @@ function CategoryItem({ category }: { category: Category }) {
         }}
       >
         <div
-          className="image-pedestal category-avatar"
+          className="category-avatar"
           style={{
             borderRadius: '50%',
             overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '14%',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 4px 14px rgba(42, 18, 24, 0.16)',
           }}
         >
           <img
             src={category.image_url}
             alt={category.name}
-            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </div>
       </div>
