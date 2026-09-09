@@ -15,7 +15,9 @@
   --color-bg: #faf6ec;
   --color-text: #2a1218;
   --radius-base: 8px;
-  --font-display: 'Playfair Display', 'Georgia', serif;
+  /* Zara logotipiga o'xshab (namunaviy rasm asosida) — nozik, baland kontrastli, elegant serif.
+     Zara'dagidek harflarni zichlashtirish shart emas, shuning uchun letter-spacing standart qoldirilgan. */
+  --font-display: 'Bodoni Moda', 'Playfair Display', 'Georgia', serif;
   /* Katta ekranlarda (desktop/monitor) kontent cheksiz cho'zilib ketmasligi uchun. */
   --content-max-width: 1280px;
 }
@@ -130,6 +132,10 @@ h6,
   max-width: 260px;
   margin: 0 auto;
   padding: 10px;
+  /* Rasm doirasidagi romka (border) olib tashlanib, shadow shu tashqi kartaning o'ziga (romkasiga)
+     ko'chirildi — `.shadow-card:hover`dan kuchliroq bo'lgani uchun hover paytida ustidan bosilib
+     ketmaydi (`.shadow-card:hover` ikkita klass selektori bo'lgani uchun bundan doim ustun turadi). */
+  box-shadow: 0 4px 14px rgba(42, 18, 24, 0.16);
 }
 
 .category-avatar {
@@ -415,9 +421,9 @@ h6,
  */
 .site-header {
   padding: 0 12px !important;
-  background: rgba(246, 204, 217, 0.55) !important;
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  background: rgba(246, 204, 217, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
 /* backdrop-filter qo'llab-quvvatlanmasa (juda eski brauzer) — shaffoflik ko'rinib qolmasligi uchun fon zichroq. */

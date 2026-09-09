@@ -66,8 +66,6 @@ function CategoryItem({ category }: { category: Category }) {
           style={{
             borderRadius: '50%',
             overflow: 'hidden',
-            border: '1px solid var(--color-border)',
-            boxShadow: '0 4px 14px rgba(42, 18, 24, 0.16)',
           }}
         >
           <img
