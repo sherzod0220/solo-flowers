@@ -4,6 +4,7 @@ import { Layout, Button, Space, Badge, Input, Drawer, Divider, Popconfirm, Modal
 import {
   ShoppingCartOutlined,
   HeartFilled,
+  UserOutlined,
   InstagramFilled,
   TelegramFilled,
   FacebookFilled,
@@ -18,6 +19,7 @@ import { CartDrawer } from '@/features/cart/components/CartDrawer';
 import { useWishlistCount } from '@/features/wishlist/hooks';
 import { CategoryNavMenu } from '@/features/categories/components/CategoryNavMenu';
 import { LangSwitcher } from '@/shared/ui/LangSwitcher';
+import { LocationButton } from '@/shared/ui/LocationButton';
 import { useT } from '@/shared/i18n/useT';
 
 const { Header, Content, Footer } = Layout;
@@ -74,7 +76,7 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
               onNavigate?.();
             }}
           >
-            <Button danger size="small">
+            <Button size="small" style={{ color: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
               {t('nav.logout')}
             </Button>
           </Popconfirm>
@@ -99,6 +101,7 @@ export function UserLayout() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const t = useT();
 
@@ -130,6 +133,36 @@ export function UserLayout() {
       </Badge>
     </Link>
   );
+
+  // Admin panel/hisob email/kirish-chiqish endi alohida inline elementlar sifatida emas, balki
+  // shu bitta user ikonka orqali ochiladigan Drawer ichida — navbar joyini tejash uchun ("joyni
+  // tartiblash"), AuthLinks o'zi ichida holatga (admin/oddiy/tizimga kirmagan) qarab to'g'ri kontent chiqaradi.
+  // Matn faqat desktop qatorda (u o'zi ham faqat >=1200px'da ko'rinadi) — burger paydo bo'ladigan
+  // mobil qatorda har doim faqat ikonka, oraliq (1024-1199px) breakpoint alohida shart emas.
+  function renderUserMenuButton(showLabel: boolean) {
+    return (
+      <button
+        type="button"
+        onClick={() => setIsUserMenuOpen(true)}
+        aria-label={t('nav.profile')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: showLabel ? 6 : 0,
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+          color: 'var(--color-primary)',
+          fontWeight: 500,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <UserOutlined style={{ fontSize: 20 }} />
+        {showLabel && <span>{t('nav.profile')}</span>}
+      </button>
+    );
+  }
 
   const contactPhoneLink = (
     <a href={CONTACT_PHONE_HREF} style={{ ...linkStyle, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
@@ -173,7 +206,7 @@ export function UserLayout() {
                 placeholder={t('common.search_products')}
                 onSearch={handleSearch}
                 allowClear
-                style={{ maxWidth: 260, flex: 1 }}
+                style={{ maxWidth: 260, minWidth: 140, flex: 1 }}
               />
 
               <CategoryNavMenu />
@@ -183,11 +216,12 @@ export function UserLayout() {
               </Link>
 
               {contactPhoneLink}
+              <LocationButton variant="nav" />
 
               <LangSwitcher />
               {wishlistButton}
               {cartButton}
-              <AuthLinks />
+              {renderUserMenuButton(true)}
             </div>
 
             {/* Mobil qator — 768px'dan tor bo'lganda qidiruv joy tejash uchun ikonka+modalga almashadi
@@ -205,9 +239,11 @@ export function UserLayout() {
                 onClick={() => setIsSearchOpen(true)}
                 aria-label={t('common.search_products')}
               />
+              <LocationButton variant="nav" />
               <LangSwitcher />
               {wishlistButton}
               {cartButton}
+              {renderUserMenuButton(false)}
               <Button
                 type="text"
                 icon={<MenuOutlined style={{ fontSize: 20, color: 'var(--color-primary)' }} />}
@@ -232,7 +268,7 @@ export function UserLayout() {
           }}
         >
           <div
-            className="page-container"
+            className="page-container footer-row"
             style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -241,12 +277,12 @@ export function UserLayout() {
               gap: 16,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <img src="/logo-S.PNG" alt="Solo" style={{ height: 32, width: 32, borderRadius: '50%', objectFit: 'cover' }} />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff' }}>Solo</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+            <div className="footer-contact" style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
               <span style={{ fontSize: 12, letterSpacing: 0.4, textTransform: 'uppercase', opacity: 0.75 }}>
                 {t('footer.contact_title')}
               </span>
@@ -258,7 +294,9 @@ export function UserLayout() {
               </a>
             </div>
 
-            <Space size={12}>
+            <LocationButton variant="footer" />
+
+            <Space size={12} className="footer-social">
               {SOCIAL_LINKS.map((social) => (
                 <a
                   key={social.key}
@@ -301,11 +339,11 @@ export function UserLayout() {
             </Link>
 
             {contactPhoneLink}
-
-            <Divider style={{ margin: 0 }} />
-
-            <AuthLinks stacked onNavigate={() => setIsMenuOpen(false)} />
           </div>
+        </Drawer>
+
+        <Drawer title={t('nav.profile')} open={isUserMenuOpen} onClose={() => setIsUserMenuOpen(false)} placement="right" size={300}>
+          <AuthLinks stacked onNavigate={() => setIsUserMenuOpen(false)} />
         </Drawer>
 
         <CartDrawer open={isCartOpen} onClose={() => setIsCartOpen(false)} />

@@ -59,12 +59,19 @@ export const translations = {
   'nav.catalog': { uz: 'Katalog', eng: 'Catalog', ru: 'Каталог' },
   'nav.about': { uz: 'Biz haqimizda', eng: 'About Us', ru: 'О нас' },
   'nav.menu': { uz: 'Menyu', eng: 'Menu', ru: 'Меню' },
+  'nav.profile': { uz: 'Profil', eng: 'Profile', ru: 'Профиль' },
   'nav.footer': {
     uz: '© {year} Solo — Flowers Boutique',
     eng: '© {year} Solo — Flowers Boutique',
     ru: '© {year} Solo — Flowers Boutique',
   },
   'footer.contact_title': { uz: 'Aloqa', eng: 'Contact', ru: 'Контакты' },
+  'footer.location_title': { uz: 'Manzil', eng: 'Location', ru: 'Адрес' },
+  'location.title': { uz: 'Manzil', eng: 'Location', ru: 'Адрес' },
+  'location.modal_title': { uz: 'Manzilni xaritada ochish', eng: 'Open location in a map', ru: 'Открыть адрес на карте' },
+  'location.yandex_maps': { uz: 'Yandex Xarita', eng: 'Yandex Maps', ru: 'Яндекс Карты' },
+  'location.google_maps': { uz: 'Google Xarita', eng: 'Google Maps', ru: 'Google Карты' },
+  'location.yandex_taxi': { uz: 'Yandex Taxi', eng: 'Yandex Taxi', ru: 'Яндекс Такси' },
 
   // --- Biz haqimizda ---
   'about.title': { uz: 'Biz haqimizda', eng: 'About Us', ru: 'О нас' },
