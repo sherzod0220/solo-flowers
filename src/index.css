@@ -414,17 +414,23 @@ h6,
 }
 
 /*
- * Navbar foni — qaymoq (--color-bg, #faf6ec) rangi, TO'LIQ ZICH (shaffof emas) — ostidagi kontent
- * navbar elementlariga (matn/ikonalar) hech qachon xalal bermasligi/aralashib ko'rinmasligi uchun.
- * backdrop-filter: blur baribir qoldirilgan — chegaralardagi nozik shaffoflik (antialiasing) va
- * kelajakda qayta shaffof qilinadigan bo'lsa deb "muzli oyna" effekti tayyor turishi uchun.
+ * Navbar foni — qaymoq (--color-bg, #faf6ec) rangi, 85% zich (15% shaffof) + kuchli xiralashtiruvchi
+ * (backdrop-filter: blur) "muzli oyna" effekti — ostidagi kontent navbar elementlariga
+ * (matn/ikonalar) xalal bermasligi uchun yetarlicha zich, lekin butunlay tekis emas.
  * Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun padding ham shu yerda.
  */
 .site-header {
   padding: 0 12px !important;
-  background: #faf6ec !important;
+  background: rgba(250, 246, 236, 0.85) !important;
   backdrop-filter: blur(48px) saturate(180%);
   -webkit-backdrop-filter: blur(48px) saturate(180%);
+}
+
+/* backdrop-filter qo'llab-quvvatlanmasa (juda eski brauzer) — shaffoflik ko'rinib qolmasligi uchun fon zichroq. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header {
+    background: rgba(250, 246, 236, 0.98) !important;
+  }
 }
 
 /*
