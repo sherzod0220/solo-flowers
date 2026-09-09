@@ -414,22 +414,48 @@ h6,
 }
 
 /*
- * Navbar foni — juda ochiq pushti (--color-primary-light asosida), shaffof + orqa fonni xiralashtiruvchi
- * (backdrop-filter: blur) "muzli oyna" (frosted glass) effekti — navbar `sticky` bo'lgani uchun,
- * pastga skroll qilinganda ostidagi kontent orqa fondan ko'rinib, xiralashib turadi.
+ * Navbar foni — qaymoq (--color-bg, #faf6ec) rangi, TO'LIQ ZICH (shaffof emas) — ostidagi kontent
+ * navbar elementlariga (matn/ikonalar) hech qachon xalal bermasligi/aralashib ko'rinmasligi uchun.
+ * backdrop-filter: blur baribir qoldirilgan — chegaralardagi nozik shaffoflik (antialiasing) va
+ * kelajakda qayta shaffof qilinadigan bo'lsa deb "muzli oyna" effekti tayyor turishi uchun.
  * Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun padding ham shu yerda.
  */
 .site-header {
   padding: 0 12px !important;
-  background: rgba(246, 204, 217, 0.45) !important;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: #faf6ec !important;
+  backdrop-filter: blur(48px) saturate(180%);
+  -webkit-backdrop-filter: blur(48px) saturate(180%);
 }
 
-/* backdrop-filter qo'llab-quvvatlanmasa (juda eski brauzer) — shaffoflik ko'rinib qolmasligi uchun fon zichroq. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .site-header {
-    background: rgba(246, 204, 217, 0.92) !important;
+/*
+ * Footer joylashuvi — 679px'dan katta ekranda hech narsa o'zgarmaydi (joriy qator + o'rtaga
+ * tekislangan ko'rinish saqlanadi). 678px'dan tor ekranda bo'limlar (logo, aloqa, ijtimoiy tarmoq,
+ * manzil) shu ANIQ tartibda ustma-ust joylashadi (CSS `order` — DOM tartibi o'zgarmaydi, shuning
+ * uchun kengroq ekranlardagi gorizontal joylashuv ham buzilmaydi) va sarlavha/matnlari chap tarafga tekislanadi.
+ */
+@media (max-width: 678px) {
+  .footer-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+  }
+
+  .footer-logo {
+    order: 1;
+  }
+
+  .footer-contact {
+    order: 2;
+    align-items: flex-start !important;
+  }
+
+  .footer-social {
+    order: 3;
+  }
+
+  .footer-location-trigger {
+    order: 4;
+    align-items: flex-start !important;
   }
 }
 
