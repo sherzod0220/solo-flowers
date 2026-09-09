@@ -1,9 +1,12 @@
 import { useQueries } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Card, Col, Row } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useWishlist } from '@/features/wishlist/hooks';
 import * as productsApi from '@/features/products/api';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { useLangStore } from '@/shared/store/langStore';
+import { ROUTES } from '@/shared/constants/routes';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageMeta } from '@/shared/ui/PageMeta';
 import { useT } from '@/shared/i18n/useT';
@@ -32,6 +35,13 @@ export function WishlistPage() {
   return (
     <div>
       <PageMeta title={`${t('wishlist.title')} — Solo`} />
+
+      <Link
+        to={ROUTES.HOME}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 16, color: 'var(--color-primary)' }}
+      >
+        <ArrowLeftOutlined /> {t('common.back_to_home')}
+      </Link>
 
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginTop: 0, marginBottom: 24 }}>
         {t('wishlist.title')}
