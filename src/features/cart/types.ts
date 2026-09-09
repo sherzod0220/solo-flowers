@@ -1,12 +1,18 @@
-/** Backendda savat/buyurtma endpointi hali yo'q — savat faqat client-side (localStorage) saqlanadi. */
-export interface CartItem {
-  productId: string;
-  slug: string;
-  name: string;
-  image: string | null;
-  /** Qo'shilgan paytdagi `final_price_amount` — narx keyin o'zgarsa ham savatdagi narx o'zgarmaydi. */
-  price: number;
-  currency: string;
-  stock: number;
+/** `GET /cart` javobidagi bitta savat elementi — rasm va slug bu shaklda yo'q (`hooks.ts`dagi `useCartItemsWithProducts` qarang). */
+export interface CartItemView {
+  product_id: string;
+  product_name: string;
+  unit_price: number;
+  discount_price?: number;
   quantity: number;
+  /** Discount bo'lsa discount narxidan, aks holda asl narxdan hisoblangan (serverda hisoblanadi). */
+  subtotal: number;
+  available: boolean;
+  currency: string;
+}
+
+export interface CartView {
+  items: CartItemView[];
+  total_items: number;
+  total_price: number;
 }

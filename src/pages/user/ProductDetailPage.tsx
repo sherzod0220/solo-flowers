@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Image, Rate, Tag, Button, InputNumber, Skeleton, Row, Col, App } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useProductBySlug } from '@/features/products/hooks';
-import { useCartActions } from '@/features/cart/hooks';
+import { useAddCartItem } from '@/features/cart/hooks';
+import { useMe } from '@/features/auth/hooks';
 import { WishlistButton } from '@/features/wishlist/components/WishlistButton';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
@@ -14,16 +15,28 @@ import { useT } from '@/shared/i18n/useT';
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading } = useProductBySlug(slug ?? '');
-  const { addItem } = useCartActions();
+  const { isAuthenticated } = useMe();
+  const navigate = useNavigate();
+  const addCartItem = useAddCartItem();
   const { message } = App.useApp();
   const t = useT();
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
+  // Xatolik (masalan zaxira yetarli emasligi) `useAddCartItem` ichida markazlashtirilgan holda
+  // ko'rsatiladi — bu yerda faqat muvaffaqiyat xabari va login'ga yo'naltirish bilan cheklanadi.
   function handleAddToCart() {
     if (!product) return;
-    addItem(product, quantity);
-    message.success(t('cart.added'));
+
+    if (!isAuthenticated) {
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
+    addCartItem.mutate(
+      { productId: product.id, quantity },
+      { onSuccess: () => message.success(t('cart.added')) },
+    );
   }
 
   if (isLoading) {
@@ -162,7 +175,13 @@ export function ProductDetailPage() {
               disabled={!product.is_available}
               size="large"
             />
-            <Button type="primary" size="large" disabled={!product.is_available} onClick={handleAddToCart}>
+            <Button
+              type="primary"
+              size="large"
+              disabled={!product.is_available}
+              loading={addCartItem.isPending}
+              onClick={handleAddToCart}
+            >
               {t('product.add_to_cart')}
             </Button>
           </div>

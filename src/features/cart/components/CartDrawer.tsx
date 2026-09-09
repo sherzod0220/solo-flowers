@@ -1,7 +1,7 @@
-import { Drawer, Button, InputNumber, Empty } from 'antd';
+import { Drawer, Button, InputNumber, Empty, Skeleton } from 'antd';
 import { Link } from 'react-router-dom';
 import { DeleteOutlined } from '@ant-design/icons';
-import { useCartItems, useCartTotal, useCartActions } from '../hooks';
+import { useCartItemsWithProducts, useRemoveCartItem, useUpdateCartItemQuantity } from '../hooks';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
@@ -12,20 +12,22 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
-  const items = useCartItems();
-  const total = useCartTotal();
-  const { removeItem, setQuantity } = useCartActions();
+  const { items, totalPrice, isLoading } = useCartItemsWithProducts();
+  const updateQuantity = useUpdateCartItemQuantity();
+  const removeItem = useRemoveCartItem();
   const t = useT();
 
   return (
     <Drawer title={t('cart.title')} open={open} onClose={onClose} size={380}>
-      {items.length === 0 ? (
+      {isLoading ? (
+        <Skeleton active paragraph={{ rows: 6 }} />
+      ) : items.length === 0 ? (
         <Empty description={t('cart.empty')} />
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {items.map((item) => (
-              <div key={item.productId} style={{ display: 'flex', gap: 12 }}>
+              <div key={item.product_id} style={{ display: 'flex', gap: 12 }}>
                 <div
                   style={{
                     width: 64,
@@ -37,39 +39,49 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                   }}
                 >
                   {item.image && (
-                    <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={item.image} alt={item.product_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   )}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <Link
-                    to={ROUTES.PRODUCT_DETAIL.replace(':slug', item.slug)}
-                    onClick={onClose}
-                    style={{
-                      color: 'var(--color-text)',
-                      fontWeight: 500,
-                      display: 'block',
-                      marginBottom: 4,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {item.name}
-                  </Link>
+                  {item.slug ? (
+                    <Link
+                      to={ROUTES.PRODUCT_DETAIL.replace(':slug', item.slug)}
+                      onClick={onClose}
+                      style={{
+                        color: 'var(--color-text)',
+                        fontWeight: 500,
+                        display: 'block',
+                        marginBottom: 4,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {item.product_name}
+                    </Link>
+                  ) : (
+                    <div style={{ fontWeight: 500, marginBottom: 4 }}>{item.product_name}</div>
+                  )}
                   <div style={{ color: 'var(--color-primary)', fontWeight: 600, marginBottom: 8 }}>
-                    {formatPrice(item.price, item.currency)}
+                    {formatPrice(item.discount_price ?? item.unit_price, item.currency)}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <InputNumber
                       min={1}
-                      max={item.stock}
+                      max={item.stock ?? undefined}
                       value={item.quantity}
-                      onChange={(value) => setQuantity(item.productId, value ?? 1)}
+                      onChange={(value) => updateQuantity.mutate({ productId: item.product_id, quantity: value ?? 1 })}
                       size="small"
                       style={{ width: 64 }}
                     />
-                    <Button type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => removeItem(item.productId)} />
+                    <Button
+                      type="text"
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={() => removeItem.mutate(item.product_id)}
+                    />
                   </div>
                 </div>
               </div>
@@ -79,7 +91,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
           <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 16, marginBottom: 16 }}>
               <span>{t('cart.total')}</span>
-              <span>{formatPrice(total)}</span>
+              <span>{formatPrice(totalPrice)}</span>
             </div>
             <Link to={ROUTES.CART} onClick={onClose}>
               <Button type="primary" block size="large">

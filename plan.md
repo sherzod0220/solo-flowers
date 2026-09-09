@@ -406,3 +406,56 @@ Uchalasi ham faqat tizimga kirgan foydalanuvchi uchun (`BearerAuth`).
 - [x] `tsc -b` / `eslint` / `npm run build` — toza.
 - [x] Haqiqiy backend bilan, Playwright orqali barcha 6 ta breakpoint (375/640/768/1024/1280/1536) da ekran suratlari olib tekshirildi: har ikkala bo'limda ham kartalar orasida gap doim ko'rinadi (touching/overlap yo'q), "Barchasi" tugmasi faqat kerak bo'lganda (kategoriyalar slotlardan ko'p bo'lganda) ko'rinadi va bosilganda "Kamroq"ga almashib, barcha kategoriyalarni panjarada to'liq ko'rsatadi.
 - [x] Bestseller karuselida romkali chap/o'ng tugmalar barcha o'lchamlarda to'g'ri joylashgani (kartalar bilan ustma-ust tushmasligi) tasdiqlandi.
+
+---
+
+## 17-bosqich — Savat (Cart) backend API'ga o'tkazildi
+
+**2026-09-09**: Backend'da yangi `cart` bo'limi qo'shildi (Swagger: `https://api.soloflowers.uz/swagger/doc.json` orqali tahlil qilindi, to'liq spetsifikatsiya `frontend.md`ning [10-bo'lim](frontend.md#10-savat-cart)iga yozildi). Client-side (Zustand + `localStorage`) savat butunlay backend API'ga o'tkazildi.
+
+### Yangi endpointlar
+
+| Endpoint | Metod | Auth | Izoh |
+|---|---|---|---|
+| `/cart` | GET | ✅ | Joriy foydalanuvchi savati — `{ items: CartItemView[], total_items, total_price }` |
+| `/cart/items` | POST | ✅ | `{ product_id, quantity }` — mahsulot qo'shish |
+| `/cart/items/{product_id}` | PUT | ✅ | `{ quantity }` — miqdorni **yangi qiymatga o'rnatadi** (increment emas) |
+| `/cart/items/{product_id}` | DELETE | ✅ | Bitta mahsulotni o'chirish |
+
+Barchasi faqat tizimga kirgan foydalanuvchi uchun (`BearerAuth`) — **mehmon (guest) savati backend darajasida yo'q**. Savatni to'liq tozalaydigan (`clear cart`) alohida endpoint yo'q. Checkout/buyurtma endpointi hali yo'q — savat mavjud bo'lsa ham, uni buyurtmaga aylantirib bo'lmaydi.
+
+### Muhim topilma — rasm va slug yo'q
+
+`CartItemView` faqat `product_id`, `product_name`, `unit_price`, `discount_price`, `subtotal`, `quantity`, `available`, `currency` qaytaradi — **rasm (`image_url`) va `slug` umuman yo'q**. Savat UI'sida rasm/havola ko'rsatish uchun, Wishlist'da (`WishlistPage.tsx`) qilingani kabi, har bir `product_id` uchun alohida `GET /products/{id}` (`useQueries` bilan parallel) chaqirish kerak bo'ladi. `subtotal`/`total_price` serverda hisoblanadi — frontendda narx matematikasini qayta qilish shart emas.
+
+### Mehmon foydalanuvchi qarori
+
+Wishlist'dagi kabi yondashuv tanlandi (1-variant): savatga qo'shish bosilganda tizimga kirmagan bo'lsa `/login`ga yo'naltiriladi. Savat ikonkasi navbar'da **hammaga** ko'rinadi (mehmonga ham), lekin mehmon uchun `useCart()` so'rov yubormaydi (`enabled: !!user`) — mehmonda savat doim bo'sh ko'rinadi, badge ko'rinmaydi.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/cart/types.ts`**
+- [x] `CartItemView`, `CartView` tiplari qo'shildi (backend shakliga mos, `discount_price` ixtiyoriy — chegirma bo'lmasa maydon umuman kelmaydi).
+
+**`src/features/cart/api.ts`**
+- [x] `getCart()`, `addCartItem(productId, quantity)`, `updateCartItemQuantity(productId, quantity)`, `removeCartItem(productId)`.
+
+**`src/features/cart/hooks.ts`**
+- [x] `useCart()` (faqat `user` bo'lsa so'rov), `useAddCartItem()`, `useUpdateCartItemQuantity()`, `useRemoveCartItem()` — barchasi muvaffaqiyatdan keyin `cart` cache'ini invalidate qiladi, muvaffaqiyatsizlikda esa markazlashtirilgan xato xabari (`message.error`) ko'rsatadi.
+- [x] `useCartItemsWithProducts()` — Wishlist'dagi naqsh: rasm/slug/`stock` uchun har bir item bo'yicha `useQueries` bilan parallel `getProductById`. `CartDrawer` va `CartPage`da qayta ishlatiladi.
+
+**`src/features/cart/store.ts`**
+- [x] Butunlay o'chirildi — endi faqat server state (`hooks.ts`), local Zustand savat qolmadi.
+
+**`src/features/cart/components/CartDrawer.tsx`, `src/pages/user/CartPage.tsx`**
+- [x] Local store o'rniga yangi hook'larga o'tkazildi; narx hisob-kitobi endi backend'dan kelgan `subtotal`/`total_price`dan olinadi. `InputNumber`ga `max={item.stock}` qo'shildi — zaxiradan ortiq miqdor UI darajasida oldindan bloklanadi.
+
+**`src/pages/user/ProductDetailPage.tsx`**
+- [x] "Savatga qo'shish" endi `useAddCartItem()` orqali ishlaydi; tizimga kirmagan bo'lsa `/login`ga yo'naltiradi (Wishlist bilan bir xil naqsh).
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` — toza.
+- [x] Haqiqiy backend bilan (throwaway test hisob orqali): ro'yxatdan o'tish → kirish → mahsulotni savatga qo'shish → miqdorni oshirish → sahifani qayta yuklab serverdagi haqiqiy holatni tasdiqlash → o'chirish — to'liq tsikl tekshirildi, tarmoq so'rovlari (`POST`/`PUT`/`DELETE /cart/items`) va javoblari to'g'ridan-to'g'ri log qilib tasdiqlandi.
+- [x] Mehmon holati: mahsulot sahifasida "Savatga qo'shish" bosilganda `/login`ga yo'naltirilishi, va `/cart`ga to'g'ridan-to'g'ri kirilganda xatosiz "Savatingiz bo'sh" ko'rsatilishi tasdiqlandi.
+- [x] **Topilgan va tuzatilgan real muammo**: zaxiradan ortiq miqdor so'ralganda backend `409` (`"requested quantity exceeds available stock"`) qaytaradi, lekin dastlabki implementatsiyada bu xato foydalanuvchiga hech qanday ko'rinmasdi (input shunchaki eski qiymatga "sirli" qaytardi). Tuzatildi: (1) `InputNumber`ga `max={item.stock}` qo'shilib, oldindan UI darajasida oldi olindi; (2) `useCartMutationErrorHandler()` orqali barcha 3 mutatsiya uchun markazlashtirilgan xato toast'i qo'shildi (fallback sifatida — masalan poyga holati/race condition uchun).

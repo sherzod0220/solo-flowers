@@ -954,6 +954,10 @@ Frontendda: login qilingandan keyin `GET /auth/me` chaqirib, javobdagi `role` ma
 | `/api/v1/events/{id}` | PUT | ✅ | admin |
 | `/api/v1/events/{id}` | DELETE | ✅ | admin |
 | `/api/v1/events/admin` | GET | ✅ | admin |
+| `/api/v1/cart` | GET | ✅ | har qanday |
+| `/api/v1/cart/items` | POST | ✅ | har qanday |
+| `/api/v1/cart/items/{product_id}` | PUT | ✅ | har qanday |
+| `/api/v1/cart/items/{product_id}` | DELETE | ✅ | har qanday |
 
 ---
 
@@ -965,5 +969,114 @@ Frontend ishini rejalashtirishda hisobga oling:
 - ❌ Mahsulot rasmlarini alohida yangilash (PUT productda faqat matn/raqam maydonlari o'zgaradi, `images` emas — rasmlarni o'zgartirish uchun alohida endpoint hali yo'q)
 - ❌ Kategoriya ierarxiyasi (parent/child daraxti) — kategoriyada `parent_id` degan maydon umuman yo'q, barcha kategoriyalar "flat" ro'yxat
 - ❌ Event rasmini alohida yangilash (PUT eventda faqat matn maydonlari o'zgaradi, rasm emas)
-- ❌ Savat, buyurtma (order) — `internal/ordering` papkasi mavjud, lekin ichida hali HTTP endpoint yo'q
+- ✅ Savat (`/cart`) — 2026-09-09'dan boshlab mavjud, [10-bo'lim](#10-savat-cart)ga qarang
+- ❌ Buyurtma (order) / checkout — savat mavjud bo'lsa-da, savatni buyurtmaga aylantiradigan checkout endpoint hali yo'q (`internal/ordering` papkasi bor, lekin HTTP endpoint yo'q)
 - ❌ Parolni tiklash / o'zgartirish, logout endpointi
+
+---
+
+## 10. Savat (Cart)
+
+**2026-09-09**: Backend'da yangi `cart` bo'limi qo'shildi (Swagger: `https://api.soloflowers.uz/swagger/doc.json` orqali aniqlandi). Prefiks: **`/api/v1/cart`**. To'rttala endpoint ham **faqat tizimga kirgan foydalanuvchi** uchun (`BearerAuth`) — **mehmon (guest) savati backend darajasida yo'q**. Hozircha faqat savatni boshqarish mavjud — savatni buyurtmaga aylantiradigan checkout endpoint hali yo'q ([9-bo'lim](#9-hali-tayyor-bolmagan-backendda-yoq-narsalar)ga qarang).
+
+### Cart obyekti (`GET /cart` javobi)
+
+```json
+{
+  "data": {
+    "items": [
+      {
+        "product_id": "uuid",
+        "product_name": "Atirgul to'plami",
+        "unit_price": 200000,
+        "discount_price": 150000,
+        "quantity": 2,
+        "subtotal": 300000,
+        "available": true,
+        "currency": "UZS"
+      }
+    ],
+    "total_items": 2,
+    "total_price": 300000
+  }
+}
+```
+
+- **Diqqat — rasm (`image`/`image_url`) va `slug` bu obyektda umuman yo'q.** Savat sahifasida/panelida mahsulot rasmini yoki slug orqali havolani ko'rsatish uchun, har bir `product_id` bo'yicha alohida `GET /products/{id}` chaqirish kerak bo'ladi — xuddi Wishlist'da (`WishlistPage.tsx`) qilinganidek, `useQueries` bilan parallel so'rovlar.
+- `subtotal` — shu item uchun serverda hisoblangan yakuniy summa (`discount_price` bo'lsa undan, aks holda `unit_price`dan, `quantity`ga ko'paytirilib). Frontendda narx hisob-kitobini qayta qilish shart emas.
+- `total_price` — barcha item'lar `subtotal`larining yig'indisi (serverda hisoblangan).
+- `available` — mahsulot hozir sotib olish uchun mavjudmi (`is_available`/stock holatiga bog'liq bo'lishi mumkin) — `false` bo'lsa UI'da "tugagan" belgisini ko'rsatish tavsiya etiladi.
+- `discount_price` — chegirma bo'lmasa maydon umuman qaytmasligi yoki `0`/`null` bo'lishi mumkin (aniq xatti-harakatni haqiqiy javobdan tekshirib ko'rish kerak).
+
+---
+
+### 10.1 Savatni olish
+
+```
+GET /api/v1/cart
+```
+
+- Auth **talab qilinadi**.
+- Javob — yuqoridagi Cart obyekti.
+- `401` — tizimga kirilmagan.
+
+---
+
+### 10.2 Savatga mahsulot qo'shish
+
+```
+POST /api/v1/cart/items
+```
+
+**So'rov tanasi:**
+```json
+{
+  "product_id": "uuid",
+  "quantity": 2
+}
+```
+
+- Auth talab qilinadi.
+- Agar mahsulot savatda allaqachon bo'lsa, xatti-harakat (miqdorni qo'shadimi yoki xato qaytaradimi) haqiqiy backend bilan tekshirilishi kerak — Swagger javob tavsifida aniq ko'rsatilmagan.
+- Xatoliklar: `400` (noto'g'ri so'rov — masalan `quantity <= 0`), `401`, `404` (mahsulot topilmadi).
+
+---
+
+### 10.3 Savatdagi mahsulot miqdorini yangilash
+
+```
+PUT /api/v1/cart/items/{product_id}
+```
+
+**So'rov tanasi:**
+```json
+{
+  "quantity": 3
+}
+```
+
+- Auth talab qilinadi. `product_id` — path parametr.
+- Bu **yangi qiymatni belgilaydi** (increment/decrement emas) — frontend joriy miqdorni o'zi hisoblab, yangi to'liq qiymatni yuborishi kerak.
+- Xatoliklar: `400`, `401`, `404` (mahsulot savatda yo'q).
+
+---
+
+### 10.4 Savatdan mahsulotni o'chirish
+
+```
+DELETE /api/v1/cart/items/{product_id}
+```
+
+- Auth talab qilinadi. `product_id` — path parametr.
+- **Savatni to'liq tozalaydigan (`clear cart`) alohida endpoint yo'q** — barcha item'larni o'chirish uchun har birini alohida `DELETE` qilish kerak bo'ladi.
+- Xatoliklar: `401`, `404` (mahsulot savatda yo'q).
+
+---
+
+### Frontend uchun muhim ta'sirlar (migratsiya)
+
+Hozirgi frontend'da `cart` **butunlay client-side** (Zustand + `localStorage`, backend bilan sinxron emas — `plan.md`dagi 6-bosqichga qarang) va **mehmon foydalanuvchi ham** ishlata oladi. Yangi backend savati esa faqat tizimga kirganlar uchun. Shuning uchun implementatsiyadan oldin hal qilinishi kerak bo'lgan savollar:
+
+1. **Mehmon foydalanuvchi uchun nima bo'ladi?** — Variantlar: (a) Wishlist'dagi kabi, savatga qo'shish tugmasi bosilganda tizimga kirmagan bo'lsa `/login`ga yo'naltirish; (b) mehmon uchun hozirgi local (localStorage) savatni saqlab qolish va tizimga kirgach serverga "merge" qilish (ancha murakkabroq).
+2. Savat panelida/sahifasida rasm va slug ko'rsatish uchun har bir item uchun qo'shimcha `GET /products/{id}` so'rovi kerak bo'ladi (N+1 so'rov, lekin Wishlist'da xuddi shu yondashuv allaqachon ishlatilgan va yaxshi ishlayapti).
+3. Checkout hali yo'qligi sababli, savatni backend'ga o'tkazgandan keyin ham "Buyurtma berish" tugmasi hozirgicha "tez orada" holatida qoladi.
