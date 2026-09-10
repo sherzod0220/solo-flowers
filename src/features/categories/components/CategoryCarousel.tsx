@@ -115,8 +115,10 @@ export function CategoryCarousel() {
   // Real ma'lumot slotlardan kam bo'lsa ham qator to'liq ko'rinishi uchun, slidesToShow mavjud
   // kategoriya soniga moslanadi.
   const slidesToShow = Math.min(responsiveCount, categories.length);
-  // "Barchasi" tugmasi faqat carusel aylantirishga arziydigan darajada kategoriya bo'lsagina ko'rinadi.
-  const canExpand = categories.length > slidesToShow;
+  // "Barchasi" tugmasi 1 tadan ortiq kategoriya bo'lsa doim ko'rinadi — `categories.length > slidesToShow`
+  // shartiga bog'lansa, aynan eng katta breakpoint slotlar soniga teng kategoriya bo'lganda (masalan
+  // 7 slot, 7 kategoriya) tugma "tasodifan" g'oyib bo'lib qolardi (aynan katta ekranda sodir bo'lgan bug).
+  const canExpand = categories.length > 1;
 
   return (
     <div style={{ position: 'relative', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>

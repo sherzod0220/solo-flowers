@@ -459,3 +459,50 @@ Wishlist'dagi kabi yondashuv tanlandi (1-variant): savatga qo'shish bosilganda t
 - [x] Haqiqiy backend bilan (throwaway test hisob orqali): ro'yxatdan o'tish → kirish → mahsulotni savatga qo'shish → miqdorni oshirish → sahifani qayta yuklab serverdagi haqiqiy holatni tasdiqlash → o'chirish — to'liq tsikl tekshirildi, tarmoq so'rovlari (`POST`/`PUT`/`DELETE /cart/items`) va javoblari to'g'ridan-to'g'ri log qilib tasdiqlandi.
 - [x] Mehmon holati: mahsulot sahifasida "Savatga qo'shish" bosilganda `/login`ga yo'naltirilishi, va `/cart`ga to'g'ridan-to'g'ri kirilganda xatosiz "Savatingiz bo'sh" ko'rsatilishi tasdiqlandi.
 - [x] **Topilgan va tuzatilgan real muammo**: zaxiradan ortiq miqdor so'ralganda backend `409` (`"requested quantity exceeds available stock"`) qaytaradi, lekin dastlabki implementatsiyada bu xato foydalanuvchiga hech qanday ko'rinmasdi (input shunchaki eski qiymatga "sirli" qaytardi). Tuzatildi: (1) `InputNumber`ga `max={item.stock}` qo'shilib, oldindan UI darajasida oldi olindi; (2) `useCartMutationErrorHandler()` orqali barcha 3 mutatsiya uchun markazlashtirilgan xato toast'i qo'shildi (fallback sifatida — masalan poyga holati/race condition uchun).
+
+---
+
+## 18-bosqich — Admin "Ommabop mahsulotlar"ni qo'lda boshqarishi
+
+**2026-09-10**: Bosh sahifadagi "Ommabop mahsulotlar" karuseli `sold_count` bo'yicha saralanadi (16-bosqichda qurilgan), lekin bu qiymat avvalgi holatda faqat backend'dagi real sotuvlardan o'zgarardi — admin uni qo'lda boshqara olmasdi. Backend Swagger'i tekshirilganda, `sold_count` allaqachon `PUT /products/{id}` (`UpdateProductInput`) orqali admin tomonidan yozilishi mumkinligi aniqlandi — alohida "is_featured" kabi flag yo'q, shuning uchun shu mavjud maydon "qo'lda ustunlik berish" sifatida qayta ishlatildi.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/admin-products/components/ProductFormModal.tsx`**
+- [x] Faqat **tahrirlash rejimida** (yaratishda emas — yangi mahsulot hali sotilmagan) "Sotilganlar soni" (`sold_count`) inputi qo'shildi, ostida uning "Ommabop mahsulotlar" tartibiga ta'sir qilishini tushuntiruvchi izoh (`extra`) bilan.
+- [x] `handleSubmit`dagi update payload'iga `sold_count: values.sold_count` qo'shildi.
+
+**`src/shared/i18n/translations.ts`**
+- [x] `product.sold_count`, `product.sold_count_hint` qo'shildi.
+
+**`src/features/products/components/BestsellerCarousel.tsx`**
+- [x] **Muhim tuzatish**: avval faqat birinchi 20 ta mahsulot (`page_size: 20`) orasidan saralanardi — agar admin qo'lda yuqori `sold_count` qo'ygan mahsulot shu 20 tadan tashqarida bo'lsa, karuselda umuman ko'rinmasdi (ya'ni bu bosqichning o'zi ishlamay qolardi). Backend'da `sort` query parametri yo'qligi Swagger orqali tasdiqlangach, `page_size` backend ruxsat etgan maksimal qiymat — **100**ga oshirildi, shu bilan real hajmdagi katalog uchun to'g'ri natija kafolatlanadi.
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` — toza.
+- [x] Haqiqiy admin hisob bilan (foydalanuvchi bergan hisob orqali): mavjud, karuselda ko'rinmayotgan mahsulotni tahrirlab, `sold_count`ni `9999`ga o'zgartirib saqlash — tarmoq so'rovi (`PUT /products/{id}`) va javobi (`200`) to'g'ridan-to'g'ri log qilindi.
+- [x] Bosh sahifaga qaytib, o'sha mahsulot "Ommabop mahsulotlar" qatorida (eng yuqori `sold_count` bo'lgani uchun) **birinchi o'rinda** chiqqani skrinshot orqali tasdiqlandi.
+- [x] Sinov tugagach, `sold_count` production ma'lumotni ifloslantirmasligi uchun `0`ga qaytarildi.
+
+---
+
+## 19-bosqich — "Ommabop mahsulotlar"ga "Barchasi" tugmasi + limit 30taga oshirildi
+
+**2026-09-10**: 16-bosqichda "Kategoriyalar" uchun qurilgan "Barchasi/Kamroq" naqshi endi "Ommabop mahsulotlar"ga ham qo'llandi, shu bilan birga aylantirish tugmalari (prev/next) har doim ko'rinadigan qilindi.
+
+### Fayl-bo-fayl o'zgarishlar ro'yxati
+
+**`src/features/products/components/BestsellerCarousel.tsx`**
+- [x] `SHOW_COUNT`: `10` → `30`.
+- [x] Avvalgi "agar mahsulot soni ekranga sig'sa, karusel o'rniga oddiy `flex` qator (tugmasiz)" fallback **olib tashlandi** — endi har doim `Carousel` ishlatiladi (`slidesToShow = Math.min(responsiveCount, bestsellers.length)`, Kategoriyalar karuseli bilan bir xil himoya), shu bilan chap/o'ng tugmalar har doim (mobil ham, desktop ham) ko'rinadi.
+- [x] Sarlavha yonida "Barchasi"/"Kamroq" tugmasi qo'shildi (`isExpanded` state) — bosilganda karusel o'rniga CSS Grid (`repeat(auto-fill, minmax(200px, 1fr))`) orqali **barcha** (saralangan, kamida 30 tagacha) mahsulot to'liq `ProductCard` (rasm+nom+narx+reyting) bilan, albom-uslubida ko'rsatiladi.
+
+### Saralash mantig'i haqida aniqlik (foydalanuvchi savoliga javoban)
+
+"Ommabop mahsulotlar" **butun katalog** (barcha kategoriyalar birga, `category_id` filtri yuborilmaydi) bo'yicha saralanadi — bitta kategoriyaga cheklanmagan. Backend'dan `page_size=100` (ruxsat etilgan maksimum) bilan olib kelingan mahsulotlar frontendda `sold_count` bo'yicha kamayish tartibida saralanadi, so'ng shulardan birinchi 30 tasi (`SHOW_COUNT`) olinadi — bu tartib (eng ko'p sotilgan birinchi) karusel/panjarada ham saqlanadi.
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` — toza.
+- [x] Playwright orqali 375px va 1280px'da: aylantirish tugmalari (`.carousel-arrow-button`) ikkalasida ham mavjudligi, "Barchasi" tugmasi bosilganda "Kamroq"ga almashib, CSS Grid orqali to'liq mahsulot kartalari (rasm/nom/narx/reyting bilan) ko'rsatilishi skrinshotlar orqali tasdiqlandi.

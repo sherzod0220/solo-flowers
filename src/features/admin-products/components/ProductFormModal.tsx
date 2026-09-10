@@ -38,6 +38,7 @@ interface ProductFormValues {
   is_available: boolean;
   rating: number;
   stock: number;
+  sold_count: number;
   tag_uz?: string;
   tag_eng?: string;
   tag_ru?: string;
@@ -77,6 +78,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
       is_available: product?.is_available ?? true,
       rating: product?.rating ?? 1,
       stock: product?.stock ?? 0,
+      sold_count: product?.sold_count ?? 0,
       tag_uz: product?.tag_uz ?? '',
       tag_eng: product?.tag_eng ?? '',
       tag_ru: product?.tag_ru ?? '',
@@ -189,6 +191,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
           is_available: values.is_available,
           rating: values.rating,
           stock: values.stock,
+          sold_count: values.sold_count,
         };
 
         // Maydon bo'shatilgan bo'lsa — avval qiymati bo'lgan bo'lsa, buni "o'chirish" deb talqin qilamiz.
@@ -340,6 +343,11 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
         <Form.Item name="rating" label={t('product.rating')}>
           <InputNumber min={1} max={5} step={0.1} style={{ width: '100%' }} />
         </Form.Item>
+        {isEdit && (
+          <Form.Item name="sold_count" label={t('product.sold_count')} extra={t('product.sold_count_hint')}>
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+        )}
         <Form.Item name="slug" label={t('product.slug')}>
           <Input placeholder={t('product.slug_placeholder')} />
         </Form.Item>

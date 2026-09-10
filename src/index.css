@@ -470,3 +470,21 @@ h6,
     padding: 0 24px !important;
   }
 }
+
+/*
+ * Til tanlash tugmasining ochiladigan ro'yxati — tanlangan til (antd fon rangini brand vino
+ * qilib bo'yaydi) ustidagi matn qora bo'lib, o'qib bo'lmas darajada ko'rinmay qolayotgan edi.
+ * Tanlangan qatorda matn oq (fon vino bo'lgani uchun), tanlanmaganida esa vino rang (fon och) bo'ladi.
+ */
+.lang-switcher-dropdown .ant-dropdown-menu-item {
+  color: var(--color-primary) !important;
+}
+
+.lang-switcher-dropdown .ant-dropdown-menu-item * {
+  color: inherit !important;
+}
+
+.lang-switcher-dropdown .ant-dropdown-menu-item-selected,
+.lang-switcher-dropdown .ant-dropdown-menu-item-selected * {
+  color: #fff !important;
+}

@@ -89,6 +89,7 @@ export function ProductTable() {
       ),
     },
     { title: t('product.col_stock'), dataIndex: 'stock', key: 'stock' },
+    { title: t('product.col_sold_count'), dataIndex: 'sold_count', key: 'sold_count' },
     {
       title: t('product.col_status'),
       key: 'status',

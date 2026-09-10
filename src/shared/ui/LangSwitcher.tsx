@@ -70,6 +70,7 @@ export function LangSwitcher() {
   return (
     <Dropdown
       trigger={['click']}
+      classNames={{ root: 'lang-switcher-dropdown' }}
       menu={{
         items,
         selectedKeys: [lang],
