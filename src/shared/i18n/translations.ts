@@ -247,6 +247,7 @@ export const translations = {
   'product.col_category': { uz: 'Kategoriya', eng: 'Category', ru: 'Категория' },
   'product.col_price': { uz: 'Narx', eng: 'Price', ru: 'Цена' },
   'product.col_stock': { uz: 'Ombor', eng: 'Stock', ru: 'Склад' },
+  'product.col_sold_count': { uz: 'Sotilgan', eng: 'Sold', ru: 'Продано' },
   'product.col_status': { uz: 'Holati', eng: 'Status', ru: 'Статус' },
   'product.out_of_stock': { uz: 'Tugagan', eng: 'Sold out', ru: 'Распродано' },
   'product.delete_title': { uz: "Mahsulotni o'chirish", eng: 'Delete product', ru: 'Удалить товар' },
@@ -286,6 +287,12 @@ export const translations = {
   'product.discount': { uz: "Chegirma narxi (so'm, ixtiyoriy)", eng: 'Discounted price (UZS, optional)', ru: 'Цена со скидкой (сум, необязательно)' },
   'product.stock': { uz: 'Ombordagi soni', eng: 'Stock quantity', ru: 'Количество на складе' },
   'product.rating': { uz: 'Reyting (1–5)', eng: 'Rating (1–5)', ru: 'Рейтинг (1–5)' },
+  'product.sold_count': { uz: 'Sotilganlar soni', eng: 'Sold count', ru: 'Количество продаж' },
+  'product.sold_count_hint': {
+    uz: "Bosh sahifadagi \"Ommabop mahsulotlar\" shu son bo'yicha saralanadi — mahsulotni ommabop qatorga chiqarish uchun bu qiymatni oshiring.",
+    eng: 'The homepage "Bestsellers" row is sorted by this number — raise it to feature this product there.',
+    ru: 'Блок "Популярные товары" на главной сортируется по этому числу — увеличьте его, чтобы товар попал туда.',
+  },
   'product.slug': {
     uz: "Slug (ixtiyoriy — bo'sh qoldirsangiz nomdan avtomatik hosil bo'ladi)",
     eng: 'Slug (optional — auto-generated from the name if left empty)',
