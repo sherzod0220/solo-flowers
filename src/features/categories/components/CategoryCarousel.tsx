@@ -132,15 +132,22 @@ export function CategoryCarousel() {
       </div>
 
       {isExpanded ? (
+        // Diqqat: CSS Grid `repeat(auto-fill, minmax(...))` keng ekranda kategoriya sonidan ko'proq
+        // "bo'sh" ustun yaratib, mavjud kartalarni haqiqiy kerakli o'lchamidan kichikroq qilib
+        // siqib qo'yardi (auto-fill bo'sh ustunlarni ham joy sifatida hisoblaydi). Shuning uchun
+        // Grid o'rniga har bir kartaga BIR XIL o'lchamli (mobil bilan bir xil ko'rinish) `flex-wrap`
+        // ishlatiladi — qator to'lganda keyingi kategoriyalar pastdan yangi qatorga tushadi.
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+            display: 'flex',
+            flexWrap: 'wrap',
             gap: 16,
           }}
         >
           {categories.map((category) => (
-            <CategoryItem key={category.id} category={category} />
+            <div key={category.id} style={{ width: 130 }}>
+              <CategoryItem category={category} />
+            </div>
           ))}
         </div>
       ) : (
