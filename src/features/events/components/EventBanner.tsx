@@ -58,7 +58,7 @@ export function EventBanner() {
   if (!events || events.length === 0) return null;
 
   return (
-    <div className="event-banner-carousel" style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 32, cursor: 'grab' }}>
+    <div className="event-banner-carousel">
       <Carousel autoplay autoplaySpeed={5000} draggable swipeToSlide>
         {events.map((event) => (
           <EventSlide key={event.id} event={event} />

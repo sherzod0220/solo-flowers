@@ -57,17 +57,9 @@ function CategoryItem({ category }: { category: Category }) {
         className="shadow-card category-card"
         style={{
           background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 24,
         }}
       >
-        <div
-          className="category-avatar"
-          style={{
-            borderRadius: '50%',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="category-avatar" style={{ overflow: 'hidden' }}>
           <img
             src={category.image_url}
             alt={category.name}
@@ -100,7 +92,7 @@ export function CategoryCarousel() {
 
   if (isLoading) {
     return (
-      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+      <div className="section-panel">
         <div style={{ display: 'flex', gap: 24 }}>
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton.Avatar key={index} active size={120} shape="circle" />
@@ -121,7 +113,7 @@ export function CategoryCarousel() {
   const canExpand = categories.length > 1;
 
   return (
-    <div style={{ position: 'relative', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 24, padding: 24, marginBottom: 32 }}>
+    <div className="section-panel">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, margin: 0 }}>{t('home.categories_title')}</h2>
         {canExpand && (

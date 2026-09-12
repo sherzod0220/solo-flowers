@@ -63,6 +63,13 @@ h6,
   transform: translateY(-2px);
 }
 
+.event-banner-carousel {
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  cursor: grab;
+}
+
 .event-banner-carousel .slick-dots li button {
   background: rgba(255, 255, 255, 0.55);
   height: 6px;
@@ -71,6 +78,48 @@ h6,
 
 .event-banner-carousel .slick-dots li.slick-active button {
   background: #ffffff;
+}
+
+/*
+ * Mobil (<1024px): banner asl kvadrat (90°) burchakka qaytadi va ekranning ikki chetiga to'liq
+ * chiqadi — Content'ning 24px padding'iga teng manfiy margin bilan "to'liq bo'yalgan" (full-bleed)
+ * qilinadi. Matn tarafi (bu enda deyarli butun slayd) uchun backdrop-filter blur + qo'shimcha
+ * qorong'ulashtiruvchi qatlam qo'shiladi — orqadagi rasm gradient orqali emas, haqiqiy "muzlangan
+ * oyna" (frosted glass) effekti bilan xiralashadi.
+ */
+@media (max-width: 1023px) {
+  .event-banner-carousel {
+    border-radius: 0;
+    margin-left: -24px;
+    margin-right: -24px;
+  }
+
+  .event-banner-slide {
+    position: relative;
+  }
+
+  .event-banner-slide::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 60%;
+    background: rgba(46, 20, 32, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* Matn tarafida to'liq, o'ng chetiga (~yarmigacha) yetguncha butunlay yo'qoladi — blur va
+       qorong'ulashtirish ikkalasi ham shu mask orqali so'nadi, o'tkir chiziq hosil bo'lmaydi. */
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .event-banner-content {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 /* Storefront (UserLayout) uchun umumiy kenglik chegarasi — header, asosiy kontent va footer bir xil o'qda joylashadi. */
@@ -131,11 +180,51 @@ h6,
   width: 100%;
   max-width: 260px;
   margin: 0 auto;
-  padding: 10px;
-  /* Rasm doirasidagi romka (border) olib tashlanib, shadow shu tashqi kartaning o'ziga (romkasiga)
-     ko'chirildi — `.shadow-card:hover`dan kuchliroq bo'lgani uchun hover paytida ustidan bosilib
-     ketmaydi (`.shadow-card:hover` ikkita klass selektori bo'lgani uchun bundan doim ustun turadi). */
-  box-shadow: 0 4px 14px rgba(42, 18, 24, 0.16);
+  /* Padding YO'Q — ichidagi doiraviy rasm (`.category-avatar`, width:100%) kartaning o'zini
+     chekkasigacha (soya/chegarasigacha) to'liq qoplashi uchun. */
+  /* Ramka (chizilgan border + yumaloq burchak) ataylab yo'q — chegara faqat torroq soya orqali
+     bildiriladi, `.shadow-card`dan kuchliroq bo'lgani uchun hover paytida ustidan bosilib ketmaydi
+     (`.shadow-card:hover` ikkita klass selektori bo'lgani uchun bundan doim ustun turadi). */
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(42, 18, 24, 0.16);
+}
+
+.category-card:hover {
+  /* `.shadow-card:hover`ning kengroq (28px) soyasidan ustun turishi uchun — shadow doim tor qoladi. */
+  box-shadow: 0 4px 12px rgba(42, 18, 24, 0.2);
+}
+
+/* Mahsulot kartasi — `.category-card` bilan bir xil naqsh: ramka yo'q, burchak kvadrat, faqat torroq soya. */
+.product-card {
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(42, 18, 24, 0.16);
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 12px rgba(42, 18, 24, 0.2);
+}
+
+/*
+ * Bosh sahifadagi bo'lim qutilari (Kategoriyalar, Ommabop mahsulotlar) uchun umumiy tashqi
+ * ko'rinish — ramka (chizilgan border + yumaloq burchak) yo'q, faqat torroq soya. Mobil
+ * (<1024px)da banner bilan bir xil naqsh — Content'ning 24px padding'iga teng manfiy margin
+ * bilan ekranning ikki chetiga to'liq chiqadi.
+ */
+.section-panel {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: 24px;
+  box-shadow: 0 2px 10px rgba(42, 18, 24, 0.14);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 1023px) {
+  .section-panel {
+    border-radius: 0;
+    margin-left: -24px;
+    margin-right: -24px;
+  }
 }
 
 .category-avatar {

@@ -20,6 +20,7 @@ import { useWishlistCount } from '@/features/wishlist/hooks';
 import { CategoryNavMenu } from '@/features/categories/components/CategoryNavMenu';
 import { LangSwitcher } from '@/shared/ui/LangSwitcher';
 import { LocationButton } from '@/shared/ui/LocationButton';
+import { useHideOnScroll } from '@/shared/hooks/useHideOnScroll';
 import { useT } from '@/shared/i18n/useT';
 
 const { Header, Content, Footer } = Layout;
@@ -104,6 +105,7 @@ export function UserLayout() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const t = useT();
+  const isHeaderHidden = useHideOnScroll();
 
   function handleSearch(value: string) {
     const query = value.trim();
@@ -184,6 +186,8 @@ export function UserLayout() {
             position: 'sticky',
             top: 0,
             zIndex: 100,
+            transform: isHeaderHidden ? 'translateY(-100%)' : 'translateY(0)',
+            transition: 'transform 0.35s ease',
           }}
         >
           <div
