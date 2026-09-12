@@ -22,11 +22,9 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link to={ROUTES.PRODUCT_DETAIL.replace(':slug', product.slug)}>
       <div
-        className="shadow-card"
+        className="shadow-card product-card"
         style={{
           background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 16,
           overflow: 'hidden',
         }}
       >
