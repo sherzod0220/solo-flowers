@@ -105,7 +105,9 @@ export function BestsellerCarousel() {
           dots={false}
           draggable
           autoplay
-          autoplaySpeed={4000}
+          autoplaySpeed={3000}
+          speed={2800}
+          cssEase="linear"
           infinite
           prevArrow={<ProductArrow direction="prev" />}
           nextArrow={<ProductArrow direction="next" />}
