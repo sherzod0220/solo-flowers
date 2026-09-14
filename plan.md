@@ -506,3 +506,241 @@ Wishlist'dagi kabi yondashuv tanlandi (1-variant): savatga qo'shish bosilganda t
 
 - [x] `tsc -b` / `eslint` — toza.
 - [x] Playwright orqali 375px va 1280px'da: aylantirish tugmalari (`.carousel-arrow-button`) ikkalasida ham mavjudligi, "Barchasi" tugmasi bosilganda "Kamroq"ga almashib, CSS Grid orqali to'liq mahsulot kartalari (rasm/nom/narx/reyting bilan) ko'rsatilishi skrinshotlar orqali tasdiqlandi.
+
+---
+
+# 20–23-bosqichlar — Backend'da 4 ta yangi bo'lim (2026-09-14) ⚠️ REJA (hali implement qilinmagan)
+
+**2026-09-14**: Backend jamoasi `backend-holati-frontend-uchun.md` hujjatini yubordi, va shu bilan bir vaqtda `https://api.soloflowers.uz/swagger/doc.json` orqali mustaqil tahlil ham qilindi (ikkalasi bir-birini tasdiqladi — pastda farq topilgan bitta joy bundan mustasno, Dashboard bo'yicha). Umumiy endpointlar soni **24 → 40** taga o'sdi. To'rtta butunlay yangi bo'lim: **Checkout+Orders**, **Reviews**, **Gallery**, **Admin Dashboard**. Hozircha kod tomonidan hech narsa o'zgartirilmagan — `src/features/orders/*` va `CheckoutPage.tsx` hamon bo'sh fayllar, Reviews/Gallery uchun frontendda umuman hech narsa yo'q.
+
+To'liq spetsifikatsiya (Swagger'dan olingan aniq schema'lar) — pastda har bir bo'lim ichida.
+
+---
+
+## 20-bosqich — Checkout va Orders (eng katta, eng muhim bo'lim) ✅ TO'LIQ BAJARILDI
+
+**Holati (2026-09-14, davomi)**: **Mijoz tomoni ✅** (checkout, "Buyurtmalarim") **va Admin tomoni ✅** (buyurtmalar jadvali, holat boshqaruvi, bekor qilish, qo'lda buyurtma yaratish) — ikkalasi ham bajarildi va haqiqiy backend bilan to'liq tekshirildi.
+
+### Yangi endpointlar
+
+| Endpoint | Metod | Auth | Kim uchun | Izoh |
+|---|---|---|---|---|
+| `/checkout` | POST | ✅ | mijoz | Joriy foydalanuvchining **savatini** buyurtmaga aylantiradi (mahsulotlar ro'yxati kerak emas — backend savatning o'zini oladi), savatni bo'shatadi, zaxirani kamaytiradi. |
+| `/orders` | GET | ✅ | mijoz | Joriy foydalanuvchining barcha buyurtmalari (sahifalanmagan, to'liq ro'yxat). |
+| `/orders/{id}` | GET | ✅ | mijoz/admin | Bitta buyurtma — faqat egasi yoki admin ko'ra oladi (403 aks holda). |
+| `/orders/admin` | GET | ✅ | admin | Barcha foydalanuvchilarning barcha buyurtmalari (sahifalanmagan). |
+| `/orders/{id}/delivery-status` | PATCH | ✅ | admin | Yetkazish holatini o'zgartiradi — **faqat oldinga** (orqaga qaytarib bo'lmaydi, 409). |
+| `/orders/{id}/payment-status` | PATCH | ✅ | admin | To'lov holatini o'zgartiradi. |
+| `/admin/orders/{id}/cancel` | PATCH | ✅ | admin | Bekor qiladi — **faqat `preparing` bosqichida** (kuryerga berilgandan keyin 409), zaxira avtomatik qaytadi. |
+| `/admin/orders` | POST | ✅ | admin | **Qo'lda buyurtma yaratish** (telefon/offline savdo) — mahsulotlar ro'yxati + mijoz ma'lumotlari + boshlang'ich to'lov holati qo'lda kiritiladi, savatga bog'liq emas. |
+
+### Schema'lar
+
+```ts
+// CheckoutRequest (POST /checkout body)
+{ address: string; phone: string; note?: string }
+
+// OrderItemResponse
+{ product_id: string; product_name: string; quantity: number; unit_price: number; currency: string }
+
+// OrderResponse
+{
+  id: string; user_id: string; address: string; phone: string; note?: string;
+  items: OrderItemResponse[];
+  total_amount: number; total_currency: string;
+  delivery_status: string;  // "preparing" | "handed_to_courier" | "delivered" | "cancelled" ⚠️
+  payment_status: string;   // "unpaid" | "paid"
+  created_at: string;
+}
+// ⚠️ "cancelled" Swagger'da hujjatlashtirilmagan (faqat "preparing/handed_to_courier/delivered"
+// yozilgan edi) — `PATCH /admin/orders/{id}/cancel` chaqirilgandan keyin `delivery_status`
+// haqiqatda shu qiymatga o'tishi haqiqiy backend bilan sinovda aniqlandi. Admin buni Select orqali
+// qo'lda TANLAY olmaydi (forward-progression ro'yxatida yo'q) — faqat "Bekor qilish" natijasida yuzaga keladi.
+
+// UpdateDeliveryStatusRequest / UpdatePaymentStatusRequest
+{ status: string }
+
+// CreateManualOrderRequest (POST /admin/orders body)
+{
+  address: string; phone: string; note?: string;
+  items: { product_id: string; quantity: number }[];
+  payment_status: string;
+}
+```
+
+- **Diqqat**: `OrderItemResponse`da `discount`/`subtotal` maydoni yo'q — faqat `unit_price`. ~~Chegirma bo'lgan mahsulot uchun bu chegirmali narxmi yoki asl narxmi — tasdiqlash kerak~~ **✅ tasdiqlandi**: haqiqiy backend bilan chegirmali mahsulot (200,000 → 150,000 chegirma bilan) checkout qilinganda, `unit_price: 150000` qaytdi — ya'ni **checkout paytidagi yakuniy (chegirmali) narx** "surat" qilinadi, frontendda qo'shimcha hisob-kitob kerak emas.
+- Checkout muvaffaqiyatsiz bo'lishi mumkin: bo'sh savat / yaroqsiz telefon-manzil (400), zaxira yetmasligi (409).
+
+### Fayl-bo-fayl reja — Mijoz tomoni ✅ bajarildi
+
+**`src/features/orders/types.ts`**
+- [x] `OrderItem`, `Order`, `CheckoutPayload`, `DeliveryStatus`/`PaymentStatus` union tiplari.
+
+**`src/features/orders/api.ts`**
+- [x] `checkout(payload)`, `getMyOrders()`, `getOrderById(id)`.
+
+**`src/features/orders/hooks.ts`**
+- [x] `useCheckout()` — muvaffaqiyatdan keyin `cart` va `orders` cache'larini invalidate qiladi.
+- [x] `useMyOrders()` (faqat `user` bo'lsa so'rov), `useOrder(id)`.
+
+**`src/shared/constants/routes.ts`, `src/router/index.tsx`**
+- [x] `ROUTES.ORDERS = '/orders'` qo'shildi, `CheckoutPage`/`OrdersPage` `RequireAuth` ostida ro'yxatga olindi.
+
+**`src/pages/user/CheckoutPage.tsx`**
+- [x] Savat tarkibini (`useCartItemsWithProducts`) faqat ko'rish tartibida ko'rsatadi + manzil/telefon/izoh forma (react-hook-form + zod, `LoginPage`/`RegisterPage` bilan bir xil naqsh) + "Buyurtmani tasdiqlash" tugmasi.
+- [x] Savat bo'sh bo'lsa — `EmptyState` + "Bosh sahifaga qaytish" havolasi (checkoutga bevosita kirilsa ham xatosiz ishlaydi).
+- [x] Muvaffaqiyatdan keyin — bildirishnoma + `ROUTES.ORDERS`ga yo'naltirish.
+
+**`src/pages/user/CartPage.tsx`**
+- [x] "Buyurtma berish" tugmasi endi `ROUTES.CHECKOUT`ga navigatsiya qiladi (avvalgi "tez orada" xabari va ishlatilmay qolgan `cart.checkout_coming_soon` kaliti olib tashlandi).
+
+**`src/pages/user/OrdersPage.tsx`** (yangi)
+- [x] "Buyurtmalarim" — ro'yxat, har birida qisqa ID, sana, holat belgilari (`Tag`, delivery+payment, rang bilan farqlangan), mahsulotlar va jami summa.
+- [x] Navbar'dagi Profil Drawer'iga (`AuthLinks`) "Buyurtmalarim" havolasi qo'shildi (Admin panel havolasi bilan email orasida).
+
+### Fayl-bo-fayl reja — Admin tomoni ✅ bajarildi
+
+**`src/features/orders/types.ts`**
+- [x] `DeliveryStatus`ga `'cancelled'` qo'shildi (yuqoridagi ⚠️ga qarang), `CreateManualOrderPayload`, `ManualOrderItemPayload` qo'shildi.
+
+**`src/features/orders/api.ts`**
+- [x] `getAdminOrders()`, `updateDeliveryStatus(id, status)`, `updatePaymentStatus(id, status)`, `cancelOrder(id)`, `createManualOrder(payload)`.
+
+**`src/features/orders/hooks.ts`**
+- [x] `useAdminOrders()` (route allaqachon `RequireAdmin` bilan himoyalangan, alohida `enabled` shart emas — boshqa admin hook'lar bilan bir xil naqsh), `useUpdateDeliveryStatus()`, `useUpdatePaymentStatus()`, `useCancelOrder()`, `useCreateManualOrder()` — barchasi mijoz+admin buyurtmalar ro'yxatini birga invalidate qiladi.
+
+**`src/features/orders/components/CreateManualOrderModal.tsx`** (yangi)
+- [x] Manzil/telefon/izoh + to'lov holati (Select) + `Form.List` orqali dinamik mahsulot qatorlari (mahsulot tanlash `useProducts({page_size:100})` bilan + miqdor + o'chirish, "Mahsulot qo'shish" tugmasi).
+
+**`src/pages/admin/OrdersListPage.tsx`**
+- [x] Barcha buyurtmalar jadvali (`useAdminOrders`): ID, telefon, manzil, tarkib, jami, yetkazish holati (Select — faqat joriy holatdan OLDINGA bo'lgan bosqichlar ko'rsatiladi, orqaga urinish UI darajasida oldindan bloklanadi), to'lov holati (Select), sana, "Bekor qilish" (faqat `preparing`da yoqilgan, Popconfirm bilan).
+- [x] `delivery_status === 'cancelled'` bo'lganda Select o'rniga oddiy qizil `Tag` (tahrirlanmaydi), to'lov Select'i ham shu holatda `disabled`.
+- [x] "Qo'lda buyurtma yaratish" tugmasi + yuqoridagi modal.
+
+**`src/pages/user/OrdersPage.tsx`**
+- [x] `'cancelled'` holati uchun rang (`red`) va tarjima qo'shildi (mijoz o'ziga tegishli bekor qilingan buyurtmani ham to'g'ri ko'rishi uchun).
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] **Mijoz tomoni** — haqiqiy backend bilan (throwaway test hisob orqali): ro'yxatdan o'tish → kirish → bo'sh savat bilan `/checkout`ga kirish (xatosiz, to'g'ri xabar) → mahsulot qo'shish → checkout formani to'ldirib yuborish → `201`, savat bo'shab qolishi (navbar badge yo'qoladi) → `/orders`ga avtomatik yo'naltirilish → buyurtma "Buyurtmalarim"da to'g'ri holat belgilari (`Tayyorlanmoqda`/`To'lanmagan`) bilan ko'rinishi — barchasi tarmoq so'rovi darajasida (`POST /checkout` → `201`, `GET /orders` → to'g'ri ma'lumot) tasdiqlandi.
+- [x] Chegirmali mahsulot bilan alohida sinov — `unit_price` chegirmali narxni to'g'ri aks ettirishi tasdiqlandi (yuqoridagi ochiq savolga javob).
+- [x] **Admin tomoni** — haqiqiy admin hisob bilan: buyurtmalar ro'yxati to'g'ri yuklandi (`GET /orders/admin` → `200`) → yetkazish holatini o'zgartirish (`preparing → handed_to_courier`, `PATCH` → `200`) → to'lov holatini o'zgartirish (`unpaid → paid`, `PATCH` → `200`) → holat o'zgargandan keyin "Bekor qilish" tugmasi avtomatik disabled bo'lib qolgani tasdiqlandi → boshqa (hali `preparing`) buyurtmani bekor qilish (`PATCH /admin/orders/{id}/cancel` → `200`) → qo'lda buyurtma yaratish formasi to'liq to'ldirilib yuborildi (`POST /admin/orders` → `201`, yangi buyurtma ro'yxatda darhol paydo bo'ldi).
+- [x] **Topilgan va tuzatilgan real bug**: bekor qilingan buyurtma `delivery_status: "cancelled"` qaytarishi (Swagger'da yo'q qiymat) frontendda hisobga olinmagan edi — Select bo'sh/xato optsiyalar hosil qilib, ekranda tarjima qilinmagan xom "cancelled" matnini ko'rsatib qo'ygan edi. `DeliveryStatus` tipiga qo'shib, alohida (tahrirlanmaydigan) Tag bilan to'g'irlandi.
+
+---
+
+## 21-bosqich — Sharhlar (Reviews) ✅ BAJARILDI
+
+### Yangi endpointlar
+
+| Endpoint | Metod | Auth | Izoh |
+|---|---|---|---|
+| `/products/{id}/reviews` | GET | ❌ | Ochiq, sahifalangan (`page`/`page_size`, default 20, max 100). |
+| `/reviews` | POST | ✅ | Faqat shu mahsulotni sotib olib, **"Delivered"** holatidagi buyurtmasi bo'lgan foydalanuvchi, va **bitta mahsulotga faqat 1 marta** (409 aks holda). |
+
+### Schema'lar
+
+```ts
+// SubmitReviewRequest
+{ product_id: string; rating: number; comment?: string } // rating 1-5, aks holda 400
+
+// ReviewResponse
+{ id: string; product_id: string; user_id: string; order_id: string; rating: number; comment?: string; created_at: string }
+```
+
+- **Muhim**: `ProductOutput.rating` — bu hamon admin qo'lda kiritadigan reyting, sharhlardan **avtomatik hisoblanmaydi**. Ikkalasi mustaqil: admin reytingi (yulduzcha) va real sharhlar (matn+baho) ro'yxati.
+- **Kamchilik**: sharhni o'chirish/moderatsiya endpointi (admin uchun ham) **yo'q** — hozircha noo'rin sharhni olib tashlab bo'lmaydi. Backend jamoasiga alohida so'rash kerak bo'lishi mumkin.
+- `ReviewResponse`da faqat `user_id` bor, ism/email yo'q — sharh yozgan foydalanuvchi nomini ko'rsatish kerak bo'lsa, backend'dan qo'shimcha ma'lumot so'rash kerak (hozircha "Foydalanuvchi" yoki ID qisqartmasi bilan ko'rsatiladi).
+
+### Fayl-bo-fayl reja
+
+**`src/features/reviews/{types,api,hooks}.ts`** (yangi feature)
+- [x] `useProductReviews(productId, params)` — sahifalangan (`PaginatedResponse<Review>`, mavjud `Pagination` UI komponenti bilan), ochiq.
+- [x] `useSubmitReview()` — muvaffaqiyatdan keyin shu mahsulotning reviews cache'ini (barcha sahifalar) invalidate qiladi.
+
+**`src/features/reviews/components/ReviewForm.tsx`** (yangi)
+- [x] Tizimga kirmagan bo'lsa — "Sharh qoldirish uchun tizimga kiring" + Kirish havolasi. Kirgan bo'lsa — `Rate` (yulduzcha) + izoh (`Input.TextArea`, ixtiyoriy) + "Sharh qoldirish" tugmasi. Reja qilinganidek: forma har doim ko'rsatiladi, ruxsat yo'qligi (403)/takroriy urinish (409) backend xato xabari orqali bildirishnomada ko'rsatiladi.
+
+**`src/features/reviews/components/ReviewList.tsx`** (yangi)
+- [x] Sharhlar ro'yxati (yulduzcha + izoh + sana) + `Pagination`, bo'sh bo'lsa `EmptyState`.
+
+**`src/pages/user/ProductDetailPage.tsx`**
+- [x] Pastda yangi "Sharhlar" bo'limi — chapda `ReviewForm`, o'ngda `ReviewList`.
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` / `npm run build` — toza.
+- [x] Haqiqiy backend bilan, to'liq tsikl (throwaway test hisob + admin hisob birgalikda): mijoz ro'yxatdan o'tib mahsulot sotib oldi → admin buyurtmani `preparing → handed_to_courier → delivered`gacha oldinga surdi → mijoz o'sha mahsulotga qaytib sharh qoldirdi — `POST /reviews` → `201`, sharh ro'yxatda darhol paydo bo'ldi (`GET` → `200`, `total_items: 1`).
+- [x] Takroriy urinish to'g'ri `409` bilan rad etildi, backend'ning aniq xato matni ("bu mahsulot uchun sharh allaqachon qoldirilgan") bildirishnomada to'g'ri ko'rsatildi.
+- [x] Mehmon (tizimga kirmagan) holatida forma o'rniga "Kirish" havolasi ko'rsatilishi, va `GET /products/{id}/reviews` autentifikatsiyasiz ham to'g'ri ishlashi tasdiqlandi.
+- [x] Frontend'ning o'z validatsiyasi (baho tanlanmasdan yuborishga urinish) to'g'ri ushlab, backend'ga so'rov yubormasdan xato ko'rsatishi tasdiqlandi.
+
+---
+
+## 22-bosqich — Galereya (Gallery)
+
+### Yangi endpointlar
+
+| Endpoint | Metod | Auth | Izoh |
+|---|---|---|---|
+| `/gallery` | GET | ❌ | Ochiq, sahifalangan. |
+| `/admin/gallery` | POST | ✅ (admin) | `multipart/form-data`: `images` (eng ko'pi 3 ta fayl) + `description` (ixtiyoriy). |
+| `/admin/gallery/{id}` | DELETE | ✅ (admin) | O'chiradi (rasmlar S3'dan ham tozalanadi). Tahrirlash (update) endpointi yo'q. |
+
+### Schema
+
+```ts
+// GalleryPostResponse
+{ id: string; description?: string; image_urls: string[]; created_at: string }
+```
+
+### Fayl-bo-fayl reja
+
+**`src/features/gallery/{types,api,hooks}.ts`** (yangi feature)
+- [x] `useGallery()` — sahifalangan, ochiq.
+- [x] Admin: `useCreateGalleryPost()`, `useDeleteGalleryPost()`.
+
+**`src/pages/user/GalleryPage.tsx`** (yangi, + `ROUTES.GALLERY`)
+- [x] iPhone Photos uslubidagi zich panjara — barcha postlarning rasmlari alohida "karra"larga yozilib (`flatMap`), 3px oraliq bilan zich joylashtiriladi; panjarada **faqat rasmlar** ko'rinadi, izoh matni yashirin.
+- [x] Rasmga bosilganda o'ziga xos to'liq ekran lightbox ochiladi (qora fon, yopish/oldingi/keyingi tugmalari, `Esc`/strelka tugmalari bilan navigatsiya). Izoh **faqat kattalashtirilgan rasmning o'ziga qayta bosilganda** pastda gradient fon ustida chiqadi, yana bosilsa yoki boshqa rasmga o'tilsa yashiriladi — talab qilingan "bosganda ko'rinadi, bosmaganda faqat gullar" xatti-harakati.
+- [x] Navbar'ga "Galereya" havolasi qo'shildi — desktop nav qatorida ("Biz haqimizda" yonida) va mobil burger menyuda.
+
+**`src/pages/admin/GalleryListPage.tsx`** (yangi, + `ROUTES.ADMIN.GALLERY`, sidebar'ga bo'lim qo'shildi)
+- [x] Postlar ro'yxati (rasm(lar) preview + tavsif) + "Yangi post" modali (3 tagacha rasm yuklash, `beforeUpload` bilan tur/hajm validatsiyasi + tavsif) + `Popconfirm` bilan o'chirish.
+
+### Tekshirish rejasi
+
+- [x] `tsc -b` / `eslint` — toza.
+- [x] Admin: haqiqiy hisob (`javascriptdev347@gmail.com`) bilan kirib, `/admin/gallery`ga o'tildi, "Yangi post" modali orqali 2 ta rasm + tavsif (`"Playwright test posti — atirgullar kolleksiyasi"`) bilan post yaratildi — `POST /admin/gallery` → `201`, S3 URL'lari to'g'ri qaytdi, ro'yxat cache'i avtomatik yangilanib yangi post darhol ko'rindi.
+- [x] Ochiq `/gallery` sahifasi (iPhone Photos uslubidagi qayta dizayn): panjarada faqat rasmlar ko'rinadi (izohsiz), rasmga bosilganda to'liq ekran lightbox ochiladi, rasmning o'ziga bosilganda izoh gradient fonda pastda chiqadi, yana bosilganda yashiriladi, "Keyingisi" tugmasida yangi rasmga o'tib izoh avtomatik yashirin holatga qaytadi, `Esc` bilan yopiladi — barchasi throwaway test postlar bilan screenshot orqali vizual tasdiqlandi (ilk skrinshotda lightbox rasmi hali yuklanmagani sabab vaqtinchalik render artefakti kuzatildi — bu faqat screenshot vaqtlashi muammosi edi, keyingi urinishda va uzunroq kutish bilan to'liq to'g'ri ekanligi tasdiqlandi).
+- [x] Admin o'chirish: post kartasidagi o'chirish tugmasi → `Popconfirm` tasdiq oynasi → tasdiqlagach `DELETE /admin/gallery/{id}` → `200`, "Post o'chirildi" bildirishnomasi chiqdi, ro'yxat avtomatik yangilanib `EmptyState` ("Hali postlar yo'q") holatiga qaytdi — ham admin, ham ochiq sahifada post yo'qolgani tasdiqlandi.
+- [x] Konsolda/sahifada hech qanday JS xatosi chiqmadi (barcha test bosqichlarida `pageerror`/`console.error` ro'yxati bo'sh).
+
+---
+
+## 23-bosqich — Admin Dashboard analitikasi ⚠️ Holati aniq emas — avval tekshirish kerak
+
+**Diqqat — ikki manba bir-biriga zid**: `backend-holati-frontend-uchun.md` "Hali tayyor emas — hozir ishlanmoqda" deb yozgan, LEKIN Swagger'da (`https://api.soloflowers.uz/swagger/doc.json`) 3 ta dashboard endpointi to'liq spetsifikatsiya (so'rov/javob shakli, xato holatlari) bilan **allaqachon mavjud**. Bu ikkalasi implementatsiyadan oldin **haqiqiy backend bilan sinab** aniqlanishi kerak (masalan admin token bilan `GET /admin/dashboard/summary`ni to'g'ridan-to'g'ri chaqirib ko'rish) — Swagger hujjati kodga yozilgan bo'lishi mumkin, lekin hali ishlab chiqilmagan/noto'g'ri natija qaytarishi mumkin.
+
+### Endpointlar (agar tasdiqlansa)
+
+| Endpoint | Metod | Izoh |
+|---|---|---|
+| `/admin/dashboard/summary` | GET | `{ total_products, total_units_sold, total_revenue }` — jami mahsulotlar, sotilgan birliklar, daromad (faqat to'langan+bekor qilinmagan buyurtmalar bo'yicha). |
+| `/admin/dashboard/low-stock` | GET | `{ id, name_uz, stock }[]` — eng kam zaxirali top-5 mahsulot. |
+| `/admin/dashboard/revenue-history?period=day\|month` | GET | `{ period, revenue }[]` — grafik uchun daromad tarixi. |
+
+### Fayl-bo-fayl reja
+
+**`src/features/admin-dashboard/{types,api,hooks}.ts`** (yangi feature)
+- [ ] `useDashboardSummary()`, `useLowStockProducts()`, `useRevenueHistory(period)`.
+
+**`src/pages/admin/DashboardPage.tsx`** (hozir faqat sarlavha)
+- [ ] Statistika kartalari (jami mahsulot/sotilgan/daromad) + kam zaxirali mahsulotlar jadvali/ro'yxati + oddiy chiziqli/ustunli grafik (kun/oy almashtiruvchi tugma bilan).
+
+### Tekshirish rejasi (barcha 20–23-bosqichlar uchun umumiy)
+
+- [ ] Har bir bosqich implement qilingandan keyin: `tsc -b` / `eslint` / `npm run build` — toza.
+- [ ] Haqiqiy backend bilan (throwaway test hisob orqali, avvalgi bosqichlardagi kabi): to'liq foydalanuvchi yo'li — savatga qo'shish → checkout → buyurtma "Mening buyurtmalarim"da ko'rinishi → admin sifatida holatlarni o'zgartirish/bekor qilish → sharh qoldirish (faqat yetkazilgan buyurtma uchun) → galereya postini ko'rish/yaratish/o'chirish — sinaladi.
+- [ ] Dashboard — avval "ishlaydimi" tekshiriladi, keyin UI quriladi.

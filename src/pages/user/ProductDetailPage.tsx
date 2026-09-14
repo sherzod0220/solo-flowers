@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Image, Rate, Tag, Button, InputNumber, Skeleton, Row, Col, App } from 'antd';
+import { Image, Rate, Tag, Button, InputNumber, Skeleton, Row, Col, App, Divider } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useProductBySlug } from '@/features/products/hooks';
 import { useAddCartItem } from '@/features/cart/hooks';
 import { useMe } from '@/features/auth/hooks';
 import { WishlistButton } from '@/features/wishlist/components/WishlistButton';
+import { ReviewForm } from '@/features/reviews/components/ReviewForm';
+import { ReviewList } from '@/features/reviews/components/ReviewList';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
 import { PageMeta } from '@/shared/ui/PageMeta';
@@ -185,6 +187,19 @@ export function ProductDetailPage() {
               {t('product.add_to_cart')}
             </Button>
           </div>
+        </Col>
+      </Row>
+
+      <Divider />
+
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 20 }}>{t('reviews.title')}</h2>
+
+      <Row gutter={[32, 24]}>
+        <Col xs={24} md={10}>
+          <ReviewForm productId={product.id} />
+        </Col>
+        <Col xs={24} md={14}>
+          <ReviewList productId={product.id} />
         </Col>
       </Row>
     </div>

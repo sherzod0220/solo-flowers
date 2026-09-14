@@ -65,6 +65,9 @@ function AuthLinks({ stacked, onNavigate }: AuthLinksProps) {
               {t('nav.admin_panel')}
             </Link>
           )}
+          <Link to={ROUTES.ORDERS} style={linkStyle} onClick={onNavigate}>
+            {t('nav.my_orders')}
+          </Link>
           <span style={{ color: 'var(--color-text)' }}>{user.email}</span>
           <Popconfirm
             title={t('auth.logout_confirm_title')}
@@ -219,6 +222,10 @@ export function UserLayout() {
                 {t('nav.about')}
               </Link>
 
+              <Link to={ROUTES.GALLERY} style={linkStyle}>
+                {t('gallery.title')}
+              </Link>
+
               {contactPhoneLink}
               <LocationButton variant="nav" />
 
@@ -340,6 +347,10 @@ export function UserLayout() {
 
             <Link to={ROUTES.ABOUT} style={linkStyle} onClick={() => setIsMenuOpen(false)}>
               {t('nav.about')}
+            </Link>
+
+            <Link to={ROUTES.GALLERY} style={linkStyle} onClick={() => setIsMenuOpen(false)}>
+              {t('gallery.title')}
             </Link>
 
             {contactPhoneLink}

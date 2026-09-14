@@ -64,7 +64,7 @@ h6,
 }
 
 .event-banner-carousel {
-  border-radius: 24px;
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 32px;
   cursor: grab;
@@ -81,15 +81,15 @@ h6,
 }
 
 /*
- * Mobil (<1024px): banner asl kvadrat (90°) burchakka qaytadi va ekranning ikki chetiga to'liq
- * chiqadi — Content'ning 24px padding'iga teng manfiy margin bilan "to'liq bo'yalgan" (full-bleed)
- * qilinadi. Matn tarafi (bu enda deyarli butun slayd) uchun backdrop-filter blur + qo'shimcha
- * qorong'ulashtiruvchi qatlam qo'shiladi — orqadagi rasm gradient orqali emas, haqiqiy "muzlangan
- * oyna" (frosted glass) effekti bilan xiralashadi.
+ * Mobil (<1024px): banner ekranning ikki chetiga to'liq chiqadi — Content'ning 24px padding'iga
+ * teng manfiy margin bilan "to'liq bo'yalgan" (full-bleed) qilinadi (burchak kvadratligi endi
+ * barcha ekran o'lchamlarida bir xil, yuqoridagi bazaviy qoidadan keladi). Matn tarafi (bu enda
+ * deyarli butun slayd) uchun backdrop-filter blur + qo'shimcha qorong'ulashtiruvchi qatlam
+ * qo'shiladi — orqadagi rasm gradient orqali emas, haqiqiy "muzlangan oyna" (frosted glass)
+ * effekti bilan xiralashadi.
  */
 @media (max-width: 1023px) {
   .event-banner-carousel {
-    border-radius: 0;
     margin-left: -24px;
     margin-right: -24px;
   }
@@ -591,4 +591,29 @@ h6,
 .lang-switcher-dropdown .ant-dropdown-menu-item-selected,
 .lang-switcher-dropdown .ant-dropdown-menu-item-selected * {
   color: #fff !important;
+}
+
+/* Ochiq galereya sahifasi — iPhone Photos uslubidagi zich panjara: bosganda biroz kattalashadi. */
+.gallery-tile {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.gallery-tile:hover,
+.gallery-tile:focus-visible {
+  transform: scale(1.03);
+  opacity: 0.92;
+  z-index: 1;
+}
+
+.gallery-lightbox {
+  animation: gallery-lightbox-fade-in 0.15s ease;
+}
+
+@keyframes gallery-lightbox-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

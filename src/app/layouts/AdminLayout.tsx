@@ -6,6 +6,7 @@ import {
   AppstoreOutlined,
   NotificationOutlined,
   FileTextOutlined,
+  PictureOutlined,
   HomeOutlined,
 } from '@ant-design/icons';
 import { ROUTES } from '@/shared/constants/routes';
@@ -23,6 +24,7 @@ export function AdminLayout() {
     { key: ROUTES.ADMIN.CATEGORIES, icon: <AppstoreOutlined />, label: <Link to={ROUTES.ADMIN.CATEGORIES}>{t('admin.categories')}</Link> },
     { key: ROUTES.ADMIN.EVENTS, icon: <NotificationOutlined />, label: <Link to={ROUTES.ADMIN.EVENTS}>{t('admin.events')}</Link> },
     { key: ROUTES.ADMIN.ORDERS, icon: <FileTextOutlined />, label: <Link to={ROUTES.ADMIN.ORDERS}>{t('admin.orders')}</Link> },
+    { key: ROUTES.ADMIN.GALLERY, icon: <PictureOutlined />, label: <Link to={ROUTES.ADMIN.GALLERY}>{t('admin.gallery')}</Link> },
   ];
 
   return (
