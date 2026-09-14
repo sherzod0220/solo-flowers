@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { Button, InputNumber, Row, Col, App, Skeleton } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button, InputNumber, Row, Col, Skeleton } from 'antd';
 import { ArrowLeftOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useCartItemsWithProducts, useRemoveCartItem, useUpdateCartItemQuantity } from '@/features/cart/hooks';
 import { formatPrice } from '@/shared/lib/utils';
@@ -12,12 +12,8 @@ export function CartPage() {
   const { items, totalPrice, isLoading } = useCartItemsWithProducts();
   const updateQuantity = useUpdateCartItemQuantity();
   const removeItem = useRemoveCartItem();
-  const { message } = App.useApp();
+  const navigate = useNavigate();
   const t = useT();
-
-  function handleCheckout() {
-    message.info(t('cart.checkout_coming_soon'));
-  }
 
   return (
     <div>
@@ -134,7 +130,7 @@ export function CartPage() {
                 <span>{t('cart.total')}</span>
                 <span>{formatPrice(totalPrice)}</span>
               </div>
-              <Button type="primary" size="large" block onClick={handleCheckout}>
+              <Button type="primary" size="large" block onClick={() => navigate(ROUTES.CHECKOUT)}>
                 {t('cart.checkout')}
               </Button>
             </div>

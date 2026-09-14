@@ -7,6 +7,8 @@ export const ROUTES = {
   CART: '/cart',
   WISHLIST: '/wishlist',
   CHECKOUT: '/checkout',
+  ORDERS: '/orders',
+  GALLERY: '/gallery',
   LOGIN: '/login',
   REGISTER: '/register',
   FORBIDDEN: '/403',
@@ -18,5 +20,6 @@ export const ROUTES = {
     CATEGORIES: '/admin/categories',
     EVENTS: '/admin/events',
     ORDERS: '/admin/orders',
+    GALLERY: '/admin/gallery',
   },
 } as const;
