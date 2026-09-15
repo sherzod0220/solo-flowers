@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { Link } from 'react-router-dom';
 import { Skeleton } from 'antd';
-import { CloseOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CloseOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useGallery } from '@/features/gallery/hooks';
+import { ROUTES } from '@/shared/constants/routes';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { Pagination } from '@/shared/ui/Pagination';
 import { PageMeta } from '@/shared/ui/PageMeta';
@@ -88,6 +90,13 @@ export function GalleryPage() {
   return (
     <div>
       <PageMeta title={`${t('gallery.title')} — Solo`} />
+
+      <Link
+        to={ROUTES.HOME}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 16, color: 'var(--color-primary)' }}
+      >
+        <ArrowLeftOutlined /> {t('common.back_to_home')}
+      </Link>
 
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginTop: 0, marginBottom: 24 }}>{t('gallery.title')}</h1>
 

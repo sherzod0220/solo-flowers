@@ -199,7 +199,10 @@ export function UserLayout() {
           >
             <Link to={ROUTES.HOME} style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
               <img src="/logo-S.PNG" alt="Solo" style={{ height: 40, width: 40, borderRadius: '50%', objectFit: 'cover' }} />
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, color: 'var(--color-primary)' }}>
+              <span
+                className="brand-name"
+                style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, color: 'var(--color-primary)' }}
+              >
                 Solo
               </span>
             </Link>
