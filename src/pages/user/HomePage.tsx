@@ -1,6 +1,7 @@
 import { EventBanner } from '@/features/events/components/EventBanner';
 import { CategoryCarousel } from '@/features/categories/components/CategoryCarousel';
 import { BestsellerCarousel } from '@/features/products/components/BestsellerCarousel';
+import { GallerySection } from '@/features/gallery/components/GallerySection';
 import { PageMeta } from '@/shared/ui/PageMeta';
 import { useT } from '@/shared/i18n/useT';
 
@@ -16,6 +17,8 @@ export function HomePage() {
       <CategoryCarousel />
 
       <BestsellerCarousel />
+
+      <GallerySection />
     </div>
   );
 }

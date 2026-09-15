@@ -575,6 +575,14 @@ h6,
   }
 }
 
+/* Juda tor ekranlarda (< 400px) logotip yonidagi "Solo" matni qidiruv/ikonkalar bilan sig'may qolgani
+   uchun yashiriladi — faqat doiraviy logotip qoladi. */
+@media (max-width: 399px) {
+  .brand-name {
+    display: none;
+  }
+}
+
 /*
  * Til tanlash tugmasining ochiladigan ro'yxati — tanlangan til (antd fon rangini brand vino
  * qilib bo'yaydi) ustidagi matn qora bo'lib, o'qib bo'lmas darajada ko'rinmay qolayotgan edi.
