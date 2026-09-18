@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Image, Rate, Tag, Button, InputNumber, Skeleton, Row, Col, App, Divider } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import { useProductBySlug } from '@/features/products/hooks';
 import { useAddCartItem } from '@/features/cart/hooks';
 import { useMe } from '@/features/auth/hooks';
@@ -84,7 +84,14 @@ export function ProductDetailPage() {
                 <Image
                   src={images[activeImage]}
                   alt={product.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  // Diqqat: oddiy `style` antd Image'ning ichki <img>'iga emas, tashqi wrapper'iga
+                  // tushib qolib, rasm o'z tabiiy o'lchamida (contain'dek) ko'rinib, vertikal
+                  // rasmda yonidan, gorizontalda tagidan bo'sh joy qoldirardi. `styles.root`/`styles.image`
+                  // — antd v6'ning har ikkala qatlamni alohida nishonlash uchun mo'ljallangan API'si.
+                  styles={{
+                    root: { width: '100%', height: '100%', display: 'block' },
+                    image: { width: '100%', height: '100%', objectFit: 'cover' },
+                  }}
                 />
               </div>
 
@@ -176,6 +183,7 @@ export function ProductDetailPage() {
               onChange={(value) => setQuantity(value ?? 1)}
               disabled={!product.is_available}
               size="large"
+              controls={{ upIcon: <PlusOutlined />, downIcon: <MinusOutlined /> }}
             />
             <Button
               type="primary"

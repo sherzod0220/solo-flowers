@@ -1,6 +1,6 @@
 import { Drawer, Button, InputNumber, Empty, Skeleton } from 'antd';
 import { Link } from 'react-router-dom';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import { useCartItemsWithProducts, useRemoveCartItem, useUpdateCartItemQuantity } from '../hooks';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
@@ -73,7 +73,8 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                       value={item.quantity}
                       onChange={(value) => updateQuantity.mutate({ productId: item.product_id, quantity: value ?? 1 })}
                       size="small"
-                      style={{ width: 64 }}
+                      style={{ width: 72 }}
+                      controls={{ upIcon: <PlusOutlined />, downIcon: <MinusOutlined /> }}
                     />
                     <Button
                       type="text"
