@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Skeleton } from 'antd';
 import { ArrowLeftOutlined, CloseOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
@@ -10,6 +10,8 @@ import { PageMeta } from '@/shared/ui/PageMeta';
 import { useT } from '@/shared/i18n/useT';
 
 const PAGE_SIZE = 24;
+/** Shundan kamrog'i — tortish joyiga qaytadi, ko'prog'i — keyingi/oldingi rasmga o'tadi. */
+const SWIPE_THRESHOLD_PX = 60;
 
 interface GalleryImage {
   url: string;
@@ -44,11 +46,14 @@ export function GalleryPage() {
   const t = useT();
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [showCaption, setShowCaption] = useState(false);
+
+  // Qo'l/sichqoncha bilan tortib o'tkazish (swipe) holati — telefondagi galereyaga o'xshab.
+  const dragStartXRef = useRef<number | null>(null);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   function goTo(next: number | null) {
     setActiveIndex(next);
-    setShowCaption(false);
   }
 
   // Iphone Photos uslubidagi zich panjara uchun har bir post rasmi alohida "karra" (tile) bo'ladi.
@@ -69,21 +74,47 @@ export function GalleryPage() {
     };
   }, [activeIndex]);
 
+function goPrev() {
+    setActiveIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
+  }
+
+  function goNext() {
+    setActiveIndex((i) => (i === null ? i : (i + 1) % images.length));
+  }
+
   useEffect(() => {
     if (activeIndex === null) return undefined;
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') goTo(null);
-      else if (e.key === 'ArrowLeft') {
-        setActiveIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
-        setShowCaption(false);
-      } else if (e.key === 'ArrowRight') {
-        setActiveIndex((i) => (i === null ? i : (i + 1) % images.length));
-        setShowCaption(false);
-      }
+      else if (e.key === 'ArrowLeft') goPrev();
+      else if (e.key === 'ArrowRight') goNext();
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, images.length]);
+
+  // Tortishni boshlash — keyingi pointermove/pointerup hodisalarini shu elementning o'ziga "ushlab qolamiz"
+  // (pointer capture), shu bilan barmoq/sichqoncha rasm chegarasidan tashqariga chiqib ketsa ham uzilib qolmaydi.
+  function handlePointerDown(e: PointerEvent<HTMLDivElement>) {
+    dragStartXRef.current = e.clientX;
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMove(e: PointerEvent<HTMLDivElement>) {
+    if (dragStartXRef.current === null) return;
+    setDragX(e.clientX - dragStartXRef.current);
+  }
+
+  function handlePointerUp() {
+    if (dragStartXRef.current === null) return;
+    if (dragX < -SWIPE_THRESHOLD_PX) goNext();
+    else if (dragX > SWIPE_THRESHOLD_PX) goPrev();
+    dragStartXRef.current = null;
+    setIsDragging(false);
+    setDragX(0);
+  }
 
   const active = activeIndex !== null ? images[activeIndex] : null;
 
@@ -183,8 +214,7 @@ export function GalleryPage() {
                 aria-label="Previous"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
-                  setShowCaption(false);
+                  goPrev();
                 }}
                 style={navArrowStyle('left')}
               >
@@ -195,8 +225,7 @@ export function GalleryPage() {
                 aria-label="Next"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveIndex((i) => (i === null ? i : (i + 1) % images.length));
-                  setShowCaption(false);
+                  goNext();
                 }}
                 style={navArrowStyle('right')}
               >
@@ -206,15 +235,27 @@ export function GalleryPage() {
           )}
 
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-              if (active.description) setShowCaption((s) => !s);
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '86vh',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              touchAction: 'pan-y',
+              transform: `translateX(${dragX}px)`,
+              // Faol tortish paytida darhol (kechikishsiz) barmoqni kuzatib borish uchun transition
+              // o'chirilgan; qo'yib yuborilganda esa keyingi/oldingi rasmga yoki joyiga silliq qaytadi.
+              transition: isDragging ? 'none' : 'transform 0.25s ease',
             }}
-            style={{ position: 'relative', maxWidth: '90vw', maxHeight: '86vh', cursor: active.description ? 'pointer' : 'default' }}
           >
             <img
               src={active.url}
               alt=""
+              draggable={false}
               style={{ maxWidth: '90vw', maxHeight: '86vh', objectFit: 'contain', display: 'block', borderRadius: 4 }}
             />
             {active.description && (
@@ -231,9 +272,6 @@ export function GalleryPage() {
                   lineHeight: 1.5,
                   borderBottomLeftRadius: 4,
                   borderBottomRightRadius: 4,
-                  opacity: showCaption ? 1 : 0,
-                  transform: showCaption ? 'translateY(0)' : 'translateY(6px)',
-                  transition: 'opacity 0.2s ease, transform 0.2s ease',
                   pointerEvents: 'none',
                 }}
               >

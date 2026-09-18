@@ -104,15 +104,16 @@ export function BestsellerCarousel() {
           arrows
           dots={false}
           draggable
+          swipeToSlide
           autoplay
-          autoplaySpeed={3000}
-          speed={2800}
+          autoplaySpeed={4500}
+          speed={4300}
           cssEase="linear"
           infinite
           prevArrow={<ProductArrow direction="prev" />}
           nextArrow={<ProductArrow direction="next" />}
           slidesToShow={slidesToShow}
-          slidesToScroll={slidesToShow}
+          slidesToScroll={1}
         >
           {bestsellers.map((product) => (
             <div key={product.id} className="product-slide">

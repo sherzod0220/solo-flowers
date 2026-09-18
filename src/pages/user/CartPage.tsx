@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, InputNumber, Row, Col, Skeleton } from 'antd';
-import { ArrowLeftOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DeleteOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import { useCartItemsWithProducts, useRemoveCartItem, useUpdateCartItemQuantity } from '@/features/cart/hooks';
 import { formatPrice } from '@/shared/lib/utils';
 import { ROUTES } from '@/shared/constants/routes';
@@ -105,6 +105,7 @@ export function CartPage() {
                           onChange={(value) =>
                             updateQuantity.mutate({ productId: item.product_id, quantity: value ?? 1 })
                           }
+                          controls={{ upIcon: <PlusOutlined />, downIcon: <MinusOutlined /> }}
                         />
                         <Button
                           type="text"

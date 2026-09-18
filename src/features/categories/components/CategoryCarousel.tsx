@@ -1,15 +1,44 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Skeleton } from 'antd';
+import { Button, Carousel, Skeleton } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useCategories } from '../hooks';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
+import { useResponsiveCount } from '@/shared/hooks/useResponsiveCount';
 import type { Category } from '../types';
 
-/** Bir soniyada necha piksel siljishi — kategoriya soni ko'paysa/kamaysa ham har bir element tezligi bir xil qolishi uchun animatsiya davomiyligi shunga qarab hisoblanadi. */
-const MARQUEE_PX_PER_SECOND = 40;
+// Banner/bestseller bilan bir xil chegaralar (xs/sm/md/lg/xl/2xl: 640/768/1024/1280/1536).
+const CATEGORY_BREAKPOINTS = [
+  { minWidth: 1536, count: 7 },
+  { minWidth: 1280, count: 6 },
+  { minWidth: 1024, count: 5 },
+  { minWidth: 768, count: 4 },
+  { minWidth: 640, count: 3 },
+];
+const CATEGORY_BASE_COUNT = 2;
 
-/** Bitta kategoriya (rasm + nom) — marquee qatorida ham, "Barchasi" panjarasida ham qayta ishlatiladi. */
+interface CategoryArrowProps {
+  direction: 'prev' | 'next';
+  onClick?: () => void;
+}
+
+/** Karta chegarasidan biroz "chiqib turadigan" dumaloq, romkali tugma — rasm bilan orasida doim bo'shliq bor. */
+function CategoryArrow({ direction, onClick }: CategoryArrowProps) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      className={`carousel-arrow-button carousel-arrow-button--${direction}`}
+      onClick={onClick}
+      aria-label={direction === 'prev' ? t('common.prev') : t('common.next')}
+    >
+      {direction === 'prev' ? <LeftOutlined /> : <RightOutlined />}
+    </button>
+  );
+}
+
+/** Bitta kategoriya (rasm + nom) — karusel slaydida ham, "Barchasi" panjarasida ham qayta ishlatiladi. */
 function CategoryItem({ category }: { category: Category }) {
   return (
     <Link
@@ -52,41 +81,11 @@ function CategoryItem({ category }: { category: Category }) {
   );
 }
 
-/**
- * To'xtovsiz, bir xil tezlikda o'ngdan-chapga siljiydigan qator. Ro'yxat ikki marta
- * takrorlanadi va track -50%ga siljitiladi — shu bilan aylanish "choksiz" ko'rinadi.
- * Sichqoncha ustiga kelinganda pauza qiladi (o'qish/bosish uchun qulay).
- */
-function CategoryMarquee({ categories }: { categories: Category[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [duration, setDuration] = useState(30);
-
-  useEffect(() => {
-    if (!trackRef.current) return;
-    // Track ikki nusxadan iborat — haqiqiy bitta to'plamning eni shuning yarmi.
-    const singleSetWidth = trackRef.current.scrollWidth / 2;
-    if (singleSetWidth > 0) {
-      setDuration(singleSetWidth / MARQUEE_PX_PER_SECOND);
-    }
-  }, [categories]);
-
-  return (
-    <div className="category-marquee">
-      <div ref={trackRef} className="category-marquee-track" style={{ animationDuration: `${duration}s` }}>
-        {[...categories, ...categories].map((category, index) => (
-          <div key={`${category.id}-${index}`} className="category-marquee-item">
-            <CategoryItem category={category} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /** Bosh sahifadagi "Kategoriyalar" qatori — rasm + nom, bosilsa shu kategoriyaga o'tadi. */
 export function CategoryCarousel() {
   const { data: categories, isLoading } = useCategories();
   const t = useT();
+  const responsiveCount = useResponsiveCount(CATEGORY_BREAKPOINTS, CATEGORY_BASE_COUNT);
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (isLoading) {
@@ -103,6 +102,9 @@ export function CategoryCarousel() {
 
   if (!categories || categories.length === 0) return null;
 
+  // Real ma'lumot slotlardan kam bo'lsa ham qator to'liq ko'rinishi uchun, slidesToShow mavjud
+  // kategoriya soniga moslanadi.
+  const slidesToShow = Math.min(responsiveCount, categories.length);
   const canExpand = categories.length > 1;
 
   return (
@@ -117,11 +119,6 @@ export function CategoryCarousel() {
       </div>
 
       {isExpanded ? (
-        // Diqqat: CSS Grid `repeat(auto-fill, minmax(...))` keng ekranda kategoriya sonidan ko'proq
-        // "bo'sh" ustun yaratib, mavjud kartalarni haqiqiy kerakli o'lchamidan kichikroq qilib
-        // siqib qo'yardi (auto-fill bo'sh ustunlarni ham joy sifatida hisoblaydi). Shuning uchun
-        // Grid o'rniga har bir kartaga BIR XIL o'lchamli (mobil bilan bir xil ko'rinish) `flex-wrap`
-        // ishlatiladi — qator to'lganda keyingi kategoriyalar pastdan yangi qatorga tushadi.
         <div
           style={{
             display: 'flex',
@@ -136,7 +133,27 @@ export function CategoryCarousel() {
           ))}
         </div>
       ) : (
-        <CategoryMarquee categories={categories} />
+        <Carousel
+          arrows
+          dots={false}
+          draggable
+          swipeToSlide
+          infinite
+          autoplay
+          autoplaySpeed={4500}
+          speed={4300}
+          cssEase="linear"
+          prevArrow={<CategoryArrow direction="prev" />}
+          nextArrow={<CategoryArrow direction="next" />}
+          slidesToShow={slidesToShow}
+          slidesToScroll={1}
+        >
+          {categories.map((category) => (
+            <div key={category.id} className="category-slide">
+              <CategoryItem category={category} />
+            </div>
+          ))}
+        </Carousel>
       )}
     </div>
   );

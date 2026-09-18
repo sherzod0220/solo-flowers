@@ -18,8 +18,9 @@
   /* Zara logotipiga o'xshab (namunaviy rasm asosida) — nozik, baland kontrastli, elegant serif.
      Zara'dagidek harflarni zichlashtirish shart emas, shuning uchun letter-spacing standart qoldirilgan. */
   --font-display: 'Bodoni Moda', 'Playfair Display', 'Georgia', serif;
-  /* Katta ekranlarda (desktop/monitor) kontent cheksiz cho'zilib ketmasligi uchun. */
-  --content-max-width: 1280px;
+  /* Katta ekranlarda (desktop/monitor) kontent cheksiz cho'zilib ketmasligi uchun — 1540px'gacha
+     kartalar to'liq (yon bo'sh joysiz), shundan kattaroq monitorlarda markazlashtiriladi. */
+  --content-max-width: 1540px;
 }
 
 body {
@@ -157,45 +158,14 @@ h6,
 }
 
 /*
- * Kategoriyalar qatori — slick-karuselning "qadam bosib, pauza qilib" harakatlanishi o'rniga,
- * hech qachon to'xtamaydigan, doim BIR XIL TEZLIKDA (px/soniya) siljiydigan CSS marquee.
- * Ro'yxat ikki marta takrorlanadi (JS'da) va track -50%ga siljiydi — shu bilan aylanish
- * "choksiz" (seamless) ko'rinadi, ikkinchi nusxa tugagan joyda birinchisi qaytadan boshlangandek.
- * Animatsiya davomiyligi JS orqali (track kengligiga qarab) hisoblanadi — kategoriya soni
- * ko'paysa ham har bir elementning ko'rinadigan tezligi (tempi) bir xil qolishi uchun.
+ * Kategoriyalar karuselidagi slayd — `.product-slide` bilan bir xil naqsh: margin o'rniga
+ * padding+border-box (antd/react-slick slaydning bevosita bolasini har doim `width:100%`ga
+ * majburlagani uchun margin hech qanday effekt bermaydi). Karusel `draggable`/`swipeToSlide`
+ * bilan ishlaydi — qo'l/sichqoncha bilan tortib harakatlantirish shu orqali ta'minlanadi.
  */
-.category-marquee {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
-  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
-}
-
-.category-marquee-track {
-  display: flex;
-  width: max-content;
-  animation-name: category-marquee-scroll;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-.category-marquee:hover .category-marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes category-marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.category-marquee-item {
-  flex: 0 0 auto;
+.category-slide {
   box-sizing: border-box;
-  width: 130px;
-  padding: 0 8px;
+  padding: 0 6px;
 }
 
 .category-card {
@@ -265,23 +235,32 @@ h6,
 }
 
 @media (min-width: 640px) {
-  .category-marquee-item {
-    width: 150px;
+  .category-slide {
+    padding: 0 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .category-slide {
     padding: 0 10px;
   }
 }
 
 @media (min-width: 1024px) {
-  .category-marquee-item {
-    width: 170px;
+  .category-slide {
     padding: 0 12px;
   }
 }
 
-@media (min-width: 1536px) {
-  .category-marquee-item {
-    width: 190px;
+@media (min-width: 1280px) {
+  .category-slide {
     padding: 0 14px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .category-slide {
+    padding: 0 16px;
   }
 }
 
