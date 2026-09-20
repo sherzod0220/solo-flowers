@@ -72,8 +72,6 @@ export function RegisterPage() {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 'calc(100vh - 220px)',
-        background: 'var(--color-primary-light)',
-        borderRadius: 24,
         padding: '56px 16px',
       }}
     >

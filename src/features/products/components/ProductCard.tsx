@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
           }}
         >
           {cover ? (
-            <img src={cover} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={cover} alt={product.name} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <div style={{ fontSize: 32 }}>🌸</div>
           )}
