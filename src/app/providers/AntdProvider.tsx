@@ -5,7 +5,7 @@ const theme = {
   token: {
     colorPrimary: 'var(--color-primary)',
     borderRadius: 8,
-    fontFamily: `'Inter', 'Segoe UI', sans-serif`,
+    fontFamily: `'Tenor Sans', 'Segoe UI', sans-serif`,
   },
 };
 

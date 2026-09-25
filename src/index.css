@@ -15,9 +15,11 @@
   --color-bg: #faf6ec;
   --color-text: #2a1218;
   --radius-base: 8px;
-  /* Zara logotipiga o'xshab (namunaviy rasm asosida) — nozik, baland kontrastli, elegant serif.
-     Zara'dagidek harflarni zichlashtirish shart emas, shuning uchun letter-spacing standart qoldirilgan. */
-  --font-display: 'Bodoni Moda', 'Playfair Display', 'Georgia', serif;
+  /* Butun sayt (sarlavhalar ham, oddiy matn ham) bitta shrift — Tenor Sans (faqat 400 og'irlik bilan keladi). */
+  --font-display: 'Tenor Sans', 'Segoe UI', sans-serif;
+  /* Faqat "Solo" brend yozuvi (navbar/footer) uchun — doiraviy logotip rasmidagi (`logo-S.PNG`)
+     qalin serif uslubga mos keladigan shrift, umumiy sayt shriftidan (--font-display) mustaqil. */
+  --font-brand: 'Bodoni Moda', 'Georgia', serif;
   /* Katta ekranlarda (desktop/monitor) kontent cheksiz cho'zilib ketmasligi uchun — 1540px'gacha
      kartalar to'liq (yon bo'sh joysiz), shundan kattaroq monitorlarda markazlashtiriladi. */
   --content-max-width: 1540px;
@@ -27,7 +29,7 @@ body {
   margin: 0;
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Tenor Sans', 'Segoe UI', sans-serif;
 }
 
 h1,
