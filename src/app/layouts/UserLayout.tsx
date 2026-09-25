@@ -7,7 +7,6 @@ import {
   UserOutlined,
   InstagramFilled,
   TelegramFilled,
-  FacebookFilled,
   MenuOutlined,
   PhoneOutlined,
   SearchOutlined,
@@ -27,15 +26,14 @@ const { Header, Content, Footer } = Layout;
 
 const linkStyle = { color: 'var(--color-primary)', fontWeight: 500 };
 
-// Facebook uchun hozircha haqiqiy account yo'q — '#' bilan placeholder sifatida qoldirilgan.
+// Facebook hozircha olib tashlandi — haqiqiy account tayyor bo'lgach qaytariladi.
 const SOCIAL_LINKS = [
   { key: 'instagram', href: 'https://instagram.com/soloflowers.uz', label: 'Instagram', icon: <InstagramFilled /> },
-  { key: 'telegram', href: 'https://t.me/solo_flowers', label: 'Telegram', icon: <TelegramFilled /> },
-  { key: 'facebook', href: '#', label: 'Facebook', icon: <FacebookFilled /> },
+  { key: 'telegram', href: 'https://t.me/soloflowers_uz', label: 'Telegram', icon: <TelegramFilled /> },
 ];
 
-const CONTACT_PHONE_DISPLAY = '+998 50 005 07 53';
-const CONTACT_PHONE_HREF = 'tel:+998500050753';
+const CONTACT_PHONE_DISPLAY = '+998 77 555 55 74';
+const CONTACT_PHONE_HREF = 'tel:+998775555574';
 
 interface AuthLinksProps {
   stacked?: boolean;
@@ -176,9 +174,8 @@ export function UserLayout() {
   );
 
   return (
-    // Storefront'ning butun matn ko'rinishi (sarlavhalardan tashqari, tugma/label/narx/paragraflar
-    // ham) Zara uslubidagi elegant serif bilan sinaladi — admin panelga (AdminLayout, alohida
-    // ConfigProvider'ga o'ralmagan) taalluqli emas, chunki bu shrift faqat shu qism ichida override qilinadi.
+    // `--font-display` global AntdProvider bilan bir xil shrift — bu qatlam faqat izchillik
+    // uchun qoldirilgan, funksional farq yo'q.
     <ConfigProvider theme={{ token: { fontFamily: 'var(--font-display)' } }}>
       <Layout style={{ minHeight: '100vh', background: 'var(--color-bg)', fontFamily: 'var(--font-display)' }}>
         <Header
@@ -201,7 +198,7 @@ export function UserLayout() {
               <img src="/logo-S.PNG" alt="Solo" style={{ height: 40, width: 40, borderRadius: '50%', objectFit: 'cover' }} />
               <span
                 className="brand-name"
-                style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, color: 'var(--color-primary)' }}
+                style={{ fontFamily: 'var(--font-brand)', fontSize: 22, fontWeight: 700, color: 'var(--color-primary)' }}
               >
                 Solo
               </span>
@@ -293,7 +290,7 @@ export function UserLayout() {
           >
             <div className="footer-logo" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <img src="/logo-S.PNG" alt="Solo" style={{ height: 32, width: 32, borderRadius: '50%', objectFit: 'cover' }} />
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: '#fff' }}>Solo</span>
+              <span style={{ fontFamily: 'var(--font-brand)', fontSize: 18, fontWeight: 700, color: '#fff' }}>Solo</span>
             </div>
 
             <div className="footer-contact" style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
