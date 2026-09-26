@@ -136,7 +136,7 @@ export function CheckoutPage() {
           </Col>
 
           <Col xs={24} md={10}>
-            <div style={{ padding: 24, background: '#fff', borderRadius: 12, border: '1px solid var(--color-border)' }}>
+            <div style={{ padding: 24, background: '#fff', borderRadius: 12, boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginTop: 0, marginBottom: 16 }}>
                 {t('checkout.order_summary')}
               </h2>

@@ -47,7 +47,7 @@ export function CartPage() {
                       padding: 16,
                       background: '#fff',
                       borderRadius: 12,
-                      border: '1px solid var(--color-border)',
+                      boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)',
                     }}
                   >
                     {item.slug ? (
@@ -126,7 +126,7 @@ export function CartPage() {
           </Col>
 
           <Col xs={24} md={8}>
-            <div style={{ padding: 24, background: '#fff', borderRadius: 12, border: '1px solid var(--color-border)' }}>
+            <div style={{ padding: 24, background: '#fff', borderRadius: 12, boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, fontWeight: 700, marginBottom: 20 }}>
                 <span>{t('cart.total')}</span>
                 <span>{formatPrice(totalPrice)}</span>
