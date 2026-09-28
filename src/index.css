@@ -3,16 +3,16 @@
 @theme {
   /*
    * "SoLo Flowers Boutique" brend palitrasi — logo asosida.
-   * Qaymoq/krem — sahifaning asosiy foni (canvas) VA bo'lim/karta yuzalari (surface) — ikkalasi ham
-   * bir-biriga yaqin, karta chegarasi (--color-border) orqali ajratiladi (avval xaki fon ishlatilgan edi).
+   * Sahifa foni VA karta/bo'lim yuzalari (surface) endi ikkalasi ham toza oq — rang farqi bilan
+   * emas, balki SOYA (box-shadow) bilan ajraladi, shuning uchun har bir asosiy box (.section-panel,
+   * .shadow-card, .category-card/.product-card va h.k.) o'ziga xos soyaga ega bo'lishi shart.
    * Pushti — kichik aksentlar (chegirma belgisi, kategoriya doiralari, navbar fon), vino — tugmalar/linklar/footer.
    */
   --color-primary: #5c1a30;
   --color-primary-light: #f6ccd9;
-  --color-khaki: #f3ecd8;
-  --color-surface: #fffefb;
+  --color-surface: #ffffff;
   --color-border: #e4d6ae;
-  --color-bg: #faf6ec;
+  --color-bg: #ffffff;
   --color-text: #2a1218;
   --radius-base: 8px;
   /* Butun sayt (sarlavhalar ham, oddiy matn ham) bitta shrift — Tenor Sans (faqat 400 og'irlik bilan keladi). */

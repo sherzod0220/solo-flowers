@@ -63,7 +63,7 @@ export function OrdersPage() {
           {orders.map((order) => (
             <div
               key={order.id}
-              style={{ padding: 20, background: '#fff', borderRadius: 12, border: '1px solid var(--color-border)' }}
+              style={{ padding: 20, background: '#fff', borderRadius: 12, boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)' }}
             >
               <div
                 style={{

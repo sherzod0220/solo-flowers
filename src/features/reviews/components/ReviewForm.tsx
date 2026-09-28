@@ -47,14 +47,14 @@ export function ReviewForm({ productId }: ReviewFormProps) {
 
   if (!isAuthenticated) {
     return (
-      <div style={{ padding: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12 }}>
+      <div style={{ padding: 16, background: 'var(--color-surface)', borderRadius: 12, boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)' }}>
         {t('reviews.login_required')} — <Link to={ROUTES.LOGIN}>{t('nav.login')}</Link>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 20, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12 }}>
+    <div style={{ padding: 20, background: 'var(--color-surface)', borderRadius: 12, boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)' }}>
       <div style={{ marginBottom: 12 }}>
         <div style={{ marginBottom: 6, fontWeight: 500 }}>{t('reviews.rating_label')}</div>
         <Rate value={rating} onChange={setRating} />

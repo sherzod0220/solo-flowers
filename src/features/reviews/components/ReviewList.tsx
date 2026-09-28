@@ -31,7 +31,7 @@ export function ReviewList({ productId }: ReviewListProps) {
         {data.items.map((review) => (
           <div
             key={review.id}
-            style={{ padding: 16, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12 }}
+            style={{ padding: 16, background: 'var(--color-surface)', borderRadius: 12, boxShadow: '0 2px 10px rgba(42, 18, 24, 0.14)' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
               <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
