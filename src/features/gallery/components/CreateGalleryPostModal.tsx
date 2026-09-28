@@ -3,6 +3,7 @@ import { App, Modal, Input, Upload } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateGalleryPost } from '../hooks';
+import { compressImages } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -57,7 +58,8 @@ export function CreateGalleryPostModal({ open, onClose }: CreateGalleryPostModal
     }
 
     try {
-      await createMutation.mutateAsync({ images, description: description || undefined });
+      const compressed = await compressImages(images);
+      await createMutation.mutateAsync({ images: compressed, description: description || undefined });
       notification.success({ title: t('gallery.create_success'), placement: 'top' });
       onClose();
     } catch (error) {

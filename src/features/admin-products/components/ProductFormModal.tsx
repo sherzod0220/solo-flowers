@@ -11,6 +11,7 @@ import {
 } from '@/features/admin-products/hooks';
 import type { ProductAdmin, UpdateProductPayload } from '@/features/products/types';
 import { CategorySelect } from '@/features/categories/components/CategorySelect';
+import { compressImage, compressImages } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -100,7 +101,8 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
     }
     setReplacingIndex(index);
     try {
-      const updated = await replaceImageMutation.mutateAsync({ id: product.id, index, image: file });
+      const compressed = await compressImage(file);
+      const updated = await replaceImageMutation.mutateAsync({ id: product.id, index, image: compressed });
       setCurrentImages(updated.images);
       notification.success({ title: t('product.image_replace_success'), placement: 'top' });
     } catch (error) {
@@ -138,7 +140,8 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
     const files = pendingNewImages.map((file) => file.originFileObj as File | undefined).filter((file): file is File => !!file);
     if (files.length === 0) return;
     try {
-      const updated = await addImagesMutation.mutateAsync({ id: product.id, images: files });
+      const compressed = await compressImages(files);
+      const updated = await addImagesMutation.mutateAsync({ id: product.id, images: compressed });
       setCurrentImages(updated.images);
       setPendingNewImages([]);
       notification.success({ title: t('product.image_add_success'), placement: 'top' });
@@ -227,14 +230,15 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
           .map((file) => file.originFileObj as File | undefined)
           .filter((file): file is File => !!file);
         if (pendingFiles.length > 0) {
-          const updated = await addImagesMutation.mutateAsync({ id: product.id, images: pendingFiles });
+          const compressedPending = await compressImages(pendingFiles);
+          const updated = await addImagesMutation.mutateAsync({ id: product.id, images: compressedPending });
           setCurrentImages(updated.images);
           setPendingNewImages([]);
         }
       } else {
-        const imageFiles = fileList
-          .map((file) => file.originFileObj as File | undefined)
-          .filter((file): file is File => !!file);
+        const imageFiles = await compressImages(
+          fileList.map((file) => file.originFileObj as File | undefined).filter((file): file is File => !!file),
+        );
 
         await createMutation.mutateAsync({
           name_uz: values.name_uz,

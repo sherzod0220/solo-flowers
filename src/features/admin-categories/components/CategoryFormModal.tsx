@@ -4,6 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateCategory, useUpdateCategory, useUpdateCategoryImage } from '@/features/categories/hooks';
 import type { CategoryAdmin } from '@/features/categories/types';
+import { compressImage } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -69,7 +70,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
 
         const newImageFile = fileList[0]?.originFileObj as File | undefined;
         if (newImageFile) {
-          await updateImageMutation.mutateAsync({ id: category.id, image: newImageFile });
+          await updateImageMutation.mutateAsync({ id: category.id, image: await compressImage(newImageFile) });
         }
       } else {
         const imageFile = fileList[0]?.originFileObj as File | undefined;
@@ -81,7 +82,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
           name_uz: values.name_uz,
           name_eng: values.name_eng,
           name_ru: values.name_ru,
-          image: imageFile,
+          image: await compressImage(imageFile),
         });
       }
       notification.success({
