@@ -11,10 +11,13 @@ import {
 } from '@/features/admin-products/hooks';
 import type { ProductAdmin, UpdateProductPayload } from '@/features/products/types';
 import { CategorySelect } from '@/features/categories/components/CategorySelect';
+import { compressImage, compressImages } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE_MB = 3;
+// Siqishdan OLDINGI xom fayl chegarasi — telefon kamerasidan tushirilgan 4-8MB'lik rasm ham shu
+// tekshiruvdan o'tishi kerak, submit paytida baribir WebP'ga siqiladi.
+const MAX_RAW_SIZE_MB = 15;
 const MAX_IMAGES = 5;
 
 interface ProductFormModalProps {
@@ -94,13 +97,14 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
       notification.error({ title: t('common.upload_type_error'), description: file.name, placement: 'top' });
       return false;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       notification.error({ title: t('common.upload_size_error'), description: file.name, placement: 'top' });
       return false;
     }
     setReplacingIndex(index);
     try {
-      const updated = await replaceImageMutation.mutateAsync({ id: product.id, index, image: file });
+      const compressed = await compressImage(file);
+      const updated = await replaceImageMutation.mutateAsync({ id: product.id, index, image: compressed });
       setCurrentImages(updated.images);
       notification.success({ title: t('product.image_replace_success'), placement: 'top' });
     } catch (error) {
@@ -138,7 +142,8 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
     const files = pendingNewImages.map((file) => file.originFileObj as File | undefined).filter((file): file is File => !!file);
     if (files.length === 0) return;
     try {
-      const updated = await addImagesMutation.mutateAsync({ id: product.id, images: files });
+      const compressed = await compressImages(files);
+      const updated = await addImagesMutation.mutateAsync({ id: product.id, images: compressed });
       setCurrentImages(updated.images);
       setPendingNewImages([]);
       notification.success({ title: t('product.image_add_success'), placement: 'top' });
@@ -160,7 +165,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
       });
       return Upload.LIST_IGNORE;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       notification.error({
         title: t('common.upload_size_error'),
         description: `${file.name} — ${(file.size / 1024 / 1024).toFixed(1)}MB`,
@@ -227,14 +232,15 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
           .map((file) => file.originFileObj as File | undefined)
           .filter((file): file is File => !!file);
         if (pendingFiles.length > 0) {
-          const updated = await addImagesMutation.mutateAsync({ id: product.id, images: pendingFiles });
+          const compressedPending = await compressImages(pendingFiles);
+          const updated = await addImagesMutation.mutateAsync({ id: product.id, images: compressedPending });
           setCurrentImages(updated.images);
           setPendingNewImages([]);
         }
       } else {
-        const imageFiles = fileList
-          .map((file) => file.originFileObj as File | undefined)
-          .filter((file): file is File => !!file);
+        const imageFiles = await compressImages(
+          fileList.map((file) => file.originFileObj as File | undefined).filter((file): file is File => !!file),
+        );
 
         await createMutation.mutateAsync({
           name_uz: values.name_uz,
@@ -377,7 +383,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
                           void handleReplaceImage(index, file);
                           return false;
                         }}
-                        accept="image/jpeg,image/png,image/webp"
+                        accept="image/*"
                       >
                         <Button
                           size="small"
@@ -420,7 +426,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
                   fileList={pendingNewImages}
                   onChange={({ fileList: newList }) => setPendingNewImages(newList.slice(-(MAX_IMAGES - currentImages.length)))}
                   onRemove={(file) => setPendingNewImages((prev) => prev.filter((item) => item.uid !== file.uid))}
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/*"
                   maxCount={MAX_IMAGES - currentImages.length}
                   multiple
                   listType="picture-card"
@@ -450,7 +456,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
               fileList={fileList}
               onChange={({ fileList: newList }) => setFileList(newList.slice(-MAX_IMAGES))}
               onRemove={(file) => setFileList((prev) => prev.filter((item) => item.uid !== file.uid))}
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/*"
               maxCount={MAX_IMAGES}
               multiple
               listType="picture-card"

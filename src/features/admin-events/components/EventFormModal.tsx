@@ -5,10 +5,13 @@ import type { UploadFile } from 'antd';
 import { useCreateEvent, useUpdateEvent, useUpdateEventImage } from '@/features/events/hooks';
 import type { EventAdmin } from '@/features/events/types';
 import { CategorySelect } from '@/features/categories/components/CategorySelect';
+import { compressImage } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE_MB = 3;
+// Siqishdan OLDINGI xom fayl chegarasi — telefon kamerasidan tushirilgan 4-8MB'lik rasm ham shu
+// tekshiruvdan o'tishi kerak, submit paytida baribir WebP'ga siqiladi.
+const MAX_RAW_SIZE_MB = 15;
 
 interface EventFormModalProps {
   open: boolean;
@@ -72,7 +75,7 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
       message.error(t('common.upload_type_error'));
       return Upload.LIST_IGNORE;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       message.error(t('common.upload_size_error'));
       return Upload.LIST_IGNORE;
     }
@@ -88,7 +91,7 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
 
         const newImageFile = fileList[0]?.originFileObj as File | undefined;
         if (newImageFile) {
-          await updateImageMutation.mutateAsync({ id: event.id, image: newImageFile });
+          await updateImageMutation.mutateAsync({ id: event.id, image: await compressImage(newImageFile) });
         }
       } else {
         const imageFile = fileList[0]?.originFileObj as File | undefined;
@@ -96,7 +99,7 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
           message.error(t('common.choose_image_required'));
           return;
         }
-        await createMutation.mutateAsync({ ...values, image: imageFile });
+        await createMutation.mutateAsync({ ...values, image: await compressImage(imageFile) });
       }
       notification.success({
         title: isEdit ? t('event.update_success') : t('event.create_success'),
@@ -190,7 +193,7 @@ export function EventFormModal({ open, event, onClose }: EventFormModalProps) {
             fileList={fileList}
             onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
             onRemove={() => setFileList([])}
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             maxCount={1}
             listType="picture"
           >

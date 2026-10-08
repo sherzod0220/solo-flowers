@@ -4,10 +4,13 @@ import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateCategory, useUpdateCategory, useUpdateCategoryImage } from '@/features/categories/hooks';
 import type { CategoryAdmin } from '@/features/categories/types';
+import { compressImage } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE_MB = 3;
+// Siqishdan OLDINGI xom fayl chegarasi — telefon kamerasidan tushirilgan 4-8MB'lik rasm ham shu
+// tekshiruvdan o'tishi kerak, submit paytida baribir WebP'ga siqiladi.
+const MAX_RAW_SIZE_MB = 15;
 
 interface CategoryFormModalProps {
   open: boolean;
@@ -49,7 +52,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
       message.error(t('common.upload_type_error'));
       return Upload.LIST_IGNORE;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       message.error(t('common.upload_size_error'));
       return Upload.LIST_IGNORE;
     }
@@ -69,7 +72,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
 
         const newImageFile = fileList[0]?.originFileObj as File | undefined;
         if (newImageFile) {
-          await updateImageMutation.mutateAsync({ id: category.id, image: newImageFile });
+          await updateImageMutation.mutateAsync({ id: category.id, image: await compressImage(newImageFile) });
         }
       } else {
         const imageFile = fileList[0]?.originFileObj as File | undefined;
@@ -81,7 +84,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
           name_uz: values.name_uz,
           name_eng: values.name_eng,
           name_ru: values.name_ru,
-          image: imageFile,
+          image: await compressImage(imageFile),
         });
       }
       notification.success({
@@ -139,7 +142,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
             fileList={fileList}
             onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
             onRemove={() => setFileList([])}
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             maxCount={1}
             listType="picture"
           >

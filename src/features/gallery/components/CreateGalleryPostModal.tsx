@@ -3,10 +3,15 @@ import { App, Modal, Input, Upload } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useCreateGalleryPost } from '../hooks';
+import { compressImages } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE_MB = 3;
+// Diqqat: bu — siqishdan OLDINGI xom fayl chegarasi (telefon kamerasidan tushirilgan 4-8MB'lik
+// rasm ham shu tekshiruvdan o'tishi kerak — submit paytida baribir WebP'ga siqiladi). Juda past
+// qo'yilsa (masalan 3MB), aynan eng ko'p yengillashtirish kerak bo'lgan og'ir rasmlar shu yerda
+// rad etilib, siqish kodiga yetib bormay qoladi.
+const MAX_RAW_SIZE_MB = 15;
 const MAX_IMAGES = 3;
 
 interface CreateGalleryPostModalProps {
@@ -36,7 +41,7 @@ export function CreateGalleryPostModal({ open, onClose }: CreateGalleryPostModal
       });
       return Upload.LIST_IGNORE;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       notification.error({
         title: t('common.upload_size_error'),
         description: `${file.name} — ${(file.size / 1024 / 1024).toFixed(1)}MB`,
@@ -57,7 +62,8 @@ export function CreateGalleryPostModal({ open, onClose }: CreateGalleryPostModal
     }
 
     try {
-      await createMutation.mutateAsync({ images, description: description || undefined });
+      const compressed = await compressImages(images);
+      await createMutation.mutateAsync({ images: compressed, description: description || undefined });
       notification.success({ title: t('gallery.create_success'), placement: 'top' });
       onClose();
     } catch (error) {
@@ -88,7 +94,7 @@ export function CreateGalleryPostModal({ open, onClose }: CreateGalleryPostModal
           fileList={fileList}
           onChange={({ fileList: newList }) => setFileList(newList.slice(-MAX_IMAGES))}
           onRemove={(file) => setFileList((prev) => prev.filter((item) => item.uid !== file.uid))}
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/*"
           maxCount={MAX_IMAGES}
           multiple
           listType="picture-card"
