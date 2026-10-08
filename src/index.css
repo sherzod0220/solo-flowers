@@ -6,7 +6,7 @@
    * Sahifa foni VA karta/bo'lim yuzalari (surface) endi ikkalasi ham toza oq — rang farqi bilan
    * emas, balki SOYA (box-shadow) bilan ajraladi, shuning uchun har bir asosiy box (.section-panel,
    * .shadow-card, .category-card/.product-card va h.k.) o'ziga xos soyaga ega bo'lishi shart.
-   * Pushti — kichik aksentlar (chegirma belgisi, kategoriya doiralari, navbar fon), vino — tugmalar/linklar/footer.
+   * Pushti — kichik aksentlar (chegirma belgisi, kategoriya doiralari), vino — tugmalar/linklar/footer.
    */
   --color-primary: #5c1a30;
   --color-primary-light: #f6ccd9;
@@ -499,22 +499,25 @@ h6,
 }
 
 /*
- * Navbar foni — qaymoq (--color-bg, #faf6ec) rangi, 85% zich (15% shaffof) + kuchli xiralashtiruvchi
- * (backdrop-filter: blur) "muzli oyna" effekti — ostidagi kontent navbar elementlariga
- * (matn/ikonalar) xalal bermasligi uchun yetarlicha zich, lekin butunlay tekis emas.
+ * Navbar foni — sahifa foni (--color-bg) bilan bir xil toza oq, 85% zich (15% shaffof) + yengil
+ * xiralashtiruvchi (backdrop-filter: blur) "muzli oyna" effekti — ostidagi kontent ozgina ko'rinib
+ * turadi, lekin navbar elementlariga (matn/ikonalar) xalal bermaydi.
+ * Kontentdan chegara chizig'i bilan emas, brend (vino, --color-primary) rangidagi SOYA bilan ajraladi —
+ * oq fonli sahifada navbar aniqroq ajralib turishi uchun.
  * Juda tor ekranlarda (masalan 375px) navbar ichidagi qidiruv+til+savat+burger sig'ishi uchun padding ham shu yerda.
  */
 .site-header {
   padding: 0 12px !important;
-  background: rgba(250, 246, 236, 0.85) !important;
-  backdrop-filter: blur(48px) saturate(180%);
-  -webkit-backdrop-filter: blur(48px) saturate(180%);
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 4px 16px rgba(92, 26, 48, 0.18);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
 /* backdrop-filter qo'llab-quvvatlanmasa (juda eski brauzer) — shaffoflik ko'rinib qolmasligi uchun fon zichroq. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .site-header {
-    background: rgba(250, 246, 236, 0.98) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
   }
 }
 
