@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, Col, Row } from 'antd';
 import { ProductFilterBar } from '@/features/products/components/ProductFilterBar';
 import { ProductCard } from '@/features/products/components/ProductCard';
+import { Reveal } from '@/shared/ui/Reveal';
 import { useProducts } from '@/features/products/hooks';
 import { Pagination } from '@/shared/ui/Pagination';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -58,9 +59,11 @@ export function SearchPage() {
       ) : data && data.items.length > 0 ? (
         <>
           <Row gutter={[16, 16]}>
-            {data.items.map((product) => (
+            {data.items.map((product, index) => (
               <Col key={product.id} xs={12} sm={8} md={6}>
-                <ProductCard product={product} />
+                <Reveal delay={(index % 4) * 0.08}>
+                  <ProductCard product={product} />
+                </Reveal>
               </Col>
             ))}
           </Row>

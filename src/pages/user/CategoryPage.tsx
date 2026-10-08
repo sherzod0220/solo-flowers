@@ -5,6 +5,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useCategory } from '@/features/categories/hooks';
 import { useProducts } from '@/features/products/hooks';
 import { ProductCard } from '@/features/products/components/ProductCard';
+import { Reveal } from '@/shared/ui/Reveal';
 import { Pagination } from '@/shared/ui/Pagination';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PageMeta } from '@/shared/ui/PageMeta';
@@ -73,9 +74,11 @@ export function CategoryPage() {
       ) : data && data.items.length > 0 ? (
         <>
           <Row gutter={[16, 16]}>
-            {data.items.map((product) => (
+            {data.items.map((product, index) => (
               <Col key={product.id} xs={12} sm={8} md={6}>
-                <ProductCard product={product} />
+                <Reveal delay={(index % 4) * 0.08}>
+                  <ProductCard product={product} />
+                </Reveal>
               </Col>
             ))}
           </Row>

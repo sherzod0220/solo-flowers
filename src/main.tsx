@@ -6,6 +6,7 @@ import './index.css';
 import { AntdProvider } from './app/providers/AntdProvider';
 import { AuthProvider } from './app/providers/AuthProvider';
 import { QueryProvider } from './app/providers/QueryProvider';
+import { MotionProvider } from './app/providers/MotionProvider';
 import App from './App.tsx';
 
 createRoot(document.getElementById('root')!).render(
@@ -14,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
       <QueryProvider>
         <AntdProvider>
           <AuthProvider>
-            <App />
+            <MotionProvider>
+              <App />
+            </MotionProvider>
           </AuthProvider>
         </AntdProvider>
       </QueryProvider>

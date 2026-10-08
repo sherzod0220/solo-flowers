@@ -3,6 +3,7 @@ import { CategoryCarousel } from '@/features/categories/components/CategoryCarou
 import { BestsellerCarousel } from '@/features/products/components/BestsellerCarousel';
 import { GallerySection } from '@/features/gallery/components/GallerySection';
 import { PageMeta } from '@/shared/ui/PageMeta';
+import { Reveal } from '@/shared/ui/Reveal';
 import { useT } from '@/shared/i18n/useT';
 
 export function HomePage() {
@@ -14,11 +15,18 @@ export function HomePage() {
 
       <EventBanner />
 
-      <CategoryCarousel />
+      {/* Har bir bo'lim skroll qilinib ekranga kirganda pastdan yumshoq ko'tariladi. */}
+      <Reveal y={40}>
+        <CategoryCarousel />
+      </Reveal>
 
-      <BestsellerCarousel />
+      <Reveal y={40}>
+        <BestsellerCarousel />
+      </Reveal>
 
-      <GallerySection />
+      <Reveal y={40}>
+        <GallerySection />
+      </Reveal>
     </div>
   );
 }

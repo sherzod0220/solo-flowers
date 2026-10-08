@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import { Layout, Button, Space, Badge, Input, Drawer, Divider, Popconfirm, Modal, ConfigProvider } from 'antd';
 import {
   ShoppingCartOutlined,
@@ -21,6 +22,8 @@ import { LangSwitcher } from '@/shared/ui/LangSwitcher';
 import { LocationButton } from '@/shared/ui/LocationButton';
 import { useHideOnScroll } from '@/shared/hooks/useHideOnScroll';
 import { useT } from '@/shared/i18n/useT';
+import { SiteIntro } from '@/shared/ui/SiteIntro';
+import { EASE_OUT, markSiteIntroSeen, shouldShowSiteIntro } from '@/shared/lib/motion';
 
 const { Header, Content, Footer } = Layout;
 
@@ -107,6 +110,17 @@ export function UserLayout() {
   const navigate = useNavigate();
   const t = useT();
   const isHeaderHidden = useHideOnScroll();
+  const location = useLocation();
+
+  // Intro faqat birinchi kirishda — u ko'rsatilgan bo'lsa, navbar/kontent parda ko'tarilayotganda
+  // (intro tugagach) kirib keladi; aks holda (keyingi kirishlar) darhol, kechikishsiz animatsiyalanadi.
+  const [isIntroVisible, setIsIntroVisible] = useState(shouldShowSiteIntro);
+  const [introEntry] = useState(() => (isIntroVisible ? location.pathname : null));
+  const handleIntroFinish = useCallback(() => {
+    markSiteIntroSeen();
+    setIsIntroVisible(false);
+  }, []);
+  const contentDelay = location.pathname === introEntry ? 0.3 : 0;
 
   function handleSearch(value: string) {
     const query = value.trim();
@@ -189,8 +203,13 @@ export function UserLayout() {
             transition: 'transform 0.35s ease',
           }}
         >
-          <div
+          {/* Header'ning o'zi `transform` bilan skrollda yashirinadi — kirish animatsiyasi u bilan
+              to'qnashmasligi uchun ichki konteynerga qo'yilgan. */}
+          <motion.div
             className="page-container"
+            initial={{ opacity: 0, y: -16 }}
+            animate={isIntroVisible ? { opacity: 0, y: -16 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: contentDelay, ease: EASE_OUT }}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, height: '100%' }}
           >
             <Link to={ROUTES.HOME} style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -261,13 +280,20 @@ export function UserLayout() {
                 aria-label={t('nav.menu')}
               />
             </div>
-          </div>
+          </motion.div>
         </Header>
 
         <Content style={{ padding: '24px' }}>
-          <div className="page-container">
+          {/* Sahifalar orasida o'tish — har yangi yo'lda (key=pathname) kontent pastdan yumshoq ko'tariladi. */}
+          <motion.div
+            key={location.pathname}
+            className="page-container"
+            initial={{ opacity: 0, y: 16 }}
+            animate={isIntroVisible ? { opacity: 0, y: 16 } : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: contentDelay, ease: EASE_OUT }}
+          >
             <Outlet />
-          </div>
+          </motion.div>
         </Content>
 
         <Footer
@@ -277,8 +303,12 @@ export function UserLayout() {
             padding: '32px 32px 24px',
           }}
         >
-          <div
+          <motion.div
             className="page-container footer-row"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: EASE_OUT }}
             style={{
               display: 'flex',
               flexWrap: 'wrap',
@@ -331,7 +361,7 @@ export function UserLayout() {
                 </a>
               ))}
             </Space>
-          </div>
+          </motion.div>
 
           <div style={{ textAlign: 'center', marginTop: 24, fontSize: 13, opacity: 0.75 }}>
             {t('nav.footer', { year: String(new Date().getFullYear()) })}
@@ -371,6 +401,8 @@ export function UserLayout() {
         >
           <Input.Search placeholder={t('common.search_products')} onSearch={handleSearch} allowClear autoFocus />
         </Modal>
+
+        <AnimatePresence>{isIntroVisible && <SiteIntro onFinish={handleIntroFinish} />}</AnimatePresence>
       </Layout>
     </ConfigProvider>
   );
