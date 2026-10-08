@@ -3,6 +3,7 @@ import { Button, Skeleton } from 'antd';
 import { useGallery } from '../hooks';
 import { ROUTES } from '@/shared/constants/routes';
 import { useT } from '@/shared/i18n/useT';
+import { Reveal } from '@/shared/ui/Reveal';
 
 const FETCH_SIZE = 12;
 const PREVIEW_COUNT = 10;
@@ -38,15 +39,16 @@ export function GallerySection() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
-        {images.map((img) => (
-          <Link
-            key={`${img.postId}-${img.url}`}
-            to={ROUTES.GALLERY}
-            className="gallery-tile"
-            style={{ display: 'block', aspectRatio: '1 / 1', overflow: 'hidden', borderRadius: 8 }}
-          >
-            <img src={img.url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          </Link>
+        {images.map((img, index) => (
+          <Reveal key={`${img.postId}-${img.url}`} delay={index * 0.05} y={16}>
+            <Link
+              to={ROUTES.GALLERY}
+              className="gallery-tile"
+              style={{ display: 'block', aspectRatio: '1 / 1', overflow: 'hidden', borderRadius: 8 }}
+            >
+              <img src={img.url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            </Link>
+          </Reveal>
         ))}
       </div>
     </div>

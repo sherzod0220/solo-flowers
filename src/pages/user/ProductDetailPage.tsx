@@ -13,6 +13,7 @@ import { ROUTES } from '@/shared/constants/routes';
 import { PageMeta } from '@/shared/ui/PageMeta';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { useT } from '@/shared/i18n/useT';
+import { Reveal } from '@/shared/ui/Reveal';
 
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -71,145 +72,152 @@ export function ProductDetailPage() {
 
       <Row gutter={[32, 24]}>
         <Col xs={24} md={12}>
-          {images.length > 0 ? (
-            <Image.PreviewGroup items={images}>
+          {/* Rasm chapdan, ma'lumot o'ngdan bir-biriga qarab kirib keladi. */}
+          <Reveal x={-32} y={0}>
+            {images.length > 0 ? (
+              <Image.PreviewGroup items={images}>
+                <div
+                  style={{
+                    aspectRatio: '1 / 1',
+                    overflow: 'hidden',
+                    borderRadius: 16,
+                    background: 'var(--color-primary-light)',
+                  }}
+                >
+                  <Image
+                    src={images[activeImage]}
+                    alt={product.name}
+                    // Diqqat: oddiy `style` antd Image'ning ichki <img>'iga emas, tashqi wrapper'iga
+                    // tushib qolib, rasm o'z tabiiy o'lchamida (contain'dek) ko'rinib, vertikal
+                    // rasmda yonidan, gorizontalda tagidan bo'sh joy qoldirardi. `styles.root`/`styles.image`
+                    // — antd v6'ning har ikkala qatlamni alohida nishonlash uchun mo'ljallangan API'si.
+                    styles={{
+                      root: { width: '100%', height: '100%', display: 'block' },
+                      image: { width: '100%', height: '100%', objectFit: 'cover' },
+                    }}
+                  />
+                </div>
+  
+                {images.length > 1 && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    {images.map((image, index) => (
+                      <button
+                        key={image}
+                        type="button"
+                        onClick={() => setActiveImage(index)}
+                        style={{
+                          width: 64,
+                          height: 64,
+                          padding: 0,
+                          borderRadius: 8,
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          border: index === activeImage ? '2px solid var(--color-primary)' : '2px solid transparent',
+                          background: 'none',
+                        }}
+                      >
+                        <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </Image.PreviewGroup>
+            ) : (
               <div
                 style={{
                   aspectRatio: '1 / 1',
-                  overflow: 'hidden',
-                  borderRadius: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 48,
                   background: 'var(--color-primary-light)',
+                  borderRadius: 16,
                 }}
               >
-                <Image
-                  src={images[activeImage]}
-                  alt={product.name}
-                  // Diqqat: oddiy `style` antd Image'ning ichki <img>'iga emas, tashqi wrapper'iga
-                  // tushib qolib, rasm o'z tabiiy o'lchamida (contain'dek) ko'rinib, vertikal
-                  // rasmda yonidan, gorizontalda tagidan bo'sh joy qoldirardi. `styles.root`/`styles.image`
-                  // — antd v6'ning har ikkala qatlamni alohida nishonlash uchun mo'ljallangan API'si.
-                  styles={{
-                    root: { width: '100%', height: '100%', display: 'block' },
-                    image: { width: '100%', height: '100%', objectFit: 'cover' },
-                  }}
-                />
+                🌸
               </div>
-
-              {images.length > 1 && (
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                  {images.map((image, index) => (
-                    <button
-                      key={image}
-                      type="button"
-                      onClick={() => setActiveImage(index)}
-                      style={{
-                        width: 64,
-                        height: 64,
-                        padding: 0,
-                        borderRadius: 8,
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                        border: index === activeImage ? '2px solid var(--color-primary)' : '2px solid transparent',
-                        background: 'none',
-                      }}
-                    >
-                      <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </Image.PreviewGroup>
-          ) : (
-            <div
-              style={{
-                aspectRatio: '1 / 1',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 48,
-                background: 'var(--color-primary-light)',
-                borderRadius: 16,
-              }}
-            >
-              🌸
-            </div>
-          )}
+            )}
+          </Reveal>
         </Col>
 
         <Col xs={24} md={12}>
-          {product.tag && (
-            <Tag color="gold" style={{ marginBottom: 12 }}>
-              {product.tag}
-            </Tag>
-          )}
-
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 8, marginTop: 0 }}>{product.name}</h1>
-            <WishlistButton
-              productId={product.id}
-              size="large"
-              style={{ border: '1px solid var(--color-border)', flexShrink: 0 }}
-            />
-          </div>
-
-          <Rate disabled allowHalf value={product.rating} style={{ fontSize: 16, marginBottom: 16 }} />
-
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
-            <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--color-primary)' }}>
-              {formatPrice(product.final_price_amount, product.price_currency)}
-            </span>
-            {hasDiscount && (
-              <span style={{ textDecoration: 'line-through', color: '#999', fontSize: 16 }}>
-                {formatPrice(product.price_amount, product.price_currency)}
-              </span>
+          <Reveal x={32} y={0} delay={0.1}>
+            {product.tag && (
+              <Tag color="gold" style={{ marginBottom: 12 }}>
+                {product.tag}
+              </Tag>
             )}
-          </div>
-
-          {!product.is_available && (
-            <Tag color="default" style={{ marginBottom: 16 }}>
-              {t('product.out_of_stock')}
-            </Tag>
-          )}
-
-          {product.description && (
-            <p style={{ color: 'var(--color-text)', lineHeight: 1.7, marginBottom: 24 }}>{product.description}</p>
-          )}
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <InputNumber
-              min={1}
-              max={product.stock}
-              value={quantity}
-              onChange={(value) => setQuantity(value ?? 1)}
-              disabled={!product.is_available}
-              size="large"
-              controls={{ upIcon: <PlusOutlined />, downIcon: <MinusOutlined /> }}
-            />
-            <Button
-              type="primary"
-              size="large"
-              disabled={!product.is_available}
-              loading={addCartItem.isPending}
-              onClick={handleAddToCart}
-            >
-              {t('product.add_to_cart')}
-            </Button>
-          </div>
+  
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, marginBottom: 8, marginTop: 0 }}>{product.name}</h1>
+              <WishlistButton
+                productId={product.id}
+                size="large"
+                style={{ border: '1px solid var(--color-border)', flexShrink: 0 }}
+              />
+            </div>
+  
+            <Rate disabled allowHalf value={product.rating} style={{ fontSize: 16, marginBottom: 16 }} />
+  
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
+              <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--color-primary)' }}>
+                {formatPrice(product.final_price_amount, product.price_currency)}
+              </span>
+              {hasDiscount && (
+                <span style={{ textDecoration: 'line-through', color: '#999', fontSize: 16 }}>
+                  {formatPrice(product.price_amount, product.price_currency)}
+                </span>
+              )}
+            </div>
+  
+            {!product.is_available && (
+              <Tag color="default" style={{ marginBottom: 16 }}>
+                {t('product.out_of_stock')}
+              </Tag>
+            )}
+  
+            {product.description && (
+              <p style={{ color: 'var(--color-text)', lineHeight: 1.7, marginBottom: 24 }}>{product.description}</p>
+            )}
+  
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <InputNumber
+                min={1}
+                max={product.stock}
+                value={quantity}
+                onChange={(value) => setQuantity(value ?? 1)}
+                disabled={!product.is_available}
+                size="large"
+                controls={{ upIcon: <PlusOutlined />, downIcon: <MinusOutlined /> }}
+              />
+              <Button
+                type="primary"
+                size="large"
+                disabled={!product.is_available}
+                loading={addCartItem.isPending}
+                onClick={handleAddToCart}
+              >
+                {t('product.add_to_cart')}
+              </Button>
+            </div>
+          </Reveal>
         </Col>
       </Row>
 
       <Divider />
 
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 20 }}>{t('reviews.title')}</h2>
+      <Reveal>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 20 }}>{t('reviews.title')}</h2>
 
-      <Row gutter={[32, 24]}>
-        <Col xs={24} md={10}>
-          <ReviewForm productId={product.id} />
-        </Col>
-        <Col xs={24} md={14}>
-          <ReviewList productId={product.id} />
-        </Col>
-      </Row>
+        <Row gutter={[32, 24]}>
+          <Col xs={24} md={10}>
+            <ReviewForm productId={product.id} />
+          </Col>
+          <Col xs={24} md={14}>
+            <ReviewList productId={product.id} />
+          </Col>
+        </Row>
+      </Reveal>
     </div>
   );
 }

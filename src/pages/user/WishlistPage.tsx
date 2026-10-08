@@ -5,6 +5,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useWishlist } from '@/features/wishlist/hooks';
 import * as productsApi from '@/features/products/api';
 import { ProductCard } from '@/features/products/components/ProductCard';
+import { Reveal } from '@/shared/ui/Reveal';
 import { useLangStore } from '@/shared/store/langStore';
 import { ROUTES } from '@/shared/constants/routes';
 import { EmptyState } from '@/shared/ui/EmptyState';
@@ -57,9 +58,11 @@ export function WishlistPage() {
         </Row>
       ) : products.length > 0 ? (
         <Row gutter={[16, 16]}>
-          {products.map((product) => (
+          {products.map((product, index) => (
             <Col key={product.id} xs={12} sm={8} md={6}>
-              <ProductCard product={product} />
+              <Reveal delay={(index % 4) * 0.08}>
+                <ProductCard product={product} />
+              </Reveal>
             </Col>
           ))}
         </Row>
