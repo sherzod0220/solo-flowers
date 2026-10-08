@@ -8,7 +8,9 @@ import { compressImage } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE_MB = 3;
+// Siqishdan OLDINGI xom fayl chegarasi — telefon kamerasidan tushirilgan 4-8MB'lik rasm ham shu
+// tekshiruvdan o'tishi kerak, submit paytida baribir WebP'ga siqiladi.
+const MAX_RAW_SIZE_MB = 15;
 
 interface CategoryFormModalProps {
   open: boolean;
@@ -50,7 +52,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
       message.error(t('common.upload_type_error'));
       return Upload.LIST_IGNORE;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       message.error(t('common.upload_size_error'));
       return Upload.LIST_IGNORE;
     }
@@ -140,7 +142,7 @@ export function CategoryFormModal({ open, category, onClose }: CategoryFormModal
             fileList={fileList}
             onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
             onRemove={() => setFileList([])}
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             maxCount={1}
             listType="picture"
           >

@@ -15,7 +15,9 @@ import { compressImage, compressImages } from '@/shared/lib/imageCompression';
 import { useT } from '@/shared/i18n/useT';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE_MB = 3;
+// Siqishdan OLDINGI xom fayl chegarasi — telefon kamerasidan tushirilgan 4-8MB'lik rasm ham shu
+// tekshiruvdan o'tishi kerak, submit paytida baribir WebP'ga siqiladi.
+const MAX_RAW_SIZE_MB = 15;
 const MAX_IMAGES = 5;
 
 interface ProductFormModalProps {
@@ -95,7 +97,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
       notification.error({ title: t('common.upload_type_error'), description: file.name, placement: 'top' });
       return false;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       notification.error({ title: t('common.upload_size_error'), description: file.name, placement: 'top' });
       return false;
     }
@@ -163,7 +165,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
       });
       return Upload.LIST_IGNORE;
     }
-    if (file.size / 1024 / 1024 > MAX_SIZE_MB) {
+    if (file.size / 1024 / 1024 > MAX_RAW_SIZE_MB) {
       notification.error({
         title: t('common.upload_size_error'),
         description: `${file.name} — ${(file.size / 1024 / 1024).toFixed(1)}MB`,
@@ -381,7 +383,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
                           void handleReplaceImage(index, file);
                           return false;
                         }}
-                        accept="image/jpeg,image/png,image/webp"
+                        accept="image/*"
                       >
                         <Button
                           size="small"
@@ -424,7 +426,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
                   fileList={pendingNewImages}
                   onChange={({ fileList: newList }) => setPendingNewImages(newList.slice(-(MAX_IMAGES - currentImages.length)))}
                   onRemove={(file) => setPendingNewImages((prev) => prev.filter((item) => item.uid !== file.uid))}
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/*"
                   maxCount={MAX_IMAGES - currentImages.length}
                   multiple
                   listType="picture-card"
@@ -454,7 +456,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
               fileList={fileList}
               onChange={({ fileList: newList }) => setFileList(newList.slice(-MAX_IMAGES))}
               onRemove={(file) => setFileList((prev) => prev.filter((item) => item.uid !== file.uid))}
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/*"
               maxCount={MAX_IMAGES}
               multiple
               listType="picture-card"

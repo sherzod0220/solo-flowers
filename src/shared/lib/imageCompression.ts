@@ -1,26 +1,26 @@
 /**
  * Admin yuklaydigan rasmlarni backendga yuborishdan oldin brauzerning o'zida (Canvas orqali)
- * kichraytirish + siqish — asl fayl (masalan telefon kamerasidan 4000x3000px, bir necha MB)
- * ko'pincha kerakidan ancha katta bo'ladi, chunki sahifada bu rasmlar 100-1500px oralig'ida
- * ko'rsatiladi. Bu yerda hech qanday tashqi kutubxona ishlatilmagan — faqat brauzer API'lari
- * (`createImageBitmap` + `<canvas>.toBlob`), backendga ham, boshqa hech narsaga tegilmagan.
+ * kichraytirish + WebP'ga aylantirish — telefon kamerasidan tushirilgan asl fayl (ko'pincha
+ * 4-8MB, 3000-4000px) sahifada aslida 100-1500px oralig'ida ko'rsatiladi va WebP formatida
+ * JPEG'ga qaraganda odatda 25-35% kichikroq chiqadi. Hech qanday tashqi kutubxona ishlatilmagan
+ * — faqat brauzer API'lari (`createImageBitmap` + `<canvas>.toBlob`).
  */
 
 const DEFAULT_MAX_DIMENSION = 1920;
-const DEFAULT_QUALITY = 0.82;
+const DEFAULT_QUALITY = 0.8;
 const COMPRESSIBLE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export interface CompressImageOptions {
   /** Eng uzun tomonining piksel chegarasi — undan katta bo'lsa, nisbati saqlab kichraytiriladi. */
   maxDimension?: number;
-  /** JPEG/WebP siqish sifati (0–1). */
+  /** WebP siqish sifati (0–1). */
   quality?: number;
 }
 
 /**
- * Bitta faylni siqadi. Format qo'llab-quvvatlanmasa, dekodlab bo'lmasa yoki natija asl fayldan
- * KATTA chiqsa (kichik/allaqachon optimallashgan rasmlarda bo'lishi mumkin) — asl faylning o'zi
- * qaytariladi, hech qachon xatolik tashlamaydi.
+ * Bitta faylni WebP'ga aylantirib siqadi. Format qo'llab-quvvatlanmasa, dekodlab bo'lmasa yoki
+ * natija asl fayldan KATTA chiqsa (kichik/allaqachon optimallashgan rasmlarda bo'lishi mumkin)
+ * — asl faylning o'zi qaytariladi, hech qachon xatolik tashlamaydi.
  */
 export async function compressImage(file: File, options: CompressImageOptions = {}): Promise<File> {
   const { maxDimension = DEFAULT_MAX_DIMENSION, quality = DEFAULT_QUALITY } = options;
@@ -46,12 +46,9 @@ export async function compressImage(file: File, options: CompressImageOptions = 
     if (!ctx) return file;
     ctx.drawImage(bitmap, 0, 0, width, height);
 
-    // PNG ham (shaffoflik kerak bo'lmagan haqiqiy fotosurat bo'lsa) JPEG'ga aylantiriladi — bu
-    // fotosuratlar uchun hajmni eng katta kamaytiradigan format. Brauzer WebP kodlashni
-    // qo'llamasa, `toBlob` avtomatik PNG'ga tushib qoladi — shuning uchun `blob.type`ning
-    // o'ziga qarab qaror qilinadi, so'ralgan turga emas.
-    const requestedType = file.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, requestedType, quality));
+    // Har doim WebP'ga aylantirishga harakat qilamiz. Brauzer WebP kodlashni qo'llamasa, `toBlob`
+    // avtomatik PNG'ga tushib qoladi — shuning uchun qaror `blob.type`ning o'ziga qarab qilinadi.
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
     if (!blob || blob.size >= file.size) return file;
 
     const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
